@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:sqflite/sqflite.dart';
 
@@ -55,8 +59,10 @@ class SQLHelper {
   // }
 
   static Future<sql.Database> db() async {
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, _databaseName);
     return sql.openDatabase(
-        '$_databaseName',
+        path,
         version: _databaseVersion,
         onCreate:  (sql.Database database, int version) async {
           await createTableProject(database);
@@ -86,21 +92,20 @@ class SQLHelper {
     await database.execute('''
     CREATE TABLE $task_table(
     $tasks_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    FK_task_id INTEGER NOT NULL,
     $tasks_name TEXT,
     $tasks_description TEXT,
     $tasks_endDate TEXT,
     $tasks_assigned_peoples TEXT,
-    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    task_id INTEGER NOT NULL, 
-    FOREIGN KEY (task_id) REFERENCES tb_project (project_id)
-    
-    )
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
     ''');
   }
   static Future<void> createTableSubTask(sql.Database database) async{
     await database.execute('''
     CREATE TABLE $sub_task_table(
     $subtasks_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    FK_sub_task_id INTEGER NOT NULL,
     $subtasks_name TEXT,
     $subtasks_description TEXT,
     $subtasks_endDate TEXT,
@@ -110,7 +115,8 @@ class SQLHelper {
     ''');
   }
 
-  static Future<int> createProject(String p_name,
+  static Future<int> createProject(
+      String p_name,
       String p_description,
       String s_date,
       String e_date,
@@ -131,7 +137,9 @@ class SQLHelper {
     return id;
   }
 
-  static Future<int> createTask(String task_name,
+  static Future<int> createTask(
+      int tid,
+      String task_name,
       String task_description,
       String end_date,
       String assign_peoples,
@@ -139,6 +147,7 @@ class SQLHelper {
     final db = await SQLHelper.db();
 
     final data = {
+      'FK_task_id' : tid,
       'tasks_name' : task_name,
       'tasks_description' : task_description,
       'tasks_end_date' : end_date,
@@ -147,6 +156,28 @@ class SQLHelper {
     };
     final id = await db.insert(task_table, data);
     print('task inserted');
+    return id;
+  }
+
+  static Future<int> createSubTask(
+      int sub_task_id,
+      String subtask_name,
+      String subtask_description,
+      String end_date,
+      String assign_peoples,
+      String current_date) async {
+    final db = await SQLHelper.db();
+
+    final data = {
+      'FK_sub_task_id' : sub_task_id,
+      'subtasks_name' : subtask_name,
+      'subtasks_description' : subtask_description,
+      'subtasks_end_date' : end_date,
+      'subtasks_assigned_peoples' : assign_peoples,
+      'createdAt' : current_date,
+    };
+    final id = await db.insert(sub_task_table, data);
+    print('sub task inserted');
     return id;
   }
 
@@ -170,12 +201,9 @@ class SQLHelper {
   static Future<List<Map<String, dynamic>>> getAllTasksByProject(int id) async {
     final db = await SQLHelper.db();
     return await db.rawQuery('''
-    SELECT * FROM $task_table 
-    WHERE $task_id = $id
+    SELECT * FROM tb_task WHERE FK_task_id = $id
     ''');
   }
-
-
 
   static Future<List<Map<String, dynamic>>> getTask(int id) async {
     final db = await SQLHelper.db();
@@ -183,7 +211,23 @@ class SQLHelper {
         task_table, where: 'column_task_id = ?', whereArgs: [id]);
   }
 
-  static Future<int> updateItem(int id,
+  static Future<List<Map<String, dynamic>>> getAllSubTasksByProject(int id) async {
+    final db = await SQLHelper.db();
+    return await db.rawQuery('''
+    SELECT * FROM tb_sub_task WHERE column_subtasks_id = $id
+    ''');
+  }
+
+  static Future<List<Map<String, dynamic>>> getSubTask(int id) async {
+    final db = await SQLHelper.db();
+    return db.query(
+        sub_task_table, where: 'column_subtasks_id = ?', whereArgs: [id]);
+  }
+
+
+
+  static Future<int> updateItem(
+      int id,
       String p_name,
       String p_description,
       String s_date,
@@ -212,5 +256,6 @@ class SQLHelper {
     } catch (err) {
       debugPrint('$err');
     }
+
   }
 }

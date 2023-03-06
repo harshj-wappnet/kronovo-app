@@ -13,17 +13,19 @@ import 'package:kronovo_app/responsive.dart';
 import 'assign members_dialog.dart';
 import 'package:sqflite/sqflite.dart';
 
-class CreateProject extends StatefulWidget {
+class UpdateProject extends StatefulWidget {
 
   final ValueChanged<String> onSubmit;
+  final id;
 
-  CreateProject({super.key, required this.onSubmit});
+  UpdateProject({super.key, required this.onSubmit, required this.id});
+
 
   @override
-  State<CreateProject> createState() => _CreateProjectState();
+  State<UpdateProject> createState() => UpdateProjectState();
 }
 
-class _CreateProjectState extends State<CreateProject> {
+class UpdateProjectState extends State<UpdateProject> {
   //final int id = ModalRoute.of(context)!.settings.arguments as Home_Page();
   final _formKey = GlobalKey<FormState>();
   FocusNode searchFocusNode = FocusNode();
@@ -159,7 +161,7 @@ class _CreateProjectState extends State<CreateProject> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create New Project'),
+        title: Text('Update Project'),
         backgroundColor: Colors.green,
       ),
       backgroundColor: Colors.white,
@@ -342,7 +344,7 @@ class _CreateProjectState extends State<CreateProject> {
                               ),
                               ElevatedButton(
                                 onPressed: () async {
-                                  await _addProject();
+                                  await _addProject(widget.id);
                                   Navigator.pop(context);
                                 },
                                 style: ButtonStyle(
@@ -370,9 +372,9 @@ class _CreateProjectState extends State<CreateProject> {
     );
   }
 
-  Future<void> _addProject() async{
+  Future<void> _addProject(int pid) async{
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.createProject(project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, people_data,current_date);
+    await SQLHelper.updateItem(pid,project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, people_data,current_date);
   }
 }
