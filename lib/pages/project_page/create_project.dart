@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:kronovo_app/helpers/sql_helper.dart';
 import 'package:kronovo_app/pages/home_page.dart';
-import 'package:kronovo_app/pages/task_page/add_task.dart';
 import 'assign members_dialog.dart';
 import 'package:kronovo_app/responsive.dart';
 import 'assign members_dialog.dart';
@@ -342,8 +341,15 @@ class _CreateProjectState extends State<CreateProject> {
                               ),
                               ElevatedButton(
                                 onPressed: () async {
-                                  await _addProject();
-                                  Navigator.pop(context);
+                                  if (_formKey.currentState?.validate() ==
+                                  true) {
+                                    setState(() async{
+                                      await _addProject();
+                                    });
+                                    Navigator.pop(context);
+                                  }else{
+                                    _formKey.currentState?.validate();
+                                  }
                                 },
                                 style: ButtonStyle(
                                   textStyle: MaterialStateProperty.all(

@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:kronovo_app/helpers/sql_helper.dart';
 import 'package:kronovo_app/pages/home_page.dart';
-import 'package:kronovo_app/pages/task_page/add_task.dart';
 import 'assign members_dialog.dart';
 import 'package:kronovo_app/responsive.dart';
 import 'assign members_dialog.dart';
@@ -33,10 +32,31 @@ class UpdateProjectState extends State<UpdateProject> {
   late MultiValueDropDownController cntMulti;
 
   late final ValueChanged<String> onSubmit;
-  late TextEditingController project_title_Controller;
-  late TextEditingController _project_description_Controller;
+  // late TextEditingController project_title_Controller;
+  // late TextEditingController _project_description_Controller;
   List<String> _selectedItems = [];
   String people_data = '';
+  List<Map<String, dynamic>> _listProjects = [];
+  List<String> _peoplesList = [];
+
+
+
+  void getProjectData(int id) async {
+    final data = await SQLHelper.getProjects();
+    setState(() {
+      _listProjects = data;
+      String peoples = _listProjects[0]['project_assigned_peoples'].toString();
+      _peoplesList = peoples.split(',');
+      if(id != null){
+        final existingList = _listProjects.firstWhere((element) => element['project_id'] == id);
+        project_title_Controller.text = existingList['project_name'];
+        _project_description_Controller.text = existingList['project_description'];
+        startDateController.text = existingList['project_start_date'];
+        endDateController.text = existingList['project_end_date'];
+        //_selectedItems = existingList['project_assigned_peoples'].split(',');
+      }
+    });
+  }
 
 
   String _displayText(String begin, DateTime? date) {
@@ -49,6 +69,9 @@ class UpdateProjectState extends State<UpdateProject> {
 
   final TextEditingController startDateController = TextEditingController(),
       endDateController = TextEditingController();
+  final project_title_Controller = TextEditingController();
+  final _project_description_Controller = TextEditingController();
+
   DateTime? startDate, endDate;
 
   Future<DateTime?> pickDate() async {
@@ -102,15 +125,25 @@ class UpdateProjectState extends State<UpdateProject> {
   }
 
 
+  void loadPrevoiusData(int id) {
+
+    if(id != null){
+      final existingList = _listProjects.firstWhere((element) => element['project_id'] == id);
+      project_title_Controller.text = existingList['project_name'];
+      _project_description_Controller.text = existingList['project_description'];
+      startDateController.text = existingList['project_start_date'];
+      endDateController.text = existingList['project_end_date'];
+      //_selectedItems = existingList['project_assigned_peoples'].split(',');
+    }
+  }
+
 
   @override
   void initState() {
-    cntMulti = MultiValueDropDownController();
-    startDateController.text = "";
-    endDateController.text = "";
-    project_title_Controller = TextEditingController();
-    _project_description_Controller = TextEditingController();
     super.initState();
+    getProjectData(widget.id);
+     //loadPrevoiusData(widget.id);
+    cntMulti = MultiValueDropDownController();
   }
 
   @override
@@ -344,7 +377,7 @@ class UpdateProjectState extends State<UpdateProject> {
                               ),
                               ElevatedButton(
                                 onPressed: () async {
-                                  await _addProject(widget.id);
+                                  await _updateProject(widget.id);
                                   Navigator.pop(context);
                                 },
                                 style: ButtonStyle(
@@ -372,9 +405,9 @@ class UpdateProjectState extends State<UpdateProject> {
     );
   }
 
-  Future<void> _addProject(int pid) async{
+  Future<void> _updateProject(int pid) async{
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.updateItem(pid,project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, people_data,current_date);
+    await SQLHelper.updateProject(pid,project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, people_data,current_date);
   }
 }

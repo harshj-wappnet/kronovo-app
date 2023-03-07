@@ -1,6 +1,6 @@
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:kronovo_app/pages/create_project/create_project.dart';
+import 'package:kronovo_app/pages/project_page/create_project.dart';
 import 'package:kronovo_app/pages/home_page.dart';
 
 void main() {

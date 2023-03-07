@@ -1,12 +1,11 @@
 
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:kronovo_app/pages/create_project/create_project.dart';
-import 'package:kronovo_app/pages/create_project/update_project_page.dart';
-import 'package:kronovo_app/pages/project_details_page.dart';
+import 'package:kronovo_app/pages/project_page/create_project.dart';
+import 'package:kronovo_app/pages/project_page/update_project_page.dart';
+import 'package:kronovo_app/pages/project_page/project_details_page.dart';
 import 'package:kronovo_app/responsive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,10 +25,10 @@ class _HomePageState extends State<HomePage> {
   late final item;
   double project_progress = 0.0;
 
-  Future<void> _loadPref() async {
+  Future<void> _loadPref(int pid) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      project_progress = prefs.getDouble('process_value')!;
+      project_progress += prefs.getDouble('$pid')!;
     });
   }
 
@@ -39,6 +38,7 @@ class _HomePageState extends State<HomePage> {
       _listProjects = data;
       String peoples = _listProjects[0]['project_assigned_peoples'].toString();
       _peoplesList = peoples.split(',');
+      _loadPref(_listProjects[0]['project_id']);
     });
   }
 
@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       getAllProjects();
-      _loadPref();
+
       print('number of items ${_listProjects.length}');
     });
   }
@@ -75,119 +75,120 @@ class _HomePageState extends State<HomePage> {
           },
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: SafeArea(
-                child: ListView.builder(
-                  itemCount: _listProjects.length,
-                  itemBuilder: (context, index) => Container(
-                    child: Slidable(
-                      key: const ValueKey(0),
-                      startActionPane: ActionPane(
-                        motion: const DrawerMotion(),
-                        children: [
-                          SlidableAction(
-                            flex: 1,
-                            autoClose: true,
-                            onPressed: (value) {
-                              SQLHelper.deleteItem(_listProjects[index]['project_id']);
-                              setState(() {
-                                getAllProjects();
-                              });
-                            },
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                          ),
-                          SlidableAction(
-                            autoClose: true,
-                            flex: 1,
-                            onPressed: (value) {
-                              //_listProjects.removeAt(index);
-                              setState(() {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProject(id :_listProjects[index]['project_id'],onSubmit: (String value){
-                                  null;
-                                },)));
-                              });
-                            },
-                            backgroundColor: Colors.blueAccent,
-                            foregroundColor: Colors.white,
-                            icon: Icons.edit,
-                            label: 'Edit',
-                          ),
-                        ],
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ProjectDetailsPage(id :_listProjects[index]['project_id'])));
+            child:  ListView.builder(
+              itemCount: _listProjects.length,
+              itemBuilder: (context, index) => Container(
+                child: Slidable(
+                  key: const ValueKey(0),
+                  startActionPane: ActionPane(
+                    motion: const DrawerMotion(),
+                    children: [
+                      SlidableAction(
+                        flex: 1,
+                        autoClose: true,
+                        onPressed: (value) {
+                          SQLHelper.deleteProject(_listProjects[index]['project_id']);
+                          setState(() {
+                            getAllProjects();
+                          });
                         },
-                        child: Card(
-                          color: Colors.white,
-                          elevation: 4.0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 15.0),
-                            padding: EdgeInsets.all(8.0),
-                            height: hp(20, context),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                      SlidableAction(
+                        autoClose: true,
+                        flex: 1,
+                        onPressed: (value) {
+                          //_listProjects.removeAt(index);
+                          setState(() {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProject(id :_listProjects[index]['project_id'],onSubmit: (String value){
+                              null;
+                            },)));
+                          });
+                        },
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        icon: Icons.edit,
+                        label: 'Edit',
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProjectDetailsPage(id :_listProjects[index]['project_id'])));
+                    },
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 4.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Container(
+                        margin: EdgeInsets.symmetric(vertical: 15.0),
+                        padding: EdgeInsets.all(8.0),
+                        height: hp(20, context),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              '${_listProjects[index]['project_name']}',
+                              style: TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                            ),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  '${_listProjects[index]['project_name']}',
-                                  style: TextStyle(
-                                      fontSize: 20.0, fontWeight: FontWeight.bold),
-                                ),
+                                Icon(Icons.calendar_month),
+                                Text('  ${_listProjects[index]['project_start_date']}'),
 
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.calendar_month),
-                                    Text('  ${_listProjects[index]['project_start_date']}'),
-
-                                    Icon(Icons.task_alt_outlined),
-                                    Text(' ${_listProjects[index]['project_end_date']}'),
-                                  ],
-                                ),
-
-                                Container(
-                                  margin: EdgeInsets.only(left: 40.0, right: 20.0),
-                                  child: LinearProgressIndicator(
-                                    value: project_progress,
-                                    valueColor: AlwaysStoppedAnimation(Colors.green),
-                                    minHeight: 10.0,
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      '${convertToAgo(DateTime.parse(_listProjects[index]['createdAt']))}',
-                                      style: TextStyle(fontSize: 14.0),
-                                    )
-                                  ],
-                                )
+                                Icon(Icons.task_alt_outlined),
+                                Text(' ${_listProjects[index]['project_end_date']}'),
                               ],
                             ),
-                          ),
+
+                            Container(
+                              margin: EdgeInsets.only(left: 40.0, right: 20.0),
+                              child: LinearProgressIndicator(
+                                value: project_progress,
+                                valueColor: AlwaysStoppedAnimation(Colors.green),
+                                minHeight: 10.0,
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${convertToAgo(DateTime.parse(_listProjects[index]['createdAt']))}',
+                                  style: TextStyle(fontSize: 14.0),
+                                )
+                              ],
+                            )
+                          ],
                         ),
                       ),
                     ),
                   ),
-                )),
+                ),
+              ),
+            )
+                // : Text("NO PROJECTS \n    Click On + to Add Projects",
+                //             style: TextStyle(
+                //                 color: Colors.black,
+                //                 fontWeight: FontWeight.bold,
+                //                 fontSize: 28)),
           ),
-        ));
+        )
+    );
   }
-
-
-
 
   String convertToAgo(DateTime input) {
     Duration diff = DateTime.now().difference(input);
-
     if (diff.inDays > 365)
       return "${(diff.inDays / 365).floor()} ${(diff.inDays / 365).floor() == 1 ? "year" : "years"} ago   ";
     if (diff.inDays > 30)

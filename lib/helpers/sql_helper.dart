@@ -39,25 +39,6 @@ class SQLHelper {
   static final subtasks_endDate = 'subtasks_end_date';
   static final subtasks_assigned_peoples = 'subtasks_assigned_peoples';
 
-  // static Future<void> createTableProject(sql.Database database) async {
-  //
-  // }
-
-  // static Future<void> createTableTask(sql.Database database) async{
-  //   await database.execute('''
-  //   CREATE TABLE IF NOT EXIST $task_table(
-  //   $tasks_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  //   $task_id INTEGER,
-  //   $tasks_name TEXT,
-  //   $tasks_description TEXT,
-  //   $tasks_endDate TEXT,
-  //   $tasks_assigned_peoples TEXT,
-  //   FOREIGN KEY($task_id) REFERENCES $project_table($project_columnId),
-  //   createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-  //   )
-  //   ''');
-  // }
-
   static Future<sql.Database> db() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
@@ -192,12 +173,6 @@ class SQLHelper {
         project_table, where: 'project_id = ?', whereArgs: [id], limit: 1);
   }
 
-  static Future<List<Map<String, dynamic>>> getTasks() async {
-    final db = await SQLHelper.db();
-    return db.query(task_table, orderBy: 'column_task_id');
-  }
-
-
   static Future<List<Map<String, dynamic>>> getAllTasksByProject(int id) async {
     final db = await SQLHelper.db();
     return await db.rawQuery('''
@@ -211,10 +186,10 @@ class SQLHelper {
         task_table, where: 'column_task_id = ?', whereArgs: [id]);
   }
 
-  static Future<List<Map<String, dynamic>>> getAllSubTasksByProject(int id) async {
+  static Future<List<Map<String, dynamic>>> getAllSubTasksByTask(int id) async {
     final db = await SQLHelper.db();
     return await db.rawQuery('''
-    SELECT * FROM tb_sub_task WHERE column_subtasks_id = $id
+    SELECT * FROM tb_sub_task WHERE FK_sub_task_id = $id
     ''');
   }
 
@@ -224,9 +199,7 @@ class SQLHelper {
         sub_task_table, where: 'column_subtasks_id = ?', whereArgs: [id]);
   }
 
-
-
-  static Future<int> updateItem(
+  static Future<int> updateProject(
       int id,
       String p_name,
       String p_description,
@@ -243,19 +216,78 @@ class SQLHelper {
       'project_assigned_peoples': a_peoples,
       'createdAt': current_date,
     };
-
     final result = await db.update(
         project_table, data, where: 'project_id = ?', whereArgs: [id]);
     return result;
   }
 
-  static Future<void> deleteItem(int id) async {
+  static Future<void> deleteProject(int id) async {
     final db = await SQLHelper.db();
     try {
       await db.delete(project_table, where: 'project_id = ?', whereArgs: [id]);
     } catch (err) {
       debugPrint('$err');
     }
-
   }
+
+
+  static Future<int> updateTask(
+      int id,
+      String u_task_name,
+      String u_task_description,
+      String u_end_date,
+      String u_assign_peoples,
+      String u_current_date) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'tasks_name' : u_task_name,
+      'tasks_description' : u_task_description,
+      'tasks_end_date' : u_end_date,
+      'tasks_assigned_peoples' : u_assign_peoples,
+      'createdAt' : u_current_date,
+    };
+    final result = await db.update(
+        task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
+    return result;
+  }
+
+  static Future<void> deleteTask(int id) async {
+    final db = await SQLHelper.db();
+    try {
+      await db.delete(task_table, where: 'column_task_id = ?', whereArgs: [id]);
+    } catch (err) {
+      debugPrint('$err');
+    }
+  }
+
+  static Future<int> updateSubTask(
+      int id,
+      String u_subtask_name,
+      String u_subtask_description,
+      String u_end_date,
+      String u_assign_peoples,
+      String u_current_date) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'subtasks_name' : u_subtask_name,
+      'subtasks_description' : u_subtask_description,
+      'subtasks_end_date' : u_end_date,
+      'subtasks_assigned_peoples' : u_assign_peoples,
+      'createdAt' : u_current_date,
+    };
+    final result = await db.update(
+        sub_task_table, data, where: 'column_subtasks_id = ?', whereArgs: [id]);
+    return result;
+  }
+
+  static Future<void> deleteSubTask(int id) async {
+    final db = await SQLHelper.db();
+    try {
+      await db.delete(sub_task_table, where: 'column_subtasks_id = ?', whereArgs: [id]);
+    } catch (err) {
+      debugPrint('$err');
+    }
+  }
+
+
 }
