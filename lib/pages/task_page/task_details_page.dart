@@ -9,6 +9,7 @@ import '../../responsive.dart';
 class TaskDetailsPage extends StatefulWidget {
   const TaskDetailsPage({Key? key, required this.id}) : super(key: key);
   final id;
+
   @override
   State<TaskDetailsPage> createState() => _TaskDetailsPageState();
 }
@@ -18,6 +19,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   List<Map<String, dynamic>> _listSubTasks = [];
   String people_data = '';
   double subtask_progress = 0.0;
+  String task_title = '';
+  String task_description = '';
+  String task_enddate = '';
+  String task_peoples = '';
 
   final _formKey = GlobalKey<FormState>();
 
@@ -31,13 +36,17 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   final update_sub_task_description = TextEditingController();
   final update_sub_task_date = TextEditingController();
 
-
   void _showTask(int? id) async {
-    if(id != null){
+    if (id != null) {
       final data = await SQLHelper.getTask(id);
-
       setState(() {
         _listTasks = data;
+        final task_data =
+            _listTasks.firstWhere((element) => element['column_task_id'] == id);
+        task_title = task_data['tasks_name'];
+        task_description = task_data['tasks_description'];
+        task_enddate = task_data['tasks_end_date'];
+        //task_peoples = task_data[''];
       });
     }
   }
@@ -57,9 +66,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
     });
   }
 
-  void loadControlerData(int stid) async{
-    if(stid != null){
-      final existingData = _listSubTasks.firstWhere((element) => element['column_subtasks_id'] == stid);
+  void loadControlerData(int stid) async {
+    if (stid != null) {
+      final existingData = _listSubTasks
+          .firstWhere((element) => element['column_subtasks_id'] == stid);
       update_sub_task_title.text = existingData['subtasks_name'];
       update_sub_task_description.text = existingData['subtasks_description'];
       update_sub_task_date.text = existingData['subtasks_end_date'];
@@ -74,7 +84,6 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
       _showTask(widget.id);
       showSubTasks(widget.id);
     });
-
   }
 
   @override
@@ -84,144 +93,145 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
         title: Text('Task Details'),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: () {
-            _showMyDialog();
-          }, icon: Icon(Icons.add))
+          IconButton(
+              onPressed: () {
+                _showMyDialog();
+              },
+              icon: Icon(Icons.add))
         ],
       ),
-      body: SafeArea(
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Column(
           children: [
-            Flexible(
-              child: Container(
-                child: ListView.builder(
-                  itemCount: _listTasks.length,
-                  itemBuilder: (context, index) => Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${_listTasks[index]['tasks_name']}',
-                          style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
-                        ),
-                        SizedBox(height: hp(4,context),),
-                        Text(
-                          '${_listTasks[index]['tasks_description']}',
-                          style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: hp(4,context),),
-                        // Text(
-                        //   '${_listProjects[index]['assigned_peoples']}',
-                        //   style:
-                        //   TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                        // ),
-                        Wrap(
-                          children: List<Widget>.generate(_listTasks[index]['tasks_assigned_peoples'].split(',').length - 1, (int i) {
-                            return Chip(
-                              label: Text('${_listTasks[index]['tasks_assigned_peoples'].split(',')[i]}'),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: hp(4,context),),
-                        Text(
-                          'deadline :- ${_listTasks[index]['tasks_end_date']}',
-                          style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: hp(8,context),),
-                      ]
-                  ),
-                ),
-              ),
+            Text(
+              '$task_title',
+              style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline),
             ),
-            Flexible(
-              child: Container(
-                  child: ListView.builder(
-                    itemCount: _listSubTasks.length,
-                    itemBuilder: (context, index) => Container(
-                      child: Slidable(
-                        key: const ValueKey(0),
-                        startActionPane: ActionPane(
-                          motion: const DrawerMotion(),
+            SizedBox(
+              height: hp(4, context),
+            ),
+            Text(
+              '$task_description',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(
+              height: hp(4, context),
+            ),
+            // Text(
+            //   '${_listProjects[index]['assigned_peoples']}',
+            //   style:
+            //   TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            // ),
+            Wrap(
+              children: List<Widget>.generate(task_peoples.split(',').length - 1,
+                  (int i) {
+                return Chip(
+                  label: Text('${task_peoples.split(',')[i]}'),
+                );
+              }).toList(),
+            ),
+            SizedBox(
+              height: hp(4, context),
+            ),
+            Text(
+              'deadline :- $task_enddate',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(
+              height: hp(8, context),
+            ),
+            Expanded(
+                child: ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              itemCount: _listSubTasks.length,
+              itemBuilder: (context, index) => Container(
+                child: Slidable(
+                  key: const ValueKey(0),
+                  startActionPane: ActionPane(
+                    motion: const DrawerMotion(),
+                    children: [
+                      SlidableAction(
+                        flex: 1,
+                        autoClose: true,
+                        onPressed: (value) {
+                          setState(() {
+                            subtask_progress += 0.1;
+                            _completeSubTask(subtask_progress);
+                          });
+                          SQLHelper.deleteSubTask(
+                              _listSubTasks[index]['column_subtasks_id']);
+                          showSubTasks(widget.id);
+                        },
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        icon: Icons.check,
+                        label: 'Complete',
+                      ),
+                      SlidableAction(
+                        autoClose: true,
+                        flex: 1,
+                        onPressed: (value) {
+                          setState(() {
+                            loadControlerData(
+                                _listSubTasks[index]['column_subtasks_id']);
+                            _updateSubTaskDialog();
+                          });
+                        },
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        icon: Icons.edit,
+                        label: 'Edit',
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    onTap: () {},
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 2.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            SlidableAction(
-                              flex: 1,
-                              autoClose: true,
-                              onPressed: (value) {
-                                setState(() {
-                                  subtask_progress += 0.1;
-                                  _completeSubTask(subtask_progress);
-                                });
-                                SQLHelper.deleteSubTask(_listSubTasks[index]['column_subtasks_id']);
-                                showSubTasks(widget.id);
-                              },
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              icon: Icons.check,
-                              label: 'Complete',
+                            Text(
+                              '${_listSubTasks[index]['subtasks_name']}',
+                              style: TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.bold),
                             ),
-                            SlidableAction(
-                              autoClose: true,
-                              flex: 1,
-                              onPressed: (value) {
-                                setState(() {
-                                  loadControlerData(_listSubTasks[index]['column_subtasks_id']);
-                                  _updateSubTaskDialog();
-                                });
-                              },
-                              backgroundColor: Colors.blueAccent,
-                              foregroundColor: Colors.white,
-                              icon: Icons.edit,
-                              label: 'Edit',
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.calendar_month),
+                                Text(
+                                    '  ${_listSubTasks[index]['subtasks_end_date']}'),
+                              ],
                             ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${convertToAgo(DateTime.parse(_listSubTasks[index]['createdAt']))}',
+                                  style: TextStyle(fontSize: 11.0),
+                                )
+                              ],
+                            )
                           ],
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                          },
-                          child: Card(
-                            color: Colors.white,
-                            elevation: 2.0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Container(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text(
-                                    '${_listSubTasks[index]['subtasks_name']}',
-                                    style: TextStyle(
-                                        fontSize: 20.0, fontWeight: FontWeight.bold),
-                                  ),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.calendar_month),
-                                      Text('  ${_listSubTasks[index]['subtasks_end_date']}'),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        '${convertToAgo(DateTime.parse(_listSubTasks[index]['createdAt']))}',
-                                        style: TextStyle(fontSize: 11.0),
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
                         ),
                       ),
                     ),
-                  )
+                  ),
+                ),
               ),
-            ),
+            )),
           ],
         ),
       ),
@@ -327,7 +337,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                           print(
                               pickedDate1); //pickedDate output format => 2021-03-10 00:00:00.000
                           String formattedDate1 =
-                          DateFormat('yMMMd').format(pickedDate1);
+                              DateFormat('yMMMd').format(pickedDate1);
                           print(
                               formattedDate1); //formatted date output using intl package =>  2021-03-16
                           setState(() {
@@ -345,21 +355,22 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       ElevatedButton(
                           style: ButtonStyle(
                             textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20,color: Colors.white),),
+                              TextStyle(fontSize: 20, color: Colors.white),
+                            ),
                             shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            fixedSize: MaterialStateProperty.all(const Size(130, 40)),
+                            fixedSize:
+                                MaterialStateProperty.all(const Size(130, 40)),
                           ),
                           onPressed: (() async {
                             if (_formKey.currentState!.validate()) {
                               await _addSubTask(widget.id);
                               showSubTasks(widget.id);
                             }
-                            setState(() {
-                            });
+                            setState(() {});
                             if (_formKey.currentState!.validate()) {
                               Navigator.pop(context);
                               sub_task_title.text = "";
@@ -371,13 +382,15 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       ElevatedButton(
                           style: ButtonStyle(
                             textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20,color: Colors.white),),
+                              TextStyle(fontSize: 20, color: Colors.white),
+                            ),
                             shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            fixedSize: MaterialStateProperty.all(const Size(130, 40)),
+                            fixedSize:
+                                MaterialStateProperty.all(const Size(130, 40)),
                           ),
                           onPressed: (() {
                             Navigator.pop(context);
@@ -496,7 +509,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                           print(
                               pickedDate1); //pickedDate output format => 2021-03-10 00:00:00.000
                           String formattedDate1 =
-                          DateFormat('yMMMd').format(pickedDate1);
+                              DateFormat('yMMMd').format(pickedDate1);
                           print(
                               formattedDate1); //formatted date output using intl package =>  2021-03-16
                           setState(() {
@@ -514,21 +527,22 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       ElevatedButton(
                           style: ButtonStyle(
                             textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20,color: Colors.white),),
+                              TextStyle(fontSize: 20, color: Colors.white),
+                            ),
                             shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            fixedSize: MaterialStateProperty.all(const Size(130, 40)),
+                            fixedSize:
+                                MaterialStateProperty.all(const Size(130, 40)),
                           ),
                           onPressed: (() async {
                             if (_formKey.currentState!.validate()) {
                               await _updateSubTask(widget.id);
                               showSubTasks(widget.id);
                             }
-                            setState(() {
-                            });
+                            setState(() {});
                             if (_formKey.currentState!.validate()) {
                               Navigator.pop(context);
                               update_sub_task_title.text = "";
@@ -540,13 +554,15 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       ElevatedButton(
                           style: ButtonStyle(
                             textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20,color: Colors.white),),
+                              TextStyle(fontSize: 20, color: Colors.white),
+                            ),
                             shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            fixedSize: MaterialStateProperty.all(const Size(130, 40)),
+                            fixedSize:
+                                MaterialStateProperty.all(const Size(130, 40)),
                           ),
                           onPressed: (() {
                             Navigator.pop(context);
@@ -566,18 +582,28 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
     );
   }
 
-
-
-  Future<void> _addSubTask(int id) async{
+  Future<void> _addSubTask(int id) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.createSubTask(id,sub_task_title.text, sub_task_description.text, sub_task_date.text, people_data, current_date);
+    await SQLHelper.createSubTask(
+        id,
+        sub_task_title.text,
+        sub_task_description.text,
+        sub_task_date.text,
+        people_data,
+        current_date);
   }
 
-  Future<void> _updateSubTask(int stid) async{
+  Future<void> _updateSubTask(int stid) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.updateSubTask(stid,update_sub_task_title.text, update_sub_task_description.text, update_sub_task_date.text, people_data,current_date);
+    await SQLHelper.updateSubTask(
+        stid,
+        update_sub_task_title.text,
+        update_sub_task_description.text,
+        update_sub_task_date.text,
+        people_data,
+        current_date);
   }
 
   String convertToAgo(DateTime input) {
