@@ -53,10 +53,7 @@ class UpdateProjectState extends State<UpdateProject> {
         _project_description_Controller.text = existingList['project_description'];
         startDateController.text = existingList['project_start_date'];
         endDateController.text = existingList['project_end_date'];
-        List.generate(
-            existingList['project_assigned_peoples'].split(',').length - 1, (int i) {
-          _selectedItems =existingList['project_assigned_peoples'].split(',')[i];
-        }).toList();
+        _selectedItems = existingList['project_assigned_peoples'].split(",");
       }
     });
   }
@@ -185,7 +182,7 @@ class UpdateProjectState extends State<UpdateProject> {
       setState(() {
         _selectedItems = results;
         // String data = jsonEncode(_selectedItems);
-        _selectedItems.forEach((element) { people_data += element; people_data += ','; });
+        //_selectedItems.forEach((element) { people_data += element; people_data += ','; });
         //print(people_data);
       });
     }
@@ -370,9 +367,8 @@ class UpdateProjectState extends State<UpdateProject> {
                                 children: _selectedItems
                                     .map((e) => Chip(
                                   label: Text(
-                                    "${e.split(" ")[0][0]}${e.split(" ")[1][0]}",
+                                    "${e.split(" ,").join()}",
                                   ),
-                                  backgroundColor: Colors.lightGreen,
                                 ))
                                     .toList(),
                               ),
@@ -382,7 +378,7 @@ class UpdateProjectState extends State<UpdateProject> {
                               ElevatedButton(
                                 onPressed: () async {
                                   await _updateProject(widget.id);
-                                  Navigator.pop(context);
+                                  Navigator.pop(context,'result_value');
                                 },
                                 style: ButtonStyle(
                                   textStyle: MaterialStateProperty.all(
@@ -412,6 +408,6 @@ class UpdateProjectState extends State<UpdateProject> {
   Future<void> _updateProject(int pid) async{
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.updateProject(pid,project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, people_data,current_date);
+    await SQLHelper.updateProject(pid,project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),current_date);
   }
 }

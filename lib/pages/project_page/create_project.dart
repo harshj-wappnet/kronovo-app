@@ -145,7 +145,7 @@ class _CreateProjectState extends State<CreateProject> {
       setState(() {
         _selectedItems = results;
         // String data = jsonEncode(_selectedItems);
-        _selectedItems.forEach((element) { people_data += element; people_data += ','; });
+       // _selectedItems.forEach((element) { people_data += element; people_data += ','; });
         //print(people_data);
       });
     }
@@ -330,9 +330,8 @@ class _CreateProjectState extends State<CreateProject> {
                                 children: _selectedItems
                                     .map((e) => Chip(
                                   label: Text(
-                                    "${e.split(" ")[0][0]}${e.split(" ")[1][0]}",
+                                    "${e.split(",").join(" ")}",
                                   ),
-                                  backgroundColor: Colors.lightGreen,
                                 ))
                                     .toList(),
                               ),
@@ -376,9 +375,10 @@ class _CreateProjectState extends State<CreateProject> {
     );
   }
 
+
   Future<void> _addProject() async{
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.createProject(project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, people_data,current_date);
+    await SQLHelper.createProject(project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),current_date);
   }
 }

@@ -49,7 +49,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
         project_title = project_data['project_name'];
         project_description = project_data['project_description'];
         project_enddate = project_data['project_end_date'];
-        project_peoples = project_data['project_assigned_peoples'];
+        _selectedItems = project_data['project_assigned_peoples'].replaceAll('[ ]', '').split(",");
       });
     }
   }
@@ -114,10 +114,10 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
       setState(() {
         _selectedItems = results;
         // String data = jsonEncode(_selectedItems);
-        _selectedItems.forEach((element) {
-          people_data += element;
-          people_data += ',';
-        });
+        // _selectedItems.forEach((element) {
+        //   people_data += element;
+        //   people_data += ',';
+        // });
         //print(people_data);
       });
     }
@@ -170,14 +170,15 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                   //   style:
                   //   TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   // ),
-                  Wrap(
-                    children: List<Widget>.generate(
-                        project_peoples.split(',').length - 1, (int i) {
-                      return Chip(
-                        label: Text('${project_peoples.split(',')[i]}'),
-                      );
-                    }).toList(),
-                  ),
+              Wrap(
+                  children: _selectedItems
+                      .map((e) => Chip(
+                    label: Text(
+                      "${e}",
+                    ),
+                  ))
+                      .toList(),
+              ),
                   SizedBox(
                     height: hp(4, context),
                   ),
