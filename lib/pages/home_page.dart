@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -42,6 +41,17 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _navigateforResult(BuildContext context) async {
+    final result = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) =>
+        CreateProject(onSubmit: (String value) {
+          null;
+        },)));
+    if (!mounted) return;
+    initState();
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -56,28 +66,23 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
-        appBar: AppBar(
-          title: Text('Projects'),
-          centerTitle: true,
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateProject(onSubmit: (String value){
-                    null;
-                  },)));
-                },
-                icon: Icon(Icons.add))
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async{
-            initState();
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child:  ListView.builder(
-              itemCount: _listProjects.length,
-              itemBuilder: (context, index) => Container(
+      appBar: AppBar(
+        title: Text('Projects'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+              onPressed: () {
+                _navigateforResult(context);
+              },
+              icon: Icon(Icons.add))
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: _listProjects.isNotEmpty ? ListView.builder(
+          itemCount: _listProjects.length,
+          itemBuilder: (context, index) =>
+              Container(
                 child: Slidable(
                   key: const ValueKey(0),
                   startActionPane: ActionPane(
@@ -87,7 +92,8 @@ class _HomePageState extends State<HomePage> {
                         flex: 1,
                         autoClose: true,
                         onPressed: (value) {
-                          SQLHelper.deleteProject(_listProjects[index]['project_id']);
+                          SQLHelper.deleteProject(
+                              _listProjects[index]['project_id']);
                           setState(() {
                             getAllProjects();
                           });
@@ -103,9 +109,13 @@ class _HomePageState extends State<HomePage> {
                         onPressed: (value) {
                           //_listProjects.removeAt(index);
                           setState(() {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProject(id :_listProjects[index]['project_id'],onSubmit: (String value){
-                              null;
-                            },)));
+                            Navigator.push(
+                                context, MaterialPageRoute(builder: (context) =>
+                                UpdateProject(
+                                  id: _listProjects[index]['project_id'],
+                                  onSubmit: (String value) {
+                                    null;
+                                  },)));
                           });
                         },
                         backgroundColor: Colors.blueAccent,
@@ -120,7 +130,9 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProjectDetailsPage(id :_listProjects[index]['project_id'])));
+                              builder: (context) =>
+                                  ProjectDetailsPage(
+                                      id: _listProjects[index]['project_id'])));
                     },
                     child: Card(
                       color: Colors.white,
@@ -145,10 +157,12 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.calendar_month),
-                                Text('  ${_listProjects[index]['project_start_date']}'),
+                                Text(
+                                    '  ${_listProjects[index]['project_start_date']}'),
 
                                 Icon(Icons.task_alt_outlined),
-                                Text(' ${_listProjects[index]['project_end_date']}'),
+                                Text(
+                                    ' ${_listProjects[index]['project_end_date']}'),
                               ],
                             ),
 
@@ -156,7 +170,8 @@ class _HomePageState extends State<HomePage> {
                               margin: EdgeInsets.only(left: 40.0, right: 20.0),
                               child: LinearProgressIndicator(
                                 value: project_progress,
-                                valueColor: AlwaysStoppedAnimation(Colors.green),
+                                valueColor: AlwaysStoppedAnimation(
+                                    Colors.green),
                                 minHeight: 10.0,
                               ),
                             ),
@@ -164,7 +179,8 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(
-                                  '${convertToAgo(DateTime.parse(_listProjects[index]['createdAt']))}',
+                                  '${convertToAgo(DateTime.parse(
+                                      _listProjects[index]['createdAt']))}',
                                   style: TextStyle(fontSize: 14.0),
                                 )
                               ],
@@ -176,31 +192,52 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-            )
-                // : Text("NO PROJECTS \n    Click On + to Add Projects",
-                //             style: TextStyle(
-                //                 color: Colors.black,
-                //                 fontWeight: FontWeight.bold,
-                //                 fontSize: 28)),
-          ),
         )
+            : Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text("NO PROJECTS",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28)
+              ),
+              Text('Click On + to Add Projects',
+                  style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 18)
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   String convertToAgo(DateTime input) {
     Duration diff = DateTime.now().difference(input);
     if (diff.inDays > 365)
-      return "${(diff.inDays / 365).floor()} ${(diff.inDays / 365).floor() == 1 ? "year" : "years"} ago   ";
+      return "${(diff.inDays / 365).floor()} ${(diff.inDays / 365).floor() == 1
+          ? "year"
+          : "years"} ago   ";
     if (diff.inDays > 30)
-      return "${(diff.inDays / 30).floor()} ${(diff.inDays / 30).floor() == 1 ? "month" : "months"} ago   ";
+      return "${(diff.inDays / 30).floor()} ${(diff.inDays / 30).floor() == 1
+          ? "month"
+          : "months"} ago   ";
     if (diff.inDays > 7)
-      return "${(diff.inDays / 7).floor()} ${(diff.inDays / 7).floor() == 1 ? "week" : "weeks"} ago   ";
+      return "${(diff.inDays / 7).floor()} ${(diff.inDays / 7).floor() == 1
+          ? "week"
+          : "weeks"} ago   ";
     if (diff.inDays > 0)
       return "${diff.inDays} ${diff.inDays == 1 ? "day" : "days"} ago   ";
     if (diff.inHours > 0)
       return "${diff.inHours} ${diff.inHours == 1 ? "hour" : "hours"} ago   ";
     if (diff.inMinutes > 0)
-      return "${diff.inMinutes} ${diff.inMinutes == 1 ? "minute" : "minutes"} ago   ";
+      return "${diff.inMinutes} ${diff.inMinutes == 1
+          ? "minute"
+          : "minutes"} ago   ";
     return "just now   ";
   }
 }

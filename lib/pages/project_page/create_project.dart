@@ -7,9 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:kronovo_app/helpers/sql_helper.dart';
 import 'package:kronovo_app/pages/home_page.dart';
-import 'assign members_dialog.dart';
+import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/responsive.dart';
-import 'assign members_dialog.dart';
+import '../../widgets/assignmembers_dialog.dart';
 import 'package:sqflite/sqflite.dart';
 
 class CreateProject extends StatefulWidget {
@@ -346,7 +346,7 @@ class _CreateProjectState extends State<CreateProject> {
                                     setState(() async{
                                       await _addProject();
                                     });
-                                    Navigator.pop(context);
+                                    Navigator.pop(context,'return_value');
                                   }else{
                                     _formKey.currentState?.validate();
                                   }

@@ -5,10 +5,12 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:kronovo_app/pages/task_page/task_details_page.dart';
 import 'package:kronovo_app/responsive.dart';
+import 'package:kronovo_app/widgets/task_dialog.dart';
+import 'package:kronovo_app/widgets/update_task_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/sql_helper.dart';
-import 'assign members_dialog.dart';
+import '../../widgets/assignmembers_dialog.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
   const ProjectDetailsPage({Key? key, required this.id}) : super(key: key);
@@ -24,22 +26,15 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   List<String> _selectedItems = [];
   String people_data = '';
   double progress_value = 0.0;
-  final _formKey = GlobalKey<FormState>();
+  int? task_id;
 
   // TextEditingController dateInput1 = TextEditingController();
 
-  final _task_title = TextEditingController();
-  final _task_description = TextEditingController();
-  final _task_date = TextEditingController();
 
-  final update_task_title = TextEditingController();
-  final update_task_description = TextEditingController();
-  final update_task_date = TextEditingController();
   double task_progress = 0.0;
 
   String project_title = "";
   String project_description = "";
-
   String project_enddate = "";
   String project_peoples = "";
 
@@ -56,16 +51,6 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
         project_enddate = project_data['project_end_date'];
         project_peoples = project_data['project_assigned_peoples'];
       });
-    }
-  }
-
-  void loadControlerData(int tid) async {
-    if (tid != null) {
-      final existingData =
-          _listTasks.firstWhere((element) => element['column_task_id'] == tid);
-      update_task_title.text = existingData['tasks_name'];
-      update_task_description.text = existingData['tasks_description'];
-      update_task_date.text = existingData['tasks_end_date'];
     }
   }
 
@@ -88,7 +73,9 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
 
     setState(() {
       _listTasks = task_data;
-      _loadPref(_listTasks[0]['column_task_id']);
+      final existing_task_data =
+      _listTasks.firstWhere((element) => element['column_task_id'] == id);
+      _loadPref(existing_task_data['column_task_id']);
     });
   }
 
@@ -145,7 +132,11 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
             actions: [
               IconButton(
                   onPressed: () {
-                    _showMyDialog();
+                    showDialog(
+                      builder: (context) => TaskDialoBox(id: widget.id),
+                        context: context,
+                      barrierDismissible: false
+                    );
                   },
                   icon: Icon(Icons.add))
             ]),
@@ -230,9 +221,11 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 flex: 1,
                                 onPressed: (value) {
                                   setState(() {
-                                    loadControlerData(
-                                        _listTasks[index]['column_task_id']);
-                                    _updateTaskDialog();
+                                    showDialog(
+                                      builder: (context) => UpdateTaskDialog(id: widget.id,task_id: _listTasks[index]['column_task_id']),
+                                      context: context,
+                                      barrierDismissible: false,
+                                    );
                                   });
                                 },
                                 backgroundColor: Colors.blueAccent,
@@ -307,369 +300,6 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
             ),
         )
     );
-  }
-
-  Future<void> _showMyDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add Task'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    width: wp(80, context),
-                    child: TextFormField(
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      controller: _task_title,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.edit_note,
-                          color: Colors.transparent,
-                        ),
-                        labelText: 'Enter Task Title',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        filled: true,
-                        // TODO: add errorHint
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Title can't be empty";
-                        } else {
-                          return null;
-                        }
-                      },
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ),
-                  SizedBox(
-                    height: hp(4, context),
-                  ),
-                  SizedBox(height: 5),
-                  SizedBox(
-                    width: wp(80, context),
-                    child: TextFormField(
-                      maxLines: 2,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      controller: _task_description,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.edit_note,
-                          color: Colors.transparent,
-                        ),
-                        labelText: 'Enter Task Description',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        filled: true,
-
-                        // TODO: add errorHint
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Project Description can't be empty";
-                        } else {
-                          return null;
-                        }
-                      },
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ),
-                  SizedBox(
-                    height: hp(4, context),
-                  ),
-                  SizedBox(height: 5),
-                  SizedBox(
-                    width: wp(80, context),
-                    child: TextField(
-                      controller: _task_date,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.calendar_today,
-                          color: Colors.transparent,
-                        ),
-                        labelText: "Enter Deadline Date",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        filled: true, //label text of field
-                      ),
-                      readOnly: true,
-                      onTap: () async {
-                        DateTime? pickedDate1 = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(1950),
-                            lastDate: DateTime(2100));
-                        if (pickedDate1 != null) {
-                          print(
-                              pickedDate1); //pickedDate output format => 2021-03-10 00:00:00.000
-                          String formattedDate1 =
-                              DateFormat('yMMMd').format(pickedDate1);
-                          print(
-                              formattedDate1); //formatted date output using intl package =>  2021-03-16
-                          setState(() {
-                            _task_date.text =
-                                formattedDate1; //set output date to TextField value.
-                          });
-                        } else {}
-                      },
-                    ),
-                  ),
-                  SizedBox(height: hp(4, context)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                          style: ButtonStyle(
-                            textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20, color: Colors.white),
-                            ),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            fixedSize:
-                                MaterialStateProperty.all(const Size(130, 40)),
-                          ),
-                          onPressed: (() async {
-                            if (_formKey.currentState!.validate()) {
-                              await _addTask(widget.id);
-                              showTasks(widget.id);
-                            }
-                            setState(() {});
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.pop(context);
-                              _task_title.text = "";
-                              _task_description.text = "";
-                              _task_date.text = "";
-                            }
-                          }),
-                          child: Text("ADD")),
-                      ElevatedButton(
-                          style: ButtonStyle(
-                            textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20, color: Colors.white),
-                            ),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            fixedSize:
-                                MaterialStateProperty.all(const Size(130, 40)),
-                          ),
-                          onPressed: (() {
-                            Navigator.pop(context);
-                          }),
-                          child: Text("CANCEL")),
-                    ],
-                  ),
-                  SizedBox(
-                    height: hp(1, context),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _updateTaskDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Update Task'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    width: wp(80, context),
-                    child: TextFormField(
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      controller: update_task_title,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.edit_note,
-                          color: Colors.transparent,
-                        ),
-                        labelText: 'Enter Task Title',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        filled: true,
-                        // TODO: add errorHint
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Title can't be empty";
-                        } else {
-                          return null;
-                        }
-                      },
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ),
-                  SizedBox(
-                    height: hp(4, context),
-                  ),
-                  SizedBox(height: 5),
-                  SizedBox(
-                    width: wp(80, context),
-                    child: TextFormField(
-                      maxLines: 2,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      controller: update_task_description,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.edit_note,
-                          color: Colors.transparent,
-                        ),
-                        labelText: 'Enter Task Description',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        filled: true,
-
-                        // TODO: add errorHint
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Project Description can't be empty";
-                        } else {
-                          return null;
-                        }
-                      },
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ),
-                  SizedBox(
-                    height: hp(4, context),
-                  ),
-                  SizedBox(height: 5),
-                  SizedBox(
-                    width: wp(80, context),
-                    child: TextField(
-                      controller: update_task_date,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.calendar_today,
-                          color: Colors.transparent,
-                        ),
-                        labelText: "Enter Deadline Date",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0)),
-                        filled: true, //label text of field
-                      ),
-                      readOnly: true,
-                      onTap: () async {
-                        DateTime? pickedDate1 = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(1950),
-                            lastDate: DateTime(2100));
-                        if (pickedDate1 != null) {
-                          print(
-                              pickedDate1); //pickedDate output format => 2021-03-10 00:00:00.000
-                          String formattedDate1 =
-                              DateFormat('yMMMd').format(pickedDate1);
-                          print(
-                              formattedDate1); //formatted date output using intl package =>  2021-03-16
-                          setState(() {
-                            _task_date.text =
-                                formattedDate1; //set output date to TextField value.
-                          });
-                        } else {}
-                      },
-                    ),
-                  ),
-                  SizedBox(height: hp(4, context)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                          style: ButtonStyle(
-                            textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20, color: Colors.white),
-                            ),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            fixedSize:
-                                MaterialStateProperty.all(const Size(130, 40)),
-                          ),
-                          onPressed: (() async {
-                            if (_formKey.currentState!.validate()) {
-                              await _updateTask(widget.id);
-                              showTasks(widget.id);
-                            }
-                            setState(() {});
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.pop(context);
-                              update_task_title.text = "";
-                              update_task_description.text = "";
-                              update_task_date.text = "";
-                            }
-                          }),
-                          child: Text("UPDATE")),
-                      ElevatedButton(
-                          style: ButtonStyle(
-                            textStyle: MaterialStateProperty.all(
-                              TextStyle(fontSize: 20, color: Colors.white),
-                            ),
-                            shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            fixedSize:
-                                MaterialStateProperty.all(const Size(130, 40)),
-                          ),
-                          onPressed: (() {
-                            Navigator.pop(context);
-                          }),
-                          child: Text("CANCEL")),
-                    ],
-                  ),
-                  SizedBox(
-                    height: hp(1, context),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _addTask(int id) async {
-    String current_date = DateTime.now().toString();
-    // String data = json.encode(_selectedItems);
-    await SQLHelper.createTask(id, _task_title.text, _task_description.text,
-        _task_date.text, people_data, current_date);
-  }
-
-  Future<void> _updateTask(int tid) async {
-    String current_date = DateTime.now().toString();
-    // String data = json.encode(_selectedItems);
-    await SQLHelper.updateTask(
-        tid,
-        update_task_title.text,
-        update_task_description.text,
-        update_task_date.text,
-        people_data,
-        current_date);
   }
 
   String convertToAgo(DateTime input) {

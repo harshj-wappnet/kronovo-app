@@ -7,9 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:kronovo_app/helpers/sql_helper.dart';
 import 'package:kronovo_app/pages/home_page.dart';
-import 'assign members_dialog.dart';
+import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/responsive.dart';
-import 'assign members_dialog.dart';
+import '../../widgets/assignmembers_dialog.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UpdateProject extends StatefulWidget {
@@ -53,7 +53,10 @@ class UpdateProjectState extends State<UpdateProject> {
         _project_description_Controller.text = existingList['project_description'];
         startDateController.text = existingList['project_start_date'];
         endDateController.text = existingList['project_end_date'];
-        //_selectedItems = existingList['project_assigned_peoples'].split(',');
+        List.generate(
+            existingList['project_assigned_peoples'].split(',').length - 1, (int i) {
+          _selectedItems =existingList['project_assigned_peoples'].split(',')[i];
+        }).toList();
       }
     });
   }
@@ -125,24 +128,25 @@ class UpdateProjectState extends State<UpdateProject> {
   }
 
 
-  void loadPrevoiusData(int id) {
-
-    if(id != null){
-      final existingList = _listProjects.firstWhere((element) => element['project_id'] == id);
-      project_title_Controller.text = existingList['project_name'];
-      _project_description_Controller.text = existingList['project_description'];
-      startDateController.text = existingList['project_start_date'];
-      endDateController.text = existingList['project_end_date'];
-      //_selectedItems = existingList['project_assigned_peoples'].split(',');
-    }
-  }
+  // void loadPrevoiusData(int id) {
+  //
+  //   if(id != null){
+  //     final existingList = _listProjects.firstWhere((element) => element['project_id'] == id);
+  //     project_title_Controller.text = existingList['project_name'];
+  //     _project_description_Controller.text = existingList['project_description'];
+  //     startDateController.text = existingList['project_start_date'];
+  //     endDateController.text = existingList['project_end_date'];
+  //
+  //
+  //   }
+  // }
 
 
   @override
   void initState() {
     super.initState();
     getProjectData(widget.id);
-     //loadPrevoiusData(widget.id);
+    //loadPrevoiusData(widget.id);
     cntMulti = MultiValueDropDownController();
   }
 
@@ -390,7 +394,7 @@ class UpdateProjectState extends State<UpdateProject> {
                                   ),
                                   fixedSize: MaterialStateProperty.all(const Size(350, 40)),
                                 ),
-                                child: const Text("Create Project"),
+                                child: const Text("Update Project"),
                               ),
                             ]),
                       ),
