@@ -39,7 +39,7 @@ class _TaskDialoBoxState extends State<TaskDialoBox> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add Task'),
+      title: Text('Add Task', style: TextStyle(fontWeight: FontWeight.bold),),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -53,13 +53,11 @@ class _TaskDialoBoxState extends State<TaskDialoBox> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.edit_note,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: 'Enter Task Title',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true,
-                    // TODO: add errorHint
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -84,14 +82,11 @@ class _TaskDialoBoxState extends State<TaskDialoBox> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.edit_note,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: 'Enter Task Description',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true,
-
-                    // TODO: add errorHint
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -109,18 +104,24 @@ class _TaskDialoBoxState extends State<TaskDialoBox> {
               SizedBox(height: 5),
               SizedBox(
                 width: wp(80, context),
-                child: TextField(
+                child: TextFormField(
                   controller: _task_date,
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.calendar_today,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: "Enter Deadline Date",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true, //label text of field
                   ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return "Deadline Date can't be empty";
+                    } else {
+                      return null;
+                    }
+                  },
                   readOnly: true,
                   onTap: () async {
                     DateTime? pickedDate1 = await showDatePicker(

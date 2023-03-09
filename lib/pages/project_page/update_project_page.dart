@@ -53,7 +53,8 @@ class UpdateProjectState extends State<UpdateProject> {
         _project_description_Controller.text = existingList['project_description'];
         startDateController.text = existingList['project_start_date'];
         endDateController.text = existingList['project_end_date'];
-        _selectedItems = existingList['project_assigned_peoples'].split(",");
+        people_data = existingList['project_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+        _selectedItems = people_data.split(",");
       }
     });
   }
@@ -367,7 +368,7 @@ class UpdateProjectState extends State<UpdateProject> {
                                 children: _selectedItems
                                     .map((e) => Chip(
                                   label: Text(
-                                    "${e.split(" ,").join()}",
+                                    "${e.split(",").join()}",
                                   ),
                                 ))
                                     .toList(),

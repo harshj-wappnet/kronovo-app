@@ -4,9 +4,8 @@ import '../helpers/sql_helper.dart';
 import '../responsive.dart';
 
 class UpdateTaskDialog extends StatefulWidget {
-  const UpdateTaskDialog({Key? key, required this.id, required this.task_id}) : super(key: key);
+  const UpdateTaskDialog({Key? key, required this.id}) : super(key: key);
     final id;
-    final task_id;
   @override
   State<UpdateTaskDialog> createState() => _UpdateTaskDialogState();
 }
@@ -26,26 +25,20 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
 
     setState(() {
       _listTasks = task_data;
+      final existingData =
+      _listTasks.firstWhere((element) => element['column_task_id'] == id);
+      update_task_title.text = existingData['tasks_name'];
+      update_task_description.text = existingData['tasks_description'];
+      update_task_date.text = existingData['tasks_end_date'];
     });
   }
 
-  void loadControlerData(int tid) async {
-    setState(() {
-      if (tid != null) {
-        final existingData =
-        _listTasks.firstWhere((element) => element['column_task_id'] == tid);
-        update_task_title.text = existingData['tasks_name'];
-        update_task_description.text = existingData['tasks_description'];
-        update_task_date.text = existingData['tasks_end_date'];
-      }
-    });
-  }
+
 
   @override
   void initState() {
     super.initState();
     loadTasks(widget.id);
-    loadControlerData(widget.task_id);
   }
 
 
@@ -66,13 +59,11 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.edit_note,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: 'Enter Task Title',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true,
-                    // TODO: add errorHint
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -97,14 +88,11 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.edit_note,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: 'Enter Task Description',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true,
-
-                    // TODO: add errorHint
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -127,12 +115,11 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.calendar_today,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: "Enter Deadline Date",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true, //label text of field
                   ),
                   readOnly: true,
                   onTap: () async {
@@ -175,7 +162,7 @@ class _UpdateTaskDialogState extends State<UpdateTaskDialog> {
                       ),
                       onPressed: (() async {
                         if (_formKey.currentState!.validate()) {
-                          await _updateTask(widget.task_id);
+                          await _updateTask(widget.id);
                           //loadTasks(widget.id);
                         }
                         setState(() {});

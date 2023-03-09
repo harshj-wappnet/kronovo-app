@@ -38,6 +38,9 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   String project_enddate = "";
   String project_peoples = "";
 
+  List<bool> cardEnabledList = [];
+  List<Color> cardColorList = [];
+
   void _showProject(int? id) async {
     if (id != null) {
       final data = await SQLHelper.getProject(id);
@@ -49,7 +52,8 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
         project_title = project_data['project_name'];
         project_description = project_data['project_description'];
         project_enddate = project_data['project_end_date'];
-        _selectedItems = project_data['project_assigned_peoples'].replaceAll('[ ]', '').split(",");
+        people_data = project_data['project_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+        _selectedItems = people_data.split(",");
       });
     }
   }
@@ -127,7 +131,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title: Text("KRONOVO"),
+            title: Text("Project"),
             backgroundColor: Colors.green,
             actions: [
               IconButton(
@@ -147,47 +151,66 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    '$project_title',
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline),
-                  ),
-                  SizedBox(
-                    height: hp(4, context),
-                  ),
-                  Text(
-                    '$project_description',
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: hp(4, context),
-                  ),
-                  // Text(
-                  //   '${_listProjects[index]['assigned_peoples']}',
-                  //   style:
-                  //   TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  // ),
+                  Container(
+                    margin: EdgeInsets.all(10.0),
+                    padding: EdgeInsets.all(5.0),
+                    child: Column(
+                      children: [
+                        Text("Title", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                        Text(
+                          '$project_title',
+                          style: TextStyle(
+                              fontSize: 20,
+                              ),
+                        ),
+                        SizedBox(
+                          height: hp(4, context),
+                        ),
+                        Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                        Text(
+                          '$project_description',
+                          style: TextStyle(fontSize: 20,),
+                        ),
+                        SizedBox(
+                          height: hp(4, context),
+                        ),
+                        // Text(
+                        //   '${_listProjects[index]['assigned_peoples']}',
+                        //   style:
+                        //   TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                        // ),
+                        Text("Assigned Members", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
               Wrap(
-                  children: _selectedItems
-                      .map((e) => Chip(
-                    label: Text(
-                      "${e}",
-                    ),
-                  ))
-                      .toList(),
+                        children: _selectedItems
+                            .map((e) => Container(
+                          margin: EdgeInsets.only(left: 5.0,right: 5.0),
+                              child: Chip(
+                          label: Text(
+                              "${e.split(",").join()}",
+                          ),
+                        ),
+                            )
+                        )
+                            .toList(),
               ),
-                  SizedBox(
-                    height: hp(4, context),
+                        SizedBox(
+                          height: hp(4, context),
+                        ),
+                        Text(
+                          'Deadline $project_enddate',
+                          style:
+                              const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: hp(4, context),
+                        ),
+                        Text("Tasks", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                        SizedBox(height: 10.0,),
+                      ],
+                    ),
                   ),
-                  Text(
-                    'deadline :- $project_enddate',
-                    style:
-                        const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 20.0,),
                   Expanded(
                     child: ListView.builder(
                       scrollDirection: Axis.vertical,
@@ -196,7 +219,8 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                       itemCount: _listTasks.length,
                       itemBuilder: (context, index) => Container(
                         child: Slidable(
-                          key: const ValueKey(0),
+                          key: ValueKey(index),
+                          enabled: cardEnabledList[index],
                           startActionPane: ActionPane(
                             motion: const DrawerMotion(),
                             children: [
@@ -205,12 +229,15 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 autoClose: true,
                                 onPressed: (value) {
                                   setState(() {
+                                    cardEnabledList[index] = false;
+                                    cardColorList[index] = Colors.grey;
+                                    initState();
                                     progress_value += 0.1;
                                     _completetask(progress_value);
                                   });
-                                  SQLHelper.deleteTask(
-                                      _listTasks[index]['column_task_id']);
-                                  showTasks(widget.id);
+                                  // SQLHelper.deleteTask(
+                                  //     _listTasks[index]['column_task_id']);
+                                  // showTasks(widget.id);
                                 },
                                 backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
@@ -223,7 +250,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 onPressed: (value) {
                                   setState(() {
                                     showDialog(
-                                      builder: (context) => UpdateTaskDialog(id: widget.id,task_id: _listTasks[index]['column_task_id']),
+                                      builder: (context) => UpdateTaskDialog(id: widget.id),
                                       context: context,
                                       barrierDismissible: false,
                                     );
@@ -247,14 +274,19 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                             },
                             child: Card(
                               color: Colors.white,
-                              elevation: 2.0,
+                              elevation: 5.0,
+                              shadowColor: Colors.green,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Container(
+                                margin: EdgeInsets.all(15.0),
+                                padding: EdgeInsets.all(5.0),
+                                height: hp(15, context),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
+                                      Container(alignment: Alignment.topLeft, child: Icon(Icons.book, size: 50),),
                                     Text(
                                       '${_listTasks[index]['tasks_name']}',
                                       style: TextStyle(
@@ -264,7 +296,6 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.calendar_month),
                                         Text(
                                             '  ${_listTasks[index]['tasks_end_date']}'),
                                       ],
@@ -297,7 +328,8 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                       ),
                     ),
                   ),
-        ]),
+                ]
+              ),
             ),
         )
     );

@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
 
       appBar: AppBar(
-        title: Text('Projects'),
+        title: Text('Kronovo'),
         centerTitle: true,
         actions: [
           IconButton(

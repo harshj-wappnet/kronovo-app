@@ -27,24 +27,18 @@ class _UpdateSubTaskDialogState extends State<UpdateSubTaskDialog> {
 
     setState(() {
       _listSubTasks = data;
-    });
-  }
-
-  void loadControlerData(int stid) async {
-    if (stid != null) {
       final existingData = _listSubTasks
-          .firstWhere((element) => element['column_subtasks_id'] == stid);
+          .firstWhere((element) => element['column_subtasks_id'] == id);
       update_sub_task_title.text = existingData['subtasks_name'];
       update_sub_task_description.text = existingData['subtasks_description'];
       update_sub_task_date.text = existingData['subtasks_end_date'];
-    }
+    });
   }
 
   @override
   void initState() {
     super.initState();
     showSubTasks(widget.id);
-    loadControlerData(widget.id);
   }
 
   @override
@@ -64,13 +58,11 @@ class _UpdateSubTaskDialogState extends State<UpdateSubTaskDialog> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.edit_note,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: 'Enter Task Title',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true,
-                    // TODO: add errorHint
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -95,12 +87,11 @@ class _UpdateSubTaskDialogState extends State<UpdateSubTaskDialog> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.edit_note,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: 'Enter Task Description',
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true,
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -123,12 +114,11 @@ class _UpdateSubTaskDialogState extends State<UpdateSubTaskDialog> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.calendar_today,
-                      color: Colors.transparent,
+                      color: Colors.grey,
                     ),
                     labelText: "Enter Deadline Date",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)),
-                    filled: true, //label text of field
                   ),
                   readOnly: true,
                   onTap: () async {
