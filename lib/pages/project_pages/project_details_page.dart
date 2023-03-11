@@ -3,12 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:kronovo_app/pages/task_page/task_details_page.dart';
-import 'package:kronovo_app/responsive.dart';
-import 'package:kronovo_app/widgets/task_dialog.dart';
-import 'package:kronovo_app/widgets/update_task_dialog.dart';
+import 'package:kronovo_app/pages/task_pages/task_details_page.dart';
+import 'package:kronovo_app/utils/responsive.dart';
+import 'package:kronovo_app/pages/task_pages/add_task_page.dart';
+import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../helpers/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
@@ -28,18 +27,18 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   double progress_value = 0.0;
   int? task_id;
 
-  // TextEditingController dateInput1 = TextEditingController();
-
-
   double task_progress = 0.0;
 
   String project_title = "";
   String project_description = "";
   String project_enddate = "";
   String project_peoples = "";
+  late int list_size = _listTasks.length;
 
+  List<double> prefList = [];
   List<bool> cardEnabledList = [];
   List<Color> cardColorList = [];
+
 
   void _showProject(int? id) async {
     if (id != null) {
@@ -48,7 +47,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
       setState(() {
         _listProjects = data;
         final project_data =
-            _listProjects.firstWhere((element) => element['project_id'] == id);
+        _listProjects.firstWhere((element) => element['project_id'] == id);
         project_title = project_data['project_name'];
         project_description = project_data['project_description'];
         project_enddate = project_data['project_end_date'];
@@ -61,17 +60,17 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   Future<void> _loadPref(int tsid) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      task_progress += prefs.getDouble('subtask_$tsid')!;
+      task_progress = prefs.getDouble('subtask_$tsid')!;
+      prefList.forEach((element) { element = task_progress;});
     });
   }
 
   Future<void> _completetask(double process_value) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      prefs.setDouble('${widget.id}', process_value);
+      prefs.setDouble('task_${widget.id}', process_value);
     });
   }
-
   void showTasks(int id) async {
     final task_data = await SQLHelper.getAllTasksByProject(id);
 
@@ -81,7 +80,11 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
       _listTasks.firstWhere((element) => element['column_task_id'] == id);
       _loadPref(existing_task_data['column_task_id']);
     });
+    cardEnabledList = List.filled(_listTasks.length,true,growable: false);
+    cardColorList = List.filled(_listTasks.length,Colors.white,growable: false);
+    prefList = List.filled(_listTasks.length, 0.0,growable: false);
   }
+
 
   @override
   void initState() {
@@ -131,86 +134,98 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title: Text("Project"),
+            title: Text("Project Details"),
+            centerTitle: true,
             backgroundColor: Colors.green,
             actions: [
               IconButton(
                   onPressed: () {
-                    showDialog(
-                      builder: (context) => TaskDialoBox(id: widget.id),
-                        context: context,
-                      barrierDismissible: false
-                    );
-                  },
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AddTaskPage(id: widget.id),));
+                   },
                   icon: Icon(Icons.add))
             ]),
         body: RefreshIndicator(
           onRefresh: () async {
-            initState();
+            _showProject(widget.id);
+            showTasks(widget.id);
           },
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  SizedBox(height: 25.0,),
                   Container(
-                    margin: EdgeInsets.all(10.0),
-                    padding: EdgeInsets.all(5.0),
+                    width: wp(100, context),
+                    margin: EdgeInsets.only(left: 20.0,right: 20.0),
+                    decoration: BoxDecoration(
+                      color: Color(0xffbcf5bc),
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.green,
+                            offset: Offset(4,8),
+                          blurRadius: 12,
+                        )
+                      ],
+                    ),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("Title", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                        SizedBox(height: 8.0,),
                         Text(
                           '$project_title',
                           style: TextStyle(
-                              fontSize: 20,
-                              ),
-                        ),
-                        SizedBox(
-                          height: hp(4, context),
-                        ),
-                        Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                        Text(
-                          '$project_description',
-                          style: TextStyle(fontSize: 20,),
-                        ),
-                        SizedBox(
-                          height: hp(4, context),
-                        ),
-                        // Text(
-                        //   '${_listProjects[index]['assigned_peoples']}',
-                        //   style:
-                        //   TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                        // ),
-                        Text("Assigned Members", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-              Wrap(
-                        children: _selectedItems
-                            .map((e) => Container(
-                          margin: EdgeInsets.only(left: 5.0,right: 5.0),
-                              child: Chip(
-                          label: Text(
-                              "${e.split(",").join()}",
+                            fontSize: 50,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold
                           ),
                         ),
-                            )
-                        )
-                            .toList(),
-              ),
-                        SizedBox(
-                          height: hp(4, context),
-                        ),
+                        SizedBox(height: 15.0,),
+                        //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
                         Text(
-                          'Deadline $project_enddate',
+                          '$project_description',
+                          style: TextStyle(fontSize: 25,
+                          color: Colors.white),
+                        ),
+                        SizedBox(height: 15.0,),
+                        Text("Assigned Members", style: TextStyle(color: Colors.white,fontSize: 20, fontWeight: FontWeight.bold,),),
+                        SizedBox(height: 6.0,),
+                        Wrap(
+                          children: _selectedItems
+                              .map((e) => Container(
+                            margin: EdgeInsets.only(left: 5.0,right: 5.0),
+                            child: Chip(
+                              padding: EdgeInsets.all(8.0),
+                              backgroundColor: Colors.white,
+                              label: Text(
+                                "${e.split(",").join()}",
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ),
+                          )
+                          )
+                              .toList(),
+                        ),
+                        SizedBox(height: 15.0,),
+                        Text(
+                          'Deadline : $project_enddate',
                           style:
-                              const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                          const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
-                        SizedBox(
-                          height: hp(4, context),
-                        ),
-                        Text("Tasks", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                        SizedBox(height: 10.0,),
+                        SizedBox(height: 15.0,)
                       ],
                     ),
                   ),
+
+                  SizedBox(
+                    height: hp(4, context),
+                  ),
+                  Text("Tasks", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                  Divider(height: 4.0,),
+                  SizedBox(height: 10.0,),
                   Expanded(
                     child: ListView.builder(
                       scrollDirection: Axis.vertical,
@@ -218,8 +233,9 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                       physics: const ClampingScrollPhysics(),
                       itemCount: _listTasks.length,
                       itemBuilder: (context, index) => Container(
+                        margin: EdgeInsets.only(left: 20.0,right: 20.0),
                         child: Slidable(
-                          key: ValueKey(index),
+                          key: const ValueKey(0),
                           enabled: cardEnabledList[index],
                           startActionPane: ActionPane(
                             motion: const DrawerMotion(),
@@ -229,11 +245,10 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 autoClose: true,
                                 onPressed: (value) {
                                   setState(() {
-                                    cardEnabledList[index] = false;
-                                    cardColorList[index] = Colors.grey;
-                                    initState();
                                     progress_value += 0.1;
                                     _completetask(progress_value);
+                                    cardEnabledList[index] = false;
+                                    cardColorList[index] = Colors.grey;
                                   });
                                   // SQLHelper.deleteTask(
                                   //     _listTasks[index]['column_task_id']);
@@ -248,13 +263,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 autoClose: true,
                                 flex: 1,
                                 onPressed: (value) {
-                                  setState(() {
-                                    showDialog(
-                                      builder: (context) => UpdateTaskDialog(id: widget.id),
-                                      context: context,
-                                      barrierDismissible: false,
-                                    );
-                                  });
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateTaskPage(id: _listTasks[index]['column_task_id']),));
                                 },
                                 backgroundColor: Colors.blueAccent,
                                 foregroundColor: Colors.white,
@@ -273,7 +282,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                               ['column_task_id'])));
                             },
                             child: Card(
-                              color: Colors.white,
+                              color: cardColorList[index],
                               elevation: 5.0,
                               shadowColor: Colors.green,
                               shape: RoundedRectangleBorder(
@@ -286,36 +295,40 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                      Container(alignment: Alignment.topLeft, child: Icon(Icons.book, size: 50),),
+                                    SizedBox(height: 4.0,),
                                     Text(
                                       '${_listTasks[index]['tasks_name']}',
                                       style: TextStyle(
                                           fontSize: 20.0,
                                           fontWeight: FontWeight.bold),
                                     ),
+                                    SizedBox(height: 15.0,),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
+                                        Icon(Icons.calendar_month),
                                         Text(
                                             '  ${_listTasks[index]['tasks_end_date']}'),
                                       ],
                                     ),
+                                    SizedBox(height: 10.0,),
                                     Container(
                                       margin:
-                                          EdgeInsets.only(left: 40.0, right: 20.0),
+                                          EdgeInsets.only(left: 20.0, right: 20.0),
                                       child: LinearProgressIndicator(
-                                        value: task_progress,
+                                        value: prefList[index],
                                         valueColor:
                                             AlwaysStoppedAnimation(Colors.green),
                                         minHeight: 10.0,
                                       ),
                                     ),
+                                    SizedBox(height: 15.0,),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
                                           '${convertToAgo(DateTime.parse(_listTasks[index]['createdAt']))}',
-                                          style: TextStyle(fontSize: 11.0),
+                                          style: TextStyle(fontSize: 12.0),
                                         )
                                       ],
                                     )
@@ -337,7 +350,6 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
 
   String convertToAgo(DateTime input) {
     Duration diff = DateTime.now().difference(input);
-
     if (diff.inDays > 365)
       return "${(diff.inDays / 365).floor()} ${(diff.inDays / 365).floor() == 1 ? "year" : "years"} ago   ";
     if (diff.inDays > 30)

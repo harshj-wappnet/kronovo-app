@@ -8,7 +8,7 @@ import 'package:path/path.dart';
 import 'package:kronovo_app/helpers/sql_helper.dart';
 import 'package:kronovo_app/pages/home_page.dart';
 import '../../widgets/assignmembers_dialog.dart';
-import 'package:kronovo_app/responsive.dart';
+import 'package:kronovo_app/utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -25,13 +25,13 @@ class UpdateProject extends StatefulWidget {
 }
 
 class UpdateProjectState extends State<UpdateProject> {
-  //final int id = ModalRoute.of(context)!.settings.arguments as Home_Page();
-  final _formKey = GlobalKey<FormState>();
+  final _formKey_update_project = GlobalKey<FormState>();
   FocusNode searchFocusNode = FocusNode();
   FocusNode textFieldFocusNode = FocusNode();
   late MultiValueDropDownController cntMulti;
 
   late final ValueChanged<String> onSubmit;
+
   // late TextEditingController project_title_Controller;
   // late TextEditingController _project_description_Controller;
   List<String> _selectedItems = [];
@@ -40,20 +40,23 @@ class UpdateProjectState extends State<UpdateProject> {
   List<String> _peoplesList = [];
 
 
-
   void getProjectData(int id) async {
     final data = await SQLHelper.getProjects();
     setState(() {
       _listProjects = data;
       String peoples = _listProjects[0]['project_assigned_peoples'].toString();
       _peoplesList = peoples.split(',');
-      if(id != null){
-        final existingList = _listProjects.firstWhere((element) => element['project_id'] == id);
+      if (id != null) {
+        final existingList = _listProjects.firstWhere((
+            element) => element['project_id'] == id);
         project_title_Controller.text = existingList['project_name'];
-        _project_description_Controller.text = existingList['project_description'];
+        _project_description_Controller.text =
+        existingList['project_description'];
         startDateController.text = existingList['project_start_date'];
         endDateController.text = existingList['project_end_date'];
-        people_data = existingList['project_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+        people_data = existingList['project_assigned_peoples']
+            .replaceAll('[', '')
+            .replaceAll(']', '');
         _selectedItems = people_data.split(",");
       }
     });
@@ -108,7 +111,9 @@ class UpdateProjectState extends State<UpdateProject> {
 
     // Note: you can do your own custom validation here
     // Move this logic this outside the widget for more testable code
-    if (text.trim().isEmpty) {
+    if (text
+        .trim()
+        .isEmpty) {
       return "Project Title can't be empty";
     } else {
       // Return null if the entered password is valid
@@ -117,6 +122,7 @@ class UpdateProjectState extends State<UpdateProject> {
   }
 
   bool _submitted = false;
+
   void _submit() {
     // if there is no error text
     setState(() => _submitted = true);
@@ -126,25 +132,13 @@ class UpdateProjectState extends State<UpdateProject> {
   }
 
 
-  // void loadPrevoiusData(int id) {
-  //
-  //   if(id != null){
-  //     final existingList = _listProjects.firstWhere((element) => element['project_id'] == id);
-  //     project_title_Controller.text = existingList['project_name'];
-  //     _project_description_Controller.text = existingList['project_description'];
-  //     startDateController.text = existingList['project_start_date'];
-  //     endDateController.text = existingList['project_end_date'];
-  //
-  //
-  //   }
-  // }
+
 
 
   @override
   void initState() {
     super.initState();
     getProjectData(widget.id);
-    //loadPrevoiusData(widget.id);
     cntMulti = MultiValueDropDownController();
   }
 
@@ -189,9 +183,6 @@ class UpdateProjectState extends State<UpdateProject> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -209,16 +200,18 @@ class UpdateProjectState extends State<UpdateProject> {
             child: Center(
               child: Column(
                 children: [
-                  Image.asset('assets/images/createproject_image.jpg', height: 200, width: 300,),
+                  Image.asset(
+                    'assets/images/createproject_image.jpg', height: 200,
+                    width: 300,),
                   Form(
-                    key: _formKey,
+                    key: _formKey_update_project,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Container(
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-
                               SizedBox(height: 5),
                               SizedBox(
                                 width: wp(80, context),
@@ -231,9 +224,11 @@ class UpdateProjectState extends State<UpdateProject> {
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Enter Project Title',
+                                    labelText: 'Project Title',
+                                    hintText: 'Enter Project Title',
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
+                                        borderRadius: BorderRadius.circular(
+                                            8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                     errorText: _submitted ? _errorText1 : null,
@@ -251,12 +246,9 @@ class UpdateProjectState extends State<UpdateProject> {
                                 ),
                               ),
                               SizedBox(
-                                height: hp(4, context),
-                              ),
-                              SizedBox(
                                 width: wp(80, context),
                                 child: TextFormField(
-                                  maxLines: 2,
+                                  maxLines: 4,
                                   autovalidateMode:
                                   AutovalidateMode.onUserInteraction,
                                   controller: _project_description_Controller,
@@ -266,8 +258,10 @@ class UpdateProjectState extends State<UpdateProject> {
                                       color: Colors.grey,
                                     ),
                                     labelText: 'Project Description',
+                                    hintText: 'Enter Project Description',
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
+                                        borderRadius: BorderRadius.circular(
+                                            8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                   ),
@@ -282,11 +276,6 @@ class UpdateProjectState extends State<UpdateProject> {
                                 ),
                               ),
                               SizedBox(
-                                height: hp(4, context),
-                              ),
-
-                              SizedBox(height: 5),
-                              SizedBox(
                                 width: wp(80, context),
                                 child: TextFormField(
                                   controller: startDateController,
@@ -298,7 +287,8 @@ class UpdateProjectState extends State<UpdateProject> {
                                     ),
                                     labelText: 'Start Date',
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
+                                        borderRadius: BorderRadius.circular(
+                                            8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                   ),
@@ -316,9 +306,6 @@ class UpdateProjectState extends State<UpdateProject> {
                                 ),
                               ),
                               SizedBox(
-                                height: hp(4, context),
-                              ),
-                              SizedBox(
                                 width: wp(80, context),
                                 child: TextFormField(
                                   controller: endDateController,
@@ -331,7 +318,8 @@ class UpdateProjectState extends State<UpdateProject> {
                                     ),
                                     labelText: 'End Date',
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
+                                        borderRadius: BorderRadius.circular(
+                                            8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                   ),
@@ -347,18 +335,19 @@ class UpdateProjectState extends State<UpdateProject> {
                                       color: Colors.black),
                                 ),
                               ),
-                              SizedBox(height: hp(4, context)),
                               ElevatedButton(
                                 onPressed: _showMultiSelect,
                                 style: ButtonStyle(
                                   textStyle: MaterialStateProperty.all(
-                                    TextStyle(fontSize: 20,color: Colors.white),),
+                                    TextStyle(
+                                        fontSize: 20, color: Colors.white),),
                                   shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  fixedSize: MaterialStateProperty.all(const Size(350, 40)),
+                                  minimumSize: MaterialStateProperty.all(
+                                      const Size(150, 40)),
                                 ),
                                 child: const Text('Assign Peoples'),
                               ),
@@ -366,11 +355,12 @@ class UpdateProjectState extends State<UpdateProject> {
                               // display selected items
                               Wrap(
                                 children: _selectedItems
-                                    .map((e) => Chip(
-                                  label: Text(
-                                    "${e.split(",").join()}",
-                                  ),
-                                ))
+                                    .map((e) =>
+                                    Chip(
+                                      label: Text(
+                                        "${e.split(",").join()}",
+                                      ),
+                                    ))
                                     .toList(),
                               ),
                               SizedBox(
@@ -378,18 +368,23 @@ class UpdateProjectState extends State<UpdateProject> {
                               ),
                               ElevatedButton(
                                 onPressed: () async {
-                                  await _updateProject(widget.id);
-                                  Navigator.pop(context,'result_value');
+                                  if (_formKey_update_project.currentState!
+                                      .validate()) {
+                                    await _updateProject(widget.id);
+                                    Navigator.pop(context, 'result_value');
+                                  }
                                 },
                                 style: ButtonStyle(
                                   textStyle: MaterialStateProperty.all(
-                                    TextStyle(fontSize: 20,color: Colors.white),),
+                                    TextStyle(
+                                        fontSize: 20, color: Colors.white),),
                                   shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  fixedSize: MaterialStateProperty.all(const Size(350, 40)),
+                                  minimumSize: MaterialStateProperty.all(
+                                      const Size(200, 40)),
                                 ),
                                 child: const Text("Update Project"),
                               ),
@@ -406,9 +401,16 @@ class UpdateProjectState extends State<UpdateProject> {
     );
   }
 
-  Future<void> _updateProject(int pid) async{
+  Future<void> _updateProject(int pid) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.updateProject(pid,project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),current_date);
+    await SQLHelper.updateProject(
+        pid,
+        project_title_Controller.text,
+        _project_description_Controller.text,
+        startDateController.text,
+        endDateController.text,
+        _selectedItems.toString(),
+        current_date);
   }
 }

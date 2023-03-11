@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:kronovo_app/widgets/subtask_dialog.dart';
+import 'package:kronovo_app/pages/sub_task_pages/sub_task_details_page.dart';
+import 'package:kronovo_app/pages/sub_task_pages/add_subtask_page.dart';
+import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/sql_helper.dart';
-import '../../responsive.dart';
-import '../../widgets/update_subtask_dialog.dart';
+import '../../utils/responsive.dart';
+import '../sub_task_pages/update_subtask_page.dart';
 
 class TaskDetailsPage extends StatefulWidget {
   const TaskDetailsPage({Key? key, required this.id}) : super(key: key);
@@ -26,13 +28,15 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   String task_enddate = '';
   String task_peoples = '';
 
+
+
   void _showTask(int? id) async {
     if (id != null) {
       final data = await SQLHelper.getTask(id);
       setState(() {
         _listTasks = data;
         final task_data =
-            _listTasks.firstWhere((element) => element['column_task_id'] == id);
+        _listTasks.firstWhere((element) => element['column_task_id'] == id);
         task_title = task_data['tasks_name'];
         task_description = task_data['tasks_description'];
         task_enddate = task_data['tasks_end_date'];
@@ -75,7 +79,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
           IconButton(
               onPressed: () {
                 showDialog(
-                  builder: (context) => SubTaskDialog(id: widget.id),
+                  builder: (context) => AddSubTaskPage(id: widget.id),
                   context: context,
                   barrierDismissible: false,
                 );
@@ -86,6 +90,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               '$task_title',
@@ -94,38 +100,24 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                   fontWeight: FontWeight.bold,
                   decoration: TextDecoration.underline),
             ),
-            SizedBox(
-              height: hp(4, context),
-            ),
             Text(
               '$task_description',
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(
-              height: hp(4, context),
-            ),
-            // Text(
-            //   '${_listProjects[index]['assigned_peoples']}',
-            //   style:
-            //   TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            // ),
             Wrap(
               children: List<Widget>.generate(task_peoples.split(',').length - 1,
                   (int i) {
-                return Chip(
-                  label: Text('${task_peoples.split(',')[i]}'),
+                return Container(
+                  margin: EdgeInsets.all(10.0),
+                  child: Chip(
+                    label: Text('${task_peoples.split(',')[i]}'),
+                  ),
                 );
               }).toList(),
             ),
-            SizedBox(
-              height: hp(4, context),
-            ),
             Text(
-              'deadline :- $task_enddate',
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(
-              height: hp(8, context),
+              'deadline  $task_enddate',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Expanded(
                 child: ListView.builder(
@@ -147,9 +139,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                             subtask_progress += 0.1;
                             _completeSubTask(subtask_progress);
                           });
-                          SQLHelper.deleteSubTask(
-                              _listSubTasks[index]['column_subtasks_id']);
-                          showSubTasks(widget.id);
+                          // SQLHelper.deleteSubTask(
+                          //     _listSubTasks[index]['column_subtasks_id']);
+                          // showSubTasks(widget.id);
                         },
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -160,13 +152,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                         autoClose: true,
                         flex: 1,
                         onPressed: (value) {
-                          setState(() {
-                            showDialog(
-                              builder: (context) => UpdateSubTaskDialog(id: _listSubTasks[index]['column_subtasks_id']),
-                              context: context,
-                              barrierDismissible: false,
-                            );
-                          });
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSubTaskPage(id: _listSubTasks[index]['column_subtasks_id']),));
                         },
                         backgroundColor: Colors.blueAccent,
                         foregroundColor: Colors.white,
@@ -176,7 +162,9 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                     ],
                   ),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => SubTaskDetailsPage(id: _listSubTasks[index]['column_subtasks_id']),));
+                    },
                     child: Card(
                       color: Colors.white,
                       elevation: 2.0,

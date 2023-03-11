@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:kronovo_app/pages/project_page/create_project.dart';
-import 'package:kronovo_app/pages/project_page/update_project_page.dart';
-import 'package:kronovo_app/pages/project_page/project_details_page.dart';
-import 'package:kronovo_app/responsive.dart';
+import 'package:kronovo_app/pages/project_pages/create_project.dart';
+import 'package:kronovo_app/pages/project_pages/update_project_page.dart';
+import 'package:kronovo_app/pages/project_pages/project_details_page.dart';
+import 'package:kronovo_app/utils/responsive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/sql_helper.dart';
@@ -23,11 +23,12 @@ class _HomePageState extends State<HomePage> {
   List<String> _peoplesList = [];
   late final item;
   double project_progress = 0.0;
+  int? project_id;
 
   Future<void> _loadPref(int pid) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      project_progress += prefs.getDouble('$pid')!;
+      project_progress = prefs.getDouble('task_$pid')!;
     });
   }
 
@@ -35,9 +36,13 @@ class _HomePageState extends State<HomePage> {
     final data = await SQLHelper.getProjects();
     setState(() {
       _listProjects = data;
-      String peoples = _listProjects[0]['project_assigned_peoples'].toString();
-      _peoplesList = peoples.split(',');
-      _loadPref(_listProjects[0]['project_id']);
+      List.generate(_listProjects.length, (index) {
+        String peoples = _listProjects[index]['project_assigned_peoples'].toString();
+        _peoplesList = peoples.split(',');
+       project_id = _listProjects[index]['project_id'];
+      }
+      );
+      _loadPref(project_id!);
     });
   }
 
@@ -55,11 +60,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      getAllProjects();
-
-      print('number of items ${_listProjects.length}');
-    });
+    getAllProjects();
+    print('number of items ${_listProjects.length}');
   }
 
   @override
@@ -77,139 +79,145 @@ class _HomePageState extends State<HomePage> {
               icon: Icon(Icons.add))
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: _listProjects.isNotEmpty ? ListView.builder(
-          itemCount: _listProjects.length,
-          itemBuilder: (context, index) =>
-              Container(
-                child: Slidable(
-                  key: const ValueKey(0),
-                  startActionPane: ActionPane(
-                    motion: const DrawerMotion(),
-                    children: [
-                      SlidableAction(
-                        flex: 1,
-                        autoClose: true,
-                        onPressed: (value) {
-                          SQLHelper.deleteProject(
-                              _listProjects[index]['project_id']);
-                          setState(() {
-                            getAllProjects();
-                          });
-                        },
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        icon: Icons.delete,
-                        label: 'Delete',
-                      ),
-                      SlidableAction(
-                        autoClose: true,
-                        flex: 1,
-                        onPressed: (value) {
-                          //_listProjects.removeAt(index);
-                          setState(() {
-                            Navigator.push(
-                                context, MaterialPageRoute(builder: (context) =>
-                                UpdateProject(
-                                  id: _listProjects[index]['project_id'],
-                                  onSubmit: (String value) {
-                                    null;
-                                  },)));
-                          });
-                        },
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        icon: Icons.edit,
-                        label: 'Edit',
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  ProjectDetailsPage(
-                                      id: _listProjects[index]['project_id'])));
-                    },
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 4.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Container(
-                        margin: EdgeInsets.symmetric(vertical: 15.0),
-                        padding: EdgeInsets.all(8.0),
-                        height: hp(20, context),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                              '${_listProjects[index]['project_name']}',
-                              style: TextStyle(
-                                  fontSize: 20.0, fontWeight: FontWeight.bold),
-                            ),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.calendar_month),
-                                Text(
-                                    '  ${_listProjects[index]['project_start_date']}'),
-
-                                Icon(Icons.task_alt_outlined),
-                                Text(
-                                    ' ${_listProjects[index]['project_end_date']}'),
-                              ],
-                            ),
-
-                            Container(
-                              margin: EdgeInsets.only(left: 40.0, right: 20.0),
-                              child: LinearProgressIndicator(
-                                value: project_progress,
-                                valueColor: AlwaysStoppedAnimation(
-                                    Colors.green),
-                                minHeight: 10.0,
+      body: RefreshIndicator(
+        onRefresh: () async{
+          initState();
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: _listProjects.isNotEmpty ? ListView.builder(
+            itemCount: _listProjects.length,
+            itemBuilder: (context, index) =>
+                Container(
+                  child: Slidable(
+                    key: const ValueKey(0),
+                    startActionPane: ActionPane(
+                      motion: const DrawerMotion(),
+                      children: [
+                        SlidableAction(
+                          flex: 1,
+                          autoClose: true,
+                          onPressed: (value) {
+                            SQLHelper.deleteProject(
+                                _listProjects[index]['project_id']);
+                            setState(() {
+                              getAllProjects();
+                            });
+                          },
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                        ),
+                        SlidableAction(
+                          autoClose: true,
+                          flex: 1,
+                          onPressed: (value) {
+                            //_listProjects.removeAt(index);
+                            setState(() {
+                              Navigator.push(
+                                  context, MaterialPageRoute(builder: (context) =>
+                                  UpdateProject(
+                                    id: _listProjects[index]['project_id'],
+                                    onSubmit: (String value) {
+                                      null;
+                                    },)));
+                            });
+                          },
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          icon: Icons.edit,
+                          label: 'Edit',
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ProjectDetailsPage(
+                                        id: _listProjects[index]['project_id'])));
+                      },
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 5.0,
+                        shadowColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.all(4.0),
+                          height: hp(16, context),
+                          child: Column(
+                            children: [
+                              Text(
+                                '${_listProjects[index]['project_name']}',
+                                style: TextStyle(
+                                    fontSize: 20.0, fontWeight: FontWeight.bold),
                               ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${convertToAgo(DateTime.parse(
-                                      _listProjects[index]['createdAt']))}',
-                                  style: TextStyle(fontSize: 14.0),
-                                )
-                              ],
-                            )
-                          ],
+                              SizedBox(height: 8.0,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.calendar_month),
+                                  Text(
+                                      '  ${_listProjects[index]['project_start_date']}'),
+                                  SizedBox(width: 10.0,),
+                                  Icon(Icons.task_alt_outlined),
+                                  Text(
+                                      ' ${_listProjects[index]['project_end_date']}'),
+                                ],
+                              ),
+                              SizedBox(height: 8.0,),
+                              Container(
+                                margin: EdgeInsets.only(left: 20.0, right: 20.0),
+                                child: LinearProgressIndicator(
+                                  value: project_progress,
+                                  valueColor: AlwaysStoppedAnimation(
+                                      Colors.green),
+                                  minHeight: 10.0,
+                                ),
+                              ),
+                              SizedBox(height: 15.0,),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${convertToAgo(DateTime.parse(
+                                        _listProjects[index]['createdAt']))}',
+                                    style: TextStyle(fontSize: 12.0),
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-        )
-            : Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text("NO PROJECTS",
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 28)
-              ),
-              Text('Click On + to Add Projects',
-                  style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 18)
-              ),
-            ],
+          )
+              : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text("NO PROJECTS",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 28)
+                ),
+                Text('Click On + to Add Projects',
+                    style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 18)
+                ),
+              ],
+            ),
           ),
         ),
       ),

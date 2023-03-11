@@ -1,44 +1,42 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart';
-import 'package:kronovo_app/helpers/sql_helper.dart';
-import 'package:kronovo_app/pages/home_page.dart';
+import '../../helpers/sql_helper.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
-import 'package:kronovo_app/responsive.dart';
-import '../../widgets/assignmembers_dialog.dart';
-import 'package:sqflite/sqflite.dart';
 
-class CreateProject extends StatefulWidget {
-
-  final ValueChanged<String> onSubmit;
-
-  CreateProject({super.key, required this.onSubmit});
-
+class UpdateTaskPage extends StatefulWidget {
+  const UpdateTaskPage({Key? key, required this.id}) : super(key: key);
+    final id;
   @override
-  State<CreateProject> createState() => _CreateProjectState();
+  State<UpdateTaskPage> createState() => _UpdateTaskPageState();
 }
 
-class _CreateProjectState extends State<CreateProject> {
-  //final int id = ModalRoute.of(context)!.settings.arguments as Home_Page();
-  final _formKey = GlobalKey<FormState>();
-  FocusNode searchFocusNode = FocusNode();
-  FocusNode textFieldFocusNode = FocusNode();
-  late MultiValueDropDownController cntMulti;
+class _UpdateTaskPageState extends State<UpdateTaskPage> {
 
-  late final ValueChanged<String> onSubmit;
-  late TextEditingController project_title_Controller;
-  late TextEditingController _project_description_Controller;
-  List<String> _selectedItems = [];
+  final _formKey_update_task = GlobalKey<FormState>();
+  final update_task_title = TextEditingController();
+  final update_task_description = TextEditingController();
+  final update_task_date = TextEditingController();
   String people_data = '';
+  List<String> _selectedItems = [];
 
+  List<Map<String, dynamic>> _listTasks = [];
+
+  void loadTasks(int id) async {
+    final task_data = await SQLHelper.getAllTasksByProject(id);
+    setState(() {
+      _listTasks = task_data;
+      final existingData =
+      _listTasks.firstWhere((element) => element['column_task_id'] == id);
+      update_task_title.text = existingData['tasks_name'];
+      update_task_description.text = existingData['tasks_description'];
+      update_task_date.text = existingData['tasks_end_date'];
+    });
+  }
 
   String _displayText(String begin, DateTime? date) {
     if (date != null) {
-      return '$begin Date: ${date.toString().split(' ')[0]}';
+      return '$begin ${date.toString().split(' ')[0]}';
     } else {
       return 'Choose The Date';
     }
@@ -59,8 +57,6 @@ class _CreateProjectState extends State<CreateProject> {
 
   String? startDateValidator(value) {
     if (startDate == null) return "select the date";
-
-    /// play with logic
   }
 
   String? endDateValidator(value) {
@@ -71,13 +67,12 @@ class _CreateProjectState extends State<CreateProject> {
     if (endDate!.isBefore(startDate!)) {
       return "End date must be after startDate";
     }
-
     return null; // optional while already return type is null
   }
 
   String? get _errorText1 {
     // at any time, we can get the text from _controller.value.text
-    final text = project_title_Controller.value.text;
+    final text = update_task_title.value.text;
 
     // Note: you can do your own custom validation here
     // Move this logic this outside the widget for more testable code
@@ -94,30 +89,8 @@ class _CreateProjectState extends State<CreateProject> {
     // if there is no error text
     setState(() => _submitted = true);
     if (_errorText1 == null) {
-      widget.onSubmit(project_title_Controller.value.text);
     }
   }
-
-
-
-  @override
-  void initState() {
-    cntMulti = MultiValueDropDownController();
-    startDateController.text = "";
-    endDateController.text = "";
-    project_title_Controller = TextEditingController();
-    _project_description_Controller = TextEditingController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    cntMulti.dispose();
-    project_title_Controller.dispose();
-    _project_description_Controller.dispose();
-    super.dispose();
-  }
-
 
   void _showMultiSelect() async {
     // a list of selectable items
@@ -145,7 +118,7 @@ class _CreateProjectState extends State<CreateProject> {
       setState(() {
         _selectedItems = results;
         // String data = jsonEncode(_selectedItems);
-       // _selectedItems.forEach((element) { people_data += element; people_data += ','; });
+        // _selectedItems.forEach((element) { people_data += element; people_data += ','; });
         //print(people_data);
       });
     }
@@ -153,57 +126,62 @@ class _CreateProjectState extends State<CreateProject> {
 
 
 
+  @override
+  void initState() {
+    super.initState();
+    loadTasks(widget.id);
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create New Project'),
-        backgroundColor: Colors.green,
+        title: Text('Update Task'),
+        centerTitle: true,
       ),
-      backgroundColor: Colors.white,
-      body: GestureDetector(
+        backgroundColor: Colors.white,
+        body: GestureDetector(
         onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
+        FocusScope.of(context).requestFocus(new FocusNode());
         },
-        child: SafeArea(
           child: SingleChildScrollView(
             child: Center(
               child: Column(
                 children: [
-                  Image.asset('assets/images/createproject_image.jpg', height: 200, width: 300,),
+                  Image.asset('assets/images/tasks_image.jpg', height: 200, width: 300,),
                   Form(
-                    key: _formKey,
+                    key: _formKey_update_task,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Container(
+                        margin: EdgeInsets.only(left: 20.0,right: 20.0),
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-
-                              SizedBox(height: 5),
                               SizedBox(
-                                width: wp(80, context),
+                                width: wp(100, context),
                                 child: TextFormField(
                                   autovalidateMode:
                                   AutovalidateMode.onUserInteraction,
-                                  controller: project_title_Controller,
+                                  controller: update_task_title,
                                   decoration: InputDecoration(
                                     prefixIcon: Icon(
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Enter Project Title',
+                                    labelText: 'Task Title',
+                                    hintText: 'Enter Task Title',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                     errorText: _submitted ? _errorText1 : null,
-                                    // TODO: add errorHint
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Project Title can't be empty";
+                                      return "Task Title can't be empty";
                                     } else {
                                       // Return null if the entered password is valid
                                       return null;
@@ -212,22 +190,21 @@ class _CreateProjectState extends State<CreateProject> {
                                   onChanged: (_) => setState(() {}),
                                 ),
                               ),
+                              SizedBox(height: 15.0,),
                               SizedBox(
-                                height: hp(4, context),
-                              ),
-                              SizedBox(
-                                width: wp(80, context),
+                                width: wp(100, context),
                                 child: TextFormField(
-                                  maxLines: 2,
+                                  maxLines: 4,
                                   autovalidateMode:
                                   AutovalidateMode.onUserInteraction,
-                                  controller: _project_description_Controller,
+                                  controller: update_task_description,
                                   decoration: InputDecoration(
                                     prefixIcon: Icon(
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Project Description',
+                                    labelText: 'Task Description',
+                                    hintText: 'Enter Task Description',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
@@ -235,7 +212,7 @@ class _CreateProjectState extends State<CreateProject> {
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Project Description can't be empty";
+                                      return "Task Description can't be empty";
                                     } else {
                                       return null;
                                     }
@@ -243,13 +220,9 @@ class _CreateProjectState extends State<CreateProject> {
                                   onChanged: (_) => setState(() {}),
                                 ),
                               ),
+                              SizedBox(height: 15.0,),
                               SizedBox(
-                                height: hp(4, context),
-                              ),
-
-                              SizedBox(height: 5),
-                              SizedBox(
-                                width: wp(80, context),
+                                width: wp(100, context),
                                 child: TextFormField(
                                   controller: startDateController,
                                   decoration: InputDecoration(
@@ -267,7 +240,7 @@ class _CreateProjectState extends State<CreateProject> {
                                   onTap: () async {
                                     startDate = await pickDate();
                                     startDateController.text =
-                                        _displayText("", startDate);
+                                        _displayText("",startDate);
                                     setState(() {});
                                   },
                                   readOnly: true,
@@ -277,11 +250,9 @@ class _CreateProjectState extends State<CreateProject> {
                                       color: Colors.black),
                                 ),
                               ),
+                              SizedBox(height: 15.0,),
                               SizedBox(
-                                height: hp(4, context),
-                              ),
-                              SizedBox(
-                                width: wp(80, context),
+                                width: wp(100, context),
                                 child: TextFormField(
                                   controller: endDateController,
                                   readOnly: true,
@@ -309,45 +280,50 @@ class _CreateProjectState extends State<CreateProject> {
                                       color: Colors.black),
                                 ),
                               ),
-                              SizedBox(height: hp(4, context)),
-                              ElevatedButton(
-                                onPressed: _showMultiSelect,
-                                style: ButtonStyle(
-                                  textStyle: MaterialStateProperty.all(
-                                    TextStyle(fontSize: 20,color: Colors.white),),
-                                  shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                              SizedBox(height: 15.0,),
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                child: ElevatedButton.icon(
+                                  icon: Icon(Icons.add),
+                                  onPressed: _showMultiSelect,
+                                  style: ButtonStyle(
+                                    textStyle: MaterialStateProperty.all(
+                                      TextStyle(fontSize: 20,color: Colors.white),),
+                                    shape: MaterialStateProperty.all(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
+                                    minimumSize: MaterialStateProperty.all(const Size(150, 40)),
                                   ),
-                                  fixedSize: MaterialStateProperty.all(const Size(350, 40)),
+                                  label: const Text('Assign Peoples'),
                                 ),
-                                child: const Text('Assign Peoples'),
                               ),
-
+                              SizedBox(height: 10.0,),
                               // display selected items
                               Wrap(
                                 children: _selectedItems
-                                    .map((e) => Chip(
-                                  label: Text(
-                                    "${e.split(",").join(" ")}",
+                                    .map((e) => Container(
+                                  margin: EdgeInsets.only(left: 6.0,right: 6.0),
+                                  child: Chip(
+                                    padding: EdgeInsets.all(8.0),
+                                    label: Text(
+                                      "${e.split(",").join(" ")}",
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
                                   ),
                                 ))
                                     .toList(),
                               ),
-                              SizedBox(
-                                height: hp(4, context),
-                              ),
                               ElevatedButton(
                                 onPressed: () async {
-                                  if (_formKey.currentState?.validate() ==
-                                  true) {
+                                  if (_formKey_update_task.currentState!.validate()) {
+                                    await _updateTask(widget.id);
                                     setState(() async{
-                                      await _addProject();
+                                      Navigator.pop(context,'return_value');
                                     });
-                                    Navigator.pop(context,'return_value');
                                   }else{
-                                    _formKey.currentState?.validate();
+                                    // _formKey.currentState!.validate();
                                   }
                                 },
                                 style: ButtonStyle(
@@ -358,9 +334,9 @@ class _CreateProjectState extends State<CreateProject> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  fixedSize: MaterialStateProperty.all(const Size(350, 40)),
+                                  minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
                                 ),
-                                child: const Text("Create Project"),
+                                child: const Text("Update Task"),
                               ),
                             ]),
                       ),
@@ -370,15 +346,19 @@ class _CreateProjectState extends State<CreateProject> {
               ),
             ),
           ),
-        ),
-      ),
+        )
     );
   }
 
-
-  Future<void> _addProject() async{
+  Future<void> _updateTask(int tid) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.createProject(project_title_Controller.text, _project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),current_date);
+    await SQLHelper.updateTask(
+        tid,
+        update_task_title.text,
+        update_task_description.text,
+        update_task_date.text,
+        people_data,
+        current_date);
   }
 }
