@@ -5,8 +5,9 @@ import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
 class UpdateTaskPage extends StatefulWidget {
-  const UpdateTaskPage({Key? key, required this.id}) : super(key: key);
+  const UpdateTaskPage({Key? key, required this.id, required this.project_id}) : super(key: key);
     final id;
+    final project_id;
   @override
   State<UpdateTaskPage> createState() => _UpdateTaskPageState();
 }
@@ -16,21 +17,24 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   final _formKey_update_task = GlobalKey<FormState>();
   final update_task_title = TextEditingController();
   final update_task_description = TextEditingController();
-  final update_task_date = TextEditingController();
   String people_data = '';
   List<String> _selectedItems = [];
 
   List<Map<String, dynamic>> _listTasks = [];
 
-  void loadTasks(int id) async {
-    final task_data = await SQLHelper.getAllTasksByProject(id);
+  void loadTasks(int id,int project_id) async {
+    final task_data = await SQLHelper.getAllTasksByProject(project_id);
     setState(() {
       _listTasks = task_data;
       final existingData =
       _listTasks.firstWhere((element) => element['column_task_id'] == id);
       update_task_title.text = existingData['tasks_name'];
       update_task_description.text = existingData['tasks_description'];
-      update_task_date.text = existingData['tasks_end_date'];
+      endDateController.text = existingData['tasks_end_date'];
+      people_data = existingData['tasks_assigned_peoples']
+          .replaceAll('[', '')
+          .replaceAll(']', '');
+      _selectedItems = people_data.split(",");
     });
   }
 
@@ -42,9 +46,8 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
     }
   }
 
-  final TextEditingController startDateController = TextEditingController(),
-      endDateController = TextEditingController();
-  DateTime? startDate, endDate;
+  final TextEditingController endDateController = TextEditingController();
+  DateTime? endDate;
 
   Future<DateTime?> pickDate() async {
     return await showDatePicker(
@@ -55,18 +58,11 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
     );
   }
 
-  String? startDateValidator(value) {
-    if (startDate == null) return "select the date";
-  }
+
 
   String? endDateValidator(value) {
-    if (startDate != null && endDate == null) {
-      return "select Both data";
-    }
+
     if (endDate == null) return "select the date";
-    if (endDate!.isBefore(startDate!)) {
-      return "End date must be after startDate";
-    }
     return null; // optional while already return type is null
   }
 
@@ -129,7 +125,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   @override
   void initState() {
     super.initState();
-    loadTasks(widget.id);
+    loadTasks(widget.id,widget.project_id);
   }
 
 
@@ -171,8 +167,8 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Task Title',
-                                    hintText: 'Enter Task Title',
+                                    labelText: 'Title',
+                                    hintText: 'Enter Title',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
@@ -181,7 +177,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Task Title can't be empty";
+                                      return "Title can't be empty";
                                     } else {
                                       // Return null if the entered password is valid
                                       return null;
@@ -203,8 +199,8 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Task Description',
-                                    hintText: 'Enter Task Description',
+                                    labelText: 'Description',
+                                    hintText: 'Enter Description',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
@@ -212,7 +208,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Task Description can't be empty";
+                                      return "Description can't be empty";
                                     } else {
                                       return null;
                                     }
@@ -224,45 +220,15 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                               SizedBox(
                                 width: wp(100, context),
                                 child: TextFormField(
-                                  controller: startDateController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Choose Start Date',
-                                    prefixIcon: Icon(
-                                      Icons.calendar_today_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    labelText: 'Start Date',
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
-                                    fillColor: Colors.transparent,
-                                    filled: true,
-                                  ),
-                                  onTap: () async {
-                                    startDate = await pickDate();
-                                    startDateController.text =
-                                        _displayText("",startDate);
-                                    setState(() {});
-                                  },
-                                  readOnly: true,
-                                  validator: startDateValidator,
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black),
-                                ),
-                              ),
-                              SizedBox(height: 15.0,),
-                              SizedBox(
-                                width: wp(100, context),
-                                child: TextFormField(
                                   controller: endDateController,
                                   readOnly: true,
                                   decoration: InputDecoration(
-                                    hintText: 'Choose End Date',
+                                    hintText: 'Choose Deadline',
                                     prefixIcon: Icon(
                                       Icons.calendar_today_outlined,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'End Date',
+                                    labelText: 'Deadline',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
@@ -303,16 +269,12 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                               // display selected items
                               Wrap(
                                 children: _selectedItems
-                                    .map((e) => Container(
-                                  margin: EdgeInsets.only(left: 6.0,right: 6.0),
-                                  child: Chip(
-                                    padding: EdgeInsets.all(8.0),
-                                    label: Text(
-                                      "${e.split(",").join(" ")}",
-                                      style: TextStyle(fontSize: 16.0),
-                                    ),
-                                  ),
-                                ))
+                                    .map((e) =>
+                                    Chip(
+                                      label: Text(
+                                        "${e.split(",").join()}",
+                                      ),
+                                    ))
                                     .toList(),
                               ),
                               ElevatedButton(
@@ -320,7 +282,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                   if (_formKey_update_task.currentState!.validate()) {
                                     await _updateTask(widget.id);
                                     setState(() async{
-                                      Navigator.pop(context,'return_value');
+                                      Navigator.pop(context);
                                     });
                                   }else{
                                     // _formKey.currentState!.validate();
@@ -357,8 +319,8 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
         tid,
         update_task_title.text,
         update_task_description.text,
-        update_task_date.text,
-        people_data,
+        endDateController.text,
+        _selectedItems.toString(),
         current_date);
   }
 }

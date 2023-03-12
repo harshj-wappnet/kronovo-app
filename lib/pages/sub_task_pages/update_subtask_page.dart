@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
 import '../../helpers/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
 class UpdateSubTaskPage extends StatefulWidget {
-  const UpdateSubTaskPage({Key? key, required this.id}) : super(key: key);
+  const UpdateSubTaskPage({Key? key, required this.id, required this.task_id}) : super(key: key);
   final id;
+  final task_id;
   @override
   State<UpdateSubTaskPage> createState() => _UpdateSubTaskPageState();
 }
@@ -16,7 +15,6 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
 
   final update_sub_task_title = TextEditingController();
   final update_sub_task_description = TextEditingController();
-  final update_sub_task_date = TextEditingController();
   List<String> _selectedItems = [];
 
   List<Map<String, dynamic>> _listSubTasks = [];
@@ -24,8 +22,8 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
 
   final _formKey_update_subtask = GlobalKey<FormState>();
 
-  void showSubTasks(int id) async {
-    final data = await SQLHelper.getAllSubTasksByTask(id);
+  void showSubTasks(int id, int task_id) async {
+    final data = await SQLHelper.getAllSubTasksByTask(task_id);
 
     setState(() {
       _listSubTasks = data;
@@ -33,7 +31,11 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
           .firstWhere((element) => element['column_subtasks_id'] == id);
       update_sub_task_title.text = existingData['subtasks_name'];
       update_sub_task_description.text = existingData['subtasks_description'];
-      update_sub_task_date.text = existingData['subtasks_end_date'];
+      endDateController.text = existingData['subtasks_end_date'];
+      people_data = existingData['subtasks_assigned_peoples']
+          .replaceAll('[', '')
+          .replaceAll(']', '');
+      _selectedItems = people_data.split(",");
     });
   }
 
@@ -45,9 +47,8 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
     }
   }
 
-  final TextEditingController startDateController = TextEditingController(),
-      endDateController = TextEditingController();
-  DateTime? startDate, endDate;
+  final TextEditingController endDateController = TextEditingController();
+  DateTime? endDate;
 
   Future<DateTime?> pickDate() async {
     return await showDatePicker(
@@ -58,18 +59,10 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
     );
   }
 
-  String? startDateValidator(value) {
-    if (startDate == null) return "select the date";
-  }
 
   String? endDateValidator(value) {
-    if (startDate != null && endDate == null) {
-      return "select Both data";
-    }
+
     if (endDate == null) return "select the date";
-    if (endDate!.isBefore(startDate!)) {
-      return "End date must be after startDate";
-    }
     return null; // optional while already return type is null
   }
 
@@ -130,7 +123,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
   @override
   void initState() {
     super.initState();
-    showSubTasks(widget.id);
+    showSubTasks(widget.id,widget.task_id);
   }
 
   @override
@@ -171,8 +164,8 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Sub Task Title',
-                                    hintText: 'Enter Sub Task Title',
+                                    labelText: 'Title',
+                                    hintText: 'Enter Title',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
@@ -181,7 +174,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Sub Task Title can't be empty";
+                                      return "Title can't be empty";
                                     } else {
                                       // Return null if the entered password is valid
                                       return null;
@@ -203,8 +196,8 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Sub Task Description',
-                                    hintText: 'Enter Sub Task Description',
+                                    labelText: 'Description',
+                                    hintText: 'Enter Description',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
@@ -212,7 +205,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Sub Task Description can't be empty";
+                                      return "Description can't be empty";
                                     } else {
                                       return null;
                                     }
@@ -224,45 +217,15 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                               SizedBox(
                                 width: wp(100, context),
                                 child: TextFormField(
-                                  controller: startDateController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Choose Start Date',
-                                    prefixIcon: Icon(
-                                      Icons.calendar_today_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    labelText: 'Start Date',
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
-                                    fillColor: Colors.transparent,
-                                    filled: true,
-                                  ),
-                                  onTap: () async {
-                                    startDate = await pickDate();
-                                    startDateController.text =
-                                        _displayText("",startDate);
-                                    setState(() {});
-                                  },
-                                  readOnly: true,
-                                  validator: startDateValidator,
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black),
-                                ),
-                              ),
-                              SizedBox(height: 15.0,),
-                              SizedBox(
-                                width: wp(100, context),
-                                child: TextFormField(
                                   controller: endDateController,
                                   readOnly: true,
                                   decoration: InputDecoration(
-                                    hintText: 'Choose End Date',
+                                    hintText: 'Choose Deadline',
                                     prefixIcon: Icon(
                                       Icons.calendar_today_outlined,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'End Date',
+                                    labelText: 'Deadline',
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
@@ -303,16 +266,12 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                               // display selected items
                               Wrap(
                                 children: _selectedItems
-                                    .map((e) => Container(
-                                  margin: EdgeInsets.only(left: 6.0,right: 6.0),
-                                  child: Chip(
-                                    padding: EdgeInsets.all(8.0),
-                                    label: Text(
-                                      "${e.split(",").join(" ")}",
-                                      style: TextStyle(fontSize: 16.0),
-                                    ),
-                                  ),
-                                ))
+                                    .map((e) =>
+                                    Chip(
+                                      label: Text(
+                                        "${e.split(",").join()}",
+                                      ),
+                                    ))
                                     .toList(),
                               ),
                               ElevatedButton(
@@ -320,7 +279,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                                   if (_formKey_update_subtask.currentState!.validate()) {
                                     await _updateSubTask(widget.id);
                                     setState(() async{
-                                      Navigator.pop(context,'return_value');
+                                      Navigator.pop(context);
                                     });
                                   }else{
                                     // _formKey.currentState!.validate();
@@ -357,8 +316,8 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
         stid,
         update_sub_task_title.text,
         update_sub_task_description.text,
-        update_sub_task_date.text,
-        people_data,
+        endDateController.text,
+        _selectedItems.toString(),
         current_date);
   }
 }

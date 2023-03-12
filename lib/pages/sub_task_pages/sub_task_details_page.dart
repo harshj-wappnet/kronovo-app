@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../helpers/sql_helper.dart';
+import '../../utils/responsive.dart';
 
 class SubTaskDetailsPage extends StatefulWidget {
   const SubTaskDetailsPage({Key? key, required this.id}) : super(key: key);
@@ -17,6 +18,7 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
   String sub_task_description = '';
   String sub_task_enddate = '';
   String sub_task_peoples = '';
+  List<String> _selectedItems = [];
 
   void _showSubTask(int? id) async {
     if (id != null) {
@@ -28,7 +30,8 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
         sub_task_title = sub_task_data['subtasks_name'];
         sub_task_description = sub_task_data['subtasks_description'];
         sub_task_enddate = sub_task_data['subtasks_end_date'];
-        //task_peoples = task_data[''];
+        people_data = sub_task_data['subtasks_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+        _selectedItems = people_data.split(",");
       });
     }
   }
@@ -50,57 +53,79 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              '$sub_task_title',
-              style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline),
-            ),
-            Text(
-              '$sub_task_description',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Wrap(
-              children: List<Widget>.generate(sub_task_peoples.split(',').length - 1,
-                      (int i) {
-                    return Container(
-                      margin: EdgeInsets.all(10.0),
+            SizedBox(height: 25.0,),
+            Container(
+              width: wp(100, context),
+              margin: EdgeInsets.only(left: 20.0,right: 20.0),
+              decoration: BoxDecoration(
+                color: Color(0xffbcf5bc),
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green,
+                    offset: Offset(4,8),
+                    blurRadius: 12,
+                  )
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 8.0,),
+                  Text(
+                    '$sub_task_title',
+                    style: TextStyle(
+                        fontSize: 50,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  SizedBox(height: 15.0,),
+                  //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                  Text(
+                    '$sub_task_description',
+                    style: TextStyle(fontSize: 25,
+                        color: Colors.white),
+                  ),
+                  SizedBox(height: 15.0,),
+                  Text("Assigned Members", style: TextStyle(color: Colors.white,fontSize: 20, fontWeight: FontWeight.bold,),),
+                  SizedBox(height: 6.0,),
+                  Wrap(
+                    children: _selectedItems
+                        .map((e) => Container(
+                      margin: EdgeInsets.only(left: 5.0,right: 5.0),
                       child: Chip(
-                        label: Text('${sub_task_peoples.split(',')[i]}'),
+                        padding: EdgeInsets.all(8.0),
+                        backgroundColor: Colors.white,
+                        label: Text(
+                          "${e.split(",").join()}",
+                          style: TextStyle(
+                            fontSize: 16.0,
+                          ),
+                        ),
                       ),
-                    );
-                  }).toList(),
+                    )
+                    )
+                        .toList(),
+                  ),
+                  SizedBox(height: 15.0,),
+                  Text(
+                    'Deadline : $sub_task_enddate',
+                    style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  SizedBox(height: 15.0,)
+                ],
+              ),
             ),
-            Text(
-              'deadline  $sub_task_enddate',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            SizedBox(
+              height: hp(4, context),
             ),
-
           ],
         ),
       ),
     );
-  }
-
-  String convertToAgo(DateTime input) {
-    Duration diff = DateTime.now().difference(input);
-
-    if (diff.inDays > 365)
-      return "${(diff.inDays / 365).floor()} ${(diff.inDays / 365).floor() == 1 ? "year" : "years"} ago   ";
-    if (diff.inDays > 30)
-      return "${(diff.inDays / 30).floor()} ${(diff.inDays / 30).floor() == 1 ? "month" : "months"} ago   ";
-    if (diff.inDays > 7)
-      return "${(diff.inDays / 7).floor()} ${(diff.inDays / 7).floor() == 1 ? "week" : "weeks"} ago   ";
-    if (diff.inDays > 0)
-      return "${diff.inDays} ${diff.inDays == 1 ? "day" : "days"} ago   ";
-    if (diff.inHours > 0)
-      return "${diff.inHours} ${diff.inHours == 1 ? "hour" : "hours"} ago   ";
-    if (diff.inMinutes > 0)
-      return "${diff.inMinutes} ${diff.inMinutes == 1 ? "minute" : "minutes"} ago   ";
-    return "just now   ";
   }
 }

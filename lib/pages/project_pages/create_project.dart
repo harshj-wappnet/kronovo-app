@@ -1,16 +1,8 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:path/path.dart';
 import 'package:kronovo_app/helpers/sql_helper.dart';
-import 'package:kronovo_app/pages/home_page.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
-import '../../widgets/assignmembers_dialog.dart';
-import 'package:sqflite/sqflite.dart';
 
 class CreateProject extends StatefulWidget {
 
@@ -160,6 +152,7 @@ class _CreateProjectState extends State<CreateProject> {
           child: Center(
             child: Column(
               children: [
+                SizedBox(height: 8.0,),
                 Image.asset('assets/images/createproject_image.jpg', height: 200, width: 300,),
                 Form(
                   key: _formKey_project,
@@ -182,8 +175,8 @@ class _CreateProjectState extends State<CreateProject> {
                                     Icons.edit_note,
                                     color: Colors.grey,
                                   ),
-                                  labelText: 'Project Title',
-                                  hintText: 'Enter Project Title',
+                                  labelText: 'Title',
+                                  hintText: 'Enter Title',
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8.0)),
                                   fillColor: Colors.transparent,
@@ -192,7 +185,7 @@ class _CreateProjectState extends State<CreateProject> {
                                 ),
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "Project Title can't be empty";
+                                    return "Title can't be empty";
                                   } else {
                                     // Return null if the entered password is valid
                                     return null;
@@ -214,8 +207,8 @@ class _CreateProjectState extends State<CreateProject> {
                                     Icons.edit_note,
                                     color: Colors.grey,
                                   ),
-                                  labelText: 'Project Description',
-                                  hintText: 'Enter Project Description',
+                                  labelText: 'Description',
+                                  hintText: 'Enter Description',
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8.0)),
                                   fillColor: Colors.transparent,
@@ -223,7 +216,7 @@ class _CreateProjectState extends State<CreateProject> {
                                 ),
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "Project Description can't be empty";
+                                    return "Description can't be empty";
                                   } else {
                                     return null;
                                   }
@@ -364,6 +357,6 @@ class _CreateProjectState extends State<CreateProject> {
   Future<void> _addProject() async{
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.createProject(project_title_Controller.text, project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),current_date);
+    await SQLHelper.createProject(project_title_Controller.text, project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),0.0,current_date);
   }
 }

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
 import '../../helpers/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
@@ -8,18 +6,17 @@ import '../../widgets/assignmembers_dialog.dart';
 class AddSubTaskPage extends StatefulWidget {
   const AddSubTaskPage({Key? key, required this.id}) : super(key: key);
   final id;
+
   @override
   State<AddSubTaskPage> createState() => _AddSubTaskPageState();
 }
 
 class _AddSubTaskPageState extends State<AddSubTaskPage> {
-
   final sub_task_title = TextEditingController();
   final sub_task_description = TextEditingController();
-  final sub_task_date = TextEditingController();
   List<String> _selectedItems = [];
   String people_data = '';
-  
+
   final _formKey_sub_task = GlobalKey<FormState>();
 
   String _displayText(String begin, DateTime? date) {
@@ -30,9 +27,8 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
     }
   }
 
-  final TextEditingController startDateController = TextEditingController(),
-      endDateController = TextEditingController();
-  DateTime? startDate, endDate;
+  final TextEditingController endDateController = TextEditingController();
+  DateTime? endDate;
 
   Future<DateTime?> pickDate() async {
     return await showDatePicker(
@@ -43,18 +39,8 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
     );
   }
 
-  String? startDateValidator(value) {
-    if (startDate == null) return "select the date";
-  }
-
   String? endDateValidator(value) {
-    if (startDate != null && endDate == null) {
-      return "select Both data";
-    }
     if (endDate == null) return "select the date";
-    if (endDate!.isBefore(startDate!)) {
-      return "End date must be after startDate";
-    }
     return null; // optional while already return type is null
   }
 
@@ -73,11 +59,11 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   }
 
   bool _submitted = false;
+
   void _submit() {
     // if there is no error text
     setState(() => _submitted = true);
-    if (_errorText1 == null) {
-    }
+    if (_errorText1 == null) {}
   }
 
   void _showMultiSelect() async {
@@ -111,39 +97,42 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
       });
     }
   }
-  
+
   @override
   void initState() {
     super.initState();
     sub_task_title.text = "";
     sub_task_description.text = "";
-    sub_task_date.text = "";
+    endDateController.text = "";
   }
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Sub Task'),
-        centerTitle: true,
-      ),
+        appBar: AppBar(
+          title: Text('Add Sub Task'),
+          centerTitle: true,
+        ),
         backgroundColor: Colors.white,
         body: GestureDetector(
-        onTap: () {
-        FocusScope.of(context).requestFocus(new FocusNode());
-        },
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
           child: SingleChildScrollView(
             child: Center(
               child: Column(
                 children: [
-                  Image.asset('assets/images/tasks_image.jpg', height: 200, width: 300,),
+                  Image.asset(
+                    'assets/images/tasks_image.jpg',
+                    height: 200,
+                    width: 300,
+                  ),
                   Form(
                     key: _formKey_sub_task,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Container(
-                        margin: EdgeInsets.only(left: 20.0,right: 20.0),
+                        margin: EdgeInsets.only(left: 20.0, right: 20.0),
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -152,24 +141,25 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                 width: wp(100, context),
                                 child: TextFormField(
                                   autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
+                                      AutovalidateMode.onUserInteraction,
                                   controller: sub_task_title,
                                   decoration: InputDecoration(
                                     prefixIcon: Icon(
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Sub Task Title',
-                                    hintText: 'Enter Sub Task Title',
+                                    labelText: 'Title',
+                                    hintText: 'Enter Title',
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                     errorText: _submitted ? _errorText1 : null,
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Sub Task Title can't be empty";
+                                      return "Title can't be empty";
                                     } else {
                                       // Return null if the entered password is valid
                                       return null;
@@ -178,29 +168,32 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                   onChanged: (_) => setState(() {}),
                                 ),
                               ),
-                              SizedBox(height: 15.0,),
+                              SizedBox(
+                                height: 15.0,
+                              ),
                               SizedBox(
                                 width: wp(100, context),
                                 child: TextFormField(
                                   maxLines: 4,
                                   autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
+                                      AutovalidateMode.onUserInteraction,
                                   controller: sub_task_description,
                                   decoration: InputDecoration(
                                     prefixIcon: Icon(
                                       Icons.edit_note,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'Sub Task Description',
-                                    hintText: 'Enter Sub Task Description',
+                                    labelText: 'Description',
+                                    hintText: 'Enter Description',
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return "Sub Task Description can't be empty";
+                                      return "Description can't be empty";
                                     } else {
                                       return null;
                                     }
@@ -208,51 +201,24 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                   onChanged: (_) => setState(() {}),
                                 ),
                               ),
-                              SizedBox(height: 15.0,),
                               SizedBox(
-                                width: wp(100, context),
-                                child: TextFormField(
-                                  controller: startDateController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Choose Start Date',
-                                    prefixIcon: Icon(
-                                      Icons.calendar_today_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    labelText: 'Start Date',
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
-                                    fillColor: Colors.transparent,
-                                    filled: true,
-                                  ),
-                                  onTap: () async {
-                                    startDate = await pickDate();
-                                    startDateController.text =
-                                        _displayText("",startDate);
-                                    setState(() {});
-                                  },
-                                  readOnly: true,
-                                  validator: startDateValidator,
-                                  style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black),
-                                ),
+                                height: 15.0,
                               ),
-                              SizedBox(height: 15.0,),
                               SizedBox(
                                 width: wp(100, context),
                                 child: TextFormField(
                                   controller: endDateController,
                                   readOnly: true,
                                   decoration: InputDecoration(
-                                    hintText: 'Choose End Date',
+                                    hintText: 'Choose Deadline',
                                     prefixIcon: Icon(
                                       Icons.calendar_today_outlined,
                                       color: Colors.grey,
                                     ),
-                                    labelText: 'End Date',
+                                    labelText: 'Deadline',
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0)),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0)),
                                     fillColor: Colors.transparent,
                                     filled: true,
                                   ),
@@ -264,11 +230,12 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                   },
                                   validator: endDateValidator,
                                   style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black),
+                                      fontSize: 15, color: Colors.black),
                                 ),
                               ),
-                              SizedBox(height: 15.0,),
+                              SizedBox(
+                                height: 15.0,
+                              ),
                               Container(
                                 alignment: Alignment.centerLeft,
                                 child: ElevatedButton.icon(
@@ -276,53 +243,63 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                   onPressed: _showMultiSelect,
                                   style: ButtonStyle(
                                     textStyle: MaterialStateProperty.all(
-                                      TextStyle(fontSize: 20,color: Colors.white),),
+                                      TextStyle(
+                                          fontSize: 20, color: Colors.white),
+                                    ),
                                     shape: MaterialStateProperty.all(
                                       RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
-                                    minimumSize: MaterialStateProperty.all(const Size(150, 40)),
+                                    minimumSize: MaterialStateProperty.all(
+                                        const Size(150, 40)),
                                   ),
                                   label: const Text('Assign Peoples'),
                                 ),
                               ),
-                              SizedBox(height: 10.0,),
+                              SizedBox(
+                                height: 10.0,
+                              ),
                               // display selected items
                               Wrap(
                                 children: _selectedItems
                                     .map((e) => Container(
-                                  margin: EdgeInsets.only(left: 6.0,right: 6.0),
-                                  child: Chip(
-                                    padding: EdgeInsets.all(8.0),
-                                    label: Text(
-                                      "${e.split(",").join(" ")}",
-                                      style: TextStyle(fontSize: 16.0),
-                                    ),
-                                  ),
-                                ))
+                                          margin: EdgeInsets.only(
+                                              left: 6.0, right: 6.0),
+                                          child: Chip(
+                                            padding: EdgeInsets.all(8.0),
+                                            label: Text(
+                                              "${e.split(",").join(" ")}",
+                                              style: TextStyle(fontSize: 16.0),
+                                            ),
+                                          ),
+                                        ))
                                     .toList(),
                               ),
                               ElevatedButton(
                                 onPressed: () async {
-                                  if (_formKey_sub_task.currentState!.validate()) {
+                                  if (_formKey_sub_task.currentState!
+                                      .validate()) {
                                     await _addSubTask(widget.id);
-                                    setState(() async{
-                                      Navigator.pop(context,'return_value');
+                                    setState(() async {
+                                      Navigator.pop(context);
                                     });
-                                  }else{
+                                  } else {
                                     // _formKey.currentState!.validate();
                                   }
                                 },
                                 style: ButtonStyle(
                                   textStyle: MaterialStateProperty.all(
-                                    TextStyle(fontSize: 20,color: Colors.white),),
+                                    TextStyle(
+                                        fontSize: 20, color: Colors.white),
+                                  ),
                                   shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
+                                  minimumSize: MaterialStateProperty.all(
+                                      Size(wp(100, context), 50)),
                                 ),
                                 child: const Text("Add Sub Task"),
                               ),
@@ -334,8 +311,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
               ),
             ),
           ),
-        )
-    );
+        ));
   }
 
   Future<void> _addSubTask(int id) async {
@@ -345,8 +321,11 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
         id,
         sub_task_title.text,
         sub_task_description.text,
-        sub_task_date.text,
-        people_data,
-        current_date);
+        endDateController.text,
+        _selectedItems.toString(),
+        0,
+        0.0,
+        current_date
+       );
   }
 }

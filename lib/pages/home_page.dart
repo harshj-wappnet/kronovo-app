@@ -1,13 +1,10 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kronovo_app/pages/project_pages/create_project.dart';
 import 'package:kronovo_app/pages/project_pages/update_project_page.dart';
 import 'package:kronovo_app/pages/project_pages/project_details_page.dart';
 import 'package:kronovo_app/utils/responsive.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../helpers/sql_helper.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,15 +19,13 @@ class _HomePageState extends State<HomePage> {
   int? id;
   List<String> _peoplesList = [];
   late final item;
-  double project_progress = 0.0;
   int? project_id;
+  List<Map<String, dynamic>> _listTasks = [];
+  double project_progress = 0.0;
+  int? task_id;
 
-  Future<void> _loadPref(int pid) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      project_progress = prefs.getDouble('task_$pid')!;
-    });
-  }
+
+
 
   void getAllProjects() async {
     final data = await SQLHelper.getProjects();
@@ -42,7 +37,6 @@ class _HomePageState extends State<HomePage> {
        project_id = _listProjects[index]['project_id'];
       }
       );
-      _loadPref(project_id!);
     });
   }
 
@@ -61,6 +55,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getAllProjects();
+    //loadTasks(task_id!);
     print('number of items ${_listProjects.length}');
   }
 
@@ -152,6 +147,7 @@ class _HomePageState extends State<HomePage> {
                           height: hp(16, context),
                           child: Column(
                             children: [
+                              SizedBox(height: 4.0,),
                               Text(
                                 '${_listProjects[index]['project_name']}',
                                 style: TextStyle(
@@ -174,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 margin: EdgeInsets.only(left: 20.0, right: 20.0),
                                 child: LinearProgressIndicator(
-                                  value: project_progress,
+                                  value: _listProjects[index]['project_progress'] / _listProjects.length,
                                   valueColor: AlwaysStoppedAnimation(
                                       Colors.green),
                                   minHeight: 10.0,

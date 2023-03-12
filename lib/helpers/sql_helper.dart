@@ -20,6 +20,7 @@ class SQLHelper {
   static final project_startDate = 'project_start_date';
   static final project_endDate = 'project_end_date';
   static final project_assigned_peoples = 'project_assigned_peoples';
+  static final project_progress = "project_progress";
 
   //static final project_people = 'project_people';
 
@@ -27,16 +28,18 @@ class SQLHelper {
   static final task_id = 'task_id';
   static final tasks_name = 'tasks_name';
   static final tasks_description = 'tasks_description';
-  static final tasks_startDate = 'tasks_start_date';
   static final tasks_endDate = 'tasks_end_date';
   static final tasks_assigned_peoples = 'tasks_assigned_peoples';
+  static final tasks_isEnable = "is_enable_tasks";
+  static final tasks_progress = "tasks_progress";
 
   static final subtasks_columnId = 'column_subtasks_id';
   static final subtasks_name = 'subtasks_name';
   static final subtasks_description = 'subtasks_description';
-  static final subtasks_startDate = 'subtasks_start_date';
   static final subtasks_endDate = 'subtasks_end_date';
   static final subtasks_assigned_peoples = 'subtasks_assigned_peoples';
+  static final subtasks_isEnable = "is_enable_subtasks";
+  static final subtasks_progress = "subtasks_progress";
 
   static Future<sql.Database> db() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
@@ -64,6 +67,7 @@ class SQLHelper {
     $project_startDate TEXT,
     $project_endDate TEXT,
     $project_assigned_peoples TEXT,
+    $project_progress REAL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
@@ -77,6 +81,8 @@ class SQLHelper {
     $tasks_description TEXT,
     $tasks_endDate TEXT,
     $tasks_assigned_peoples TEXT,
+    $tasks_isEnable INTEGER,
+    $tasks_progress REAL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
@@ -90,6 +96,8 @@ class SQLHelper {
     $subtasks_description TEXT,
     $subtasks_endDate TEXT,
     $subtasks_assigned_peoples TEXT,
+    $subtasks_isEnable INTEGER,
+    $subtasks_progress REAL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
@@ -101,6 +109,7 @@ class SQLHelper {
       String s_date,
       String e_date,
       String a_peoples,
+      double project_progress,
       String current_date) async {
     final db = await SQLHelper.db();
 
@@ -110,6 +119,7 @@ class SQLHelper {
       'project_start_date': s_date,
       'project_end_date': e_date,
       'project_assigned_peoples': a_peoples,
+      'project_progress': project_progress,
       'createdAt': current_date,
     };
     final id = await db.insert(project_table, data);
@@ -123,7 +133,10 @@ class SQLHelper {
       String task_description,
       String end_date,
       String assign_peoples,
-      String current_date) async {
+      int isEnable,
+      double task_progress,
+      String current_date
+     ) async {
     final db = await SQLHelper.db();
 
     final data = {
@@ -132,7 +145,9 @@ class SQLHelper {
       'tasks_description' : task_description,
       'tasks_end_date' : end_date,
       'tasks_assigned_peoples' : assign_peoples,
-      'createdAt' : current_date,
+      'is_enable_tasks' : isEnable,
+      'tasks_progress' : task_progress,
+      'createdAt': current_date,
     };
     final id = await db.insert(task_table, data);
     print('task inserted');
@@ -145,7 +160,10 @@ class SQLHelper {
       String subtask_description,
       String end_date,
       String assign_peoples,
-      String current_date) async {
+      int isEnable,
+      double subtasks_progress,
+      String current_date
+     ) async {
     final db = await SQLHelper.db();
 
     final data = {
@@ -154,7 +172,9 @@ class SQLHelper {
       'subtasks_description' : subtask_description,
       'subtasks_end_date' : end_date,
       'subtasks_assigned_peoples' : assign_peoples,
-      'createdAt' : current_date,
+      'is_enable_subtasks' : isEnable,
+      'subtasks_progress' : subtasks_progress,
+      'createdAt': current_date,
     };
     final id = await db.insert(sub_task_table, data);
     print('sub task inserted');
@@ -288,4 +308,55 @@ class SQLHelper {
     }
   }
 
+  static Future<int> updateProgressProject(
+      int id,
+      double task_progress
+      ) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'project_progress' : task_progress,
+    };
+    final result = await db.update(
+        project_table, data, where: 'project_id = ?', whereArgs: [id]);
+    return result;
+  }
+
+  static Future<int> changeValuesTask(
+      int id,
+      int isEnable,
+      ) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'is_enable_tasks' : isEnable,
+    };
+    final result = await db.update(
+        task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
+    return result;
+  }
+
+  static Future<int> updateProgressTask(
+      int id,
+      double task_progress,
+      ) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'tasks_progress' : task_progress,
+    };
+    final result = await db.update(
+        task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
+    return result;
+  }
+
+  static Future<int> changeValuesSubTask(
+      int id,
+      int isEnable,
+      ) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'is_enable_subtasks' : isEnable,
+    };
+    final result = await db.update(
+        sub_task_table, data, where: 'column_subtasks_id = ?', whereArgs: [id]);
+    return result;
+  }
 }

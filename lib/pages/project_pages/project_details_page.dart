@@ -1,13 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
 import 'package:kronovo_app/pages/task_pages/task_details_page.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 import 'package:kronovo_app/pages/task_pages/add_task_page.dart';
 import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../helpers/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
@@ -24,20 +20,16 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   List<Map<String, dynamic>> _listTasks = [];
   List<String> _selectedItems = [];
   String people_data = '';
-  double progress_value = 0.0;
   int? task_id;
 
   double task_progress = 0.0;
+  double progress = 0.0;
 
   String project_title = "";
   String project_description = "";
   String project_enddate = "";
   String project_peoples = "";
-  late int list_size = _listTasks.length;
-
-  List<double> prefList = [];
-  List<bool> cardEnabledList = [];
-  List<Color> cardColorList = [];
+  int isenable = 0;
 
 
   void _showProject(int? id) async {
@@ -56,21 +48,6 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
       });
     }
   }
-
-  Future<void> _loadPref(int tsid) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      task_progress = prefs.getDouble('subtask_$tsid')!;
-      prefList.forEach((element) { element = task_progress;});
-    });
-  }
-
-  Future<void> _completetask(double process_value) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setDouble('task_${widget.id}', process_value);
-    });
-  }
   void showTasks(int id) async {
     final task_data = await SQLHelper.getAllTasksByProject(id);
 
@@ -78,11 +55,9 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
       _listTasks = task_data;
       final existing_task_data =
       _listTasks.firstWhere((element) => element['column_task_id'] == id);
-      _loadPref(existing_task_data['column_task_id']);
+      isenable = existing_task_data['is_enable_tasks'];
+      task_progress = existing_task_data['tasks_progress'];
     });
-    cardEnabledList = List.filled(_listTasks.length,true,growable: false);
-    cardColorList = List.filled(_listTasks.length,Colors.white,growable: false);
-    prefList = List.filled(_listTasks.length, 0.0,growable: false);
   }
 
 
@@ -146,8 +121,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
             ]),
         body: RefreshIndicator(
           onRefresh: () async {
-            _showProject(widget.id);
-            showTasks(widget.id);
+           initState();
           },
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
@@ -236,7 +210,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                         margin: EdgeInsets.only(left: 20.0,right: 20.0),
                         child: Slidable(
                           key: const ValueKey(0),
-                          enabled: cardEnabledList[index],
+                          enabled: _listTasks[index]['is_enable_tasks'] == 1 ? false : true,
                           startActionPane: ActionPane(
                             motion: const DrawerMotion(),
                             children: [
@@ -244,11 +218,11 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 flex: 1,
                                 autoClose: true,
                                 onPressed: (value) {
+                                  progress += 0.1;
+                                  SQLHelper.updateProgressProject(widget.id, progress);
+                                  SQLHelper.changeValuesTask(_listTasks[index]['column_task_id'], 1);
                                   setState(() {
-                                    progress_value += 0.1;
-                                    _completetask(progress_value);
-                                    cardEnabledList[index] = false;
-                                    cardColorList[index] = Colors.grey;
+                                    showTasks(widget.id);
                                   });
                                   // SQLHelper.deleteTask(
                                   //     _listTasks[index]['column_task_id']);
@@ -263,7 +237,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 autoClose: true,
                                 flex: 1,
                                 onPressed: (value) {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateTaskPage(id: _listTasks[index]['column_task_id']),));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateTaskPage(id: _listTasks[index]['column_task_id'],project_id: widget.id),));
                                 },
                                 backgroundColor: Colors.blueAccent,
                                 foregroundColor: Colors.white,
@@ -282,16 +256,15 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                               ['column_task_id'])));
                             },
                             child: Card(
-                              color: cardColorList[index],
+                              color: _listTasks[index]['is_enable_tasks'] == 1 ? Colors.grey : Colors.white,
                               elevation: 5.0,
                               shadowColor: Colors.green,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Container(
-                                margin: EdgeInsets.all(15.0),
-                                padding: EdgeInsets.all(5.0),
-                                height: hp(15, context),
+                                padding: EdgeInsets.all(4.0),
+                                height: hp(16, context),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
@@ -302,21 +275,21 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                           fontSize: 20.0,
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    SizedBox(height: 15.0,),
+                                    SizedBox(height: 8.0,),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.calendar_month),
+                                        Icon(Icons.task_alt_outlined),
                                         Text(
                                             '  ${_listTasks[index]['tasks_end_date']}'),
                                       ],
                                     ),
-                                    SizedBox(height: 10.0,),
+                                    SizedBox(height: 8.0,),
                                     Container(
                                       margin:
                                           EdgeInsets.only(left: 20.0, right: 20.0),
                                       child: LinearProgressIndicator(
-                                        value: prefList[index],
+                                        value: _listTasks[index]['tasks_progress'] / _listTasks.length,
                                         valueColor:
                                             AlwaysStoppedAnimation(Colors.green),
                                         minHeight: 10.0,
@@ -324,6 +297,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                     ),
                                     SizedBox(height: 15.0,),
                                     Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(

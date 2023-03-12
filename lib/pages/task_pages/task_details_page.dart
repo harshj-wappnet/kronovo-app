@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
 import 'package:kronovo_app/pages/sub_task_pages/sub_task_details_page.dart';
 import 'package:kronovo_app/pages/sub_task_pages/add_subtask_page.dart';
-import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../helpers/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../sub_task_pages/update_subtask_page.dart';
@@ -22,11 +18,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   List<Map<String, dynamic>> _listTasks = [];
   List<Map<String, dynamic>> _listSubTasks = [];
   String people_data = '';
-  double subtask_progress = 0.0;
   String task_title = '';
   String task_description = '';
   String task_enddate = '';
   String task_peoples = '';
+  List<String> _selectedItems = [];
+  double progress = 0.0;
 
 
 
@@ -40,25 +37,19 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
         task_title = task_data['tasks_name'];
         task_description = task_data['tasks_description'];
         task_enddate = task_data['tasks_end_date'];
-        //task_peoples = task_data[''];
+        people_data = task_data['tasks_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+        _selectedItems = people_data.split(",");
       });
     }
   }
 
   void showSubTasks(int id) async {
     final data = await SQLHelper.getAllSubTasksByTask(id);
-
     setState(() {
       _listSubTasks = data;
     });
   }
 
-  Future<void> _completeSubTask(double process_value) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setDouble('subtask_${widget.id}', process_value);
-    });
-  }
   @override
   void initState() {
     super.initState();
@@ -87,125 +78,184 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
               icon: Icon(Icons.add))
         ],
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              '$task_title',
-              style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline),
-            ),
-            Text(
-              '$task_description',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Wrap(
-              children: List<Widget>.generate(task_peoples.split(',').length - 1,
-                  (int i) {
-                return Container(
-                  margin: EdgeInsets.all(10.0),
-                  child: Chip(
-                    label: Text('${task_peoples.split(',')[i]}'),
-                  ),
-                );
-              }).toList(),
-            ),
-            Text(
-              'deadline  $task_enddate',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Expanded(
-                child: ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
-              itemCount: _listSubTasks.length,
-              itemBuilder: (context, index) => Container(
-                child: Slidable(
-                  key: const ValueKey(0),
-                  startActionPane: ActionPane(
-                    motion: const DrawerMotion(),
-                    children: [
-                      SlidableAction(
-                        flex: 1,
-                        autoClose: true,
-                        onPressed: (value) {
-                          setState(() {
-                            subtask_progress += 0.1;
-                            _completeSubTask(subtask_progress);
-                          });
-                          // SQLHelper.deleteSubTask(
-                          //     _listSubTasks[index]['column_subtasks_id']);
-                          // showSubTasks(widget.id);
-                        },
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        icon: Icons.check,
-                        label: 'Done',
+      body: RefreshIndicator(
+        onRefresh: () async {
+          initState();
+        },
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            children: [
+              SizedBox(height: 25.0,),
+              Container(
+                width: wp(100, context),
+                margin: EdgeInsets.only(left: 20.0,right: 20.0),
+                decoration: BoxDecoration(
+                  color: Color(0xffbcf5bc),
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green,
+                      offset: Offset(4,8),
+                      blurRadius: 12,
+                    )
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 8.0,),
+                    Text(
+                      '$task_title',
+                      style: TextStyle(
+                          fontSize: 50,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold
                       ),
-                      SlidableAction(
-                        autoClose: true,
-                        flex: 1,
-                        onPressed: (value) {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSubTaskPage(id: _listSubTasks[index]['column_subtasks_id']),));
-                        },
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        icon: Icons.edit,
-                        label: 'Edit',
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => SubTaskDetailsPage(id: _listSubTasks[index]['column_subtasks_id']),));
-                    },
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 2.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              '${_listSubTasks[index]['subtasks_name']}',
-                              style: TextStyle(
-                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 15.0,),
+                    //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                    Text(
+                      '$task_description',
+                      style: TextStyle(fontSize: 25,
+                          color: Colors.white),
+                    ),
+                    SizedBox(height: 15.0,),
+                    Text("Assigned Members", style: TextStyle(color: Colors.white,fontSize: 20, fontWeight: FontWeight.bold,),),
+                    SizedBox(height: 6.0,),
+                    Wrap(
+                      children: _selectedItems
+                          .map((e) => Container(
+                        margin: EdgeInsets.only(left: 5.0,right: 5.0),
+                        child: Chip(
+                          padding: EdgeInsets.all(8.0),
+                          backgroundColor: Colors.white,
+                          label: Text(
+                            "${e.split(",").join()}",
+                            style: TextStyle(
+                              fontSize: 16.0,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.calendar_month),
-                                Text(
-                                    '  ${_listSubTasks[index]['subtasks_end_date']}'),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${convertToAgo(DateTime.parse(_listSubTasks[index]['createdAt']))}',
-                                  style: TextStyle(fontSize: 11.0),
-                                )
-                              ],
-                            )
-                          ],
+                          ),
+                        ),
+                      )
+                      )
+                          .toList(),
+                    ),
+                    SizedBox(height: 15.0,),
+                    Text(
+                      'Deadline : $task_enddate',
+                      style:
+                      const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    SizedBox(height: 15.0,)
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: hp(4, context),
+              ),
+              Text("Sub Tasks", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+              Divider(height: 4.0,),
+              SizedBox(height: 10.0,),
+              Expanded(
+                  child: ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                itemCount: _listSubTasks.length,
+                itemBuilder: (context, index) => Container(
+                  child: Slidable(
+                    enabled: _listSubTasks[index]['is_enable_subtasks'] == 1 ? false : true,
+                    key: const ValueKey(0),
+                    startActionPane: ActionPane(
+                      motion: const DrawerMotion(),
+                      children: [
+                        SlidableAction(
+                          flex: 1,
+                          autoClose: true,
+                          onPressed: (value) {
+                            progress += 0.1;
+                            SQLHelper.updateProgressTask(widget.id, progress);
+                            SQLHelper.changeValuesSubTask(_listSubTasks[index]['column_subtasks_id'], 1);
+                            setState(() {
+                              showSubTasks(widget.id);
+                            });
+                            // SQLHelper.deleteSubTask(
+                            //     _listSubTasks[index]['column_subtasks_id']);
+                            // showSubTasks(widget.id);
+                          },
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          icon: Icons.check,
+                          label: 'Done',
+                        ),
+                        SlidableAction(
+                          autoClose: true,
+                          flex: 1,
+                          onPressed: (value) {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSubTaskPage(id: _listSubTasks[index]['column_subtasks_id'],task_id: widget.id),));
+                          },
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          icon: Icons.edit,
+                          label: 'Edit',
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => SubTaskDetailsPage(id: _listSubTasks[index]['column_subtasks_id']),));
+                      },
+                      child: Card(
+                        color: _listSubTasks[index]['is_enable_subtasks'] == 1 ? Colors.grey : Colors.white,
+                        elevation: 5.0,
+                        shadowColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.all(4.0),
+                          height: hp(16, context),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              SizedBox(height: 4.0,),
+                              Text(
+                                '${_listSubTasks[index]['subtasks_name']}',
+                                style: TextStyle(
+                                    fontSize: 20.0, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 8.0,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.task_alt_outlined),
+                                  Text(
+                                      '  ${_listSubTasks[index]['subtasks_end_date']}'),
+                                ],
+                              ),
+                              SizedBox(height: 15.0,),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${convertToAgo(DateTime.parse(_listSubTasks[index]['createdAt']))}',
+                                    style: TextStyle(fontSize: 12.0),
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            )),
-          ],
+              )),
+            ],
+          ),
         ),
       ),
     );
