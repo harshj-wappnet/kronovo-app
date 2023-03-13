@@ -142,58 +142,142 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                         )
                       ],
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 8.0,),
-                        Text(
-                          '$project_title',
-                          style: TextStyle(
-                            fontSize: 50,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                        SizedBox(height: 15.0,),
-                        //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                        Text(
-                          '$project_description',
-                          style: TextStyle(fontSize: 25,
-                          color: Colors.white),
-                        ),
-                        SizedBox(height: 15.0,),
-                        Text("Assigned Members", style: TextStyle(color: Colors.white,fontSize: 20, fontWeight: FontWeight.bold,),),
-                        SizedBox(height: 6.0,),
-                        Wrap(
-                          children: _selectedItems
-                              .map((e) => Container(
-                            margin: EdgeInsets.only(left: 5.0,right: 5.0),
-                            child: Chip(
-                              padding: EdgeInsets.all(8.0),
-                              backgroundColor: Colors.white,
-                              label: Text(
-                                "${e.split(",").join()}",
+                    child: Container(
+                      margin: EdgeInsets.only(left: 20.0),
+                      child: Column(
+                        children: [
+                          SizedBox(height: 10.0,),
+                          Row(
+                            children: [
+                              Icon(Icons.text_format, color: Colors.white,size: 35,),
+                              Text(
+                                'Title',
                                 style: TextStyle(
-                                  fontSize: 16.0,
+                                    fontSize: 30,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold
                                 ),
                               ),
-                            ),
-                          )
-                          )
-                              .toList(),
-                        ),
-                        SizedBox(height: 15.0,),
-                        Text(
-                          'Deadline : $project_enddate',
-                          style:
-                          const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        SizedBox(height: 15.0,)
-                      ],
+                            ],
+                          ),
+                          SizedBox(height: 10.0,),
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(70, context),
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  '$project_title',
+                                  style: TextStyle(fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.0,),
+                          //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                          Row(
+                            children: [
+                              Icon(Icons.text_snippet, color: Colors.white,size: 35,),
+                              Text(
+                                'Description',
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.0,),
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(70, context),
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  '$project_description',
+                                  style: TextStyle(fontSize: 22,
+                                  color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.0,),
+                          Row(
+                            children: [
+                              Icon(Icons.person, color: Colors.white,size: 35,),
+                              Text(
+                                'Members',
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.0,),
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(70, context),
+                                padding: EdgeInsets.all(10),
+                                child: Wrap(
+                                  children: _selectedItems
+                                      .map((e) => Container(
+                                    margin: EdgeInsets.only(left: 5.0,right: 5.0),
+                                    child: Chip(
+                                      padding: EdgeInsets.all(6.0),
+                                      backgroundColor: Colors.white,
+                                      label: Text(
+                                        "${e.split(",").join()}",
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  )
+                                      .toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.0,),
+                          Row(
+                            children: [
+                              Icon(Icons.calendar_month, color: Colors.white,size: 35,),
+                              Text(
+                                'Deadline',
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.0,),
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(70, context),
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  '$project_enddate',
+                                  style: TextStyle(fontSize: 22,
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15.0,)
+                        ],
+                      ),
                     ),
                   ),
-
                   SizedBox(
                     height: hp(4, context),
                   ),
@@ -258,7 +342,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                             child: Card(
                               color: _listTasks[index]['is_enable_tasks'] == 1 ? Colors.grey : Colors.white,
                               elevation: 5.0,
-                              shadowColor: Colors.green,
+                              shadowColor: _listTasks[index]['is_enable_tasks'] == 1 ? Colors.grey : Colors.green,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                               ),

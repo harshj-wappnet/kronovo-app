@@ -57,7 +57,7 @@ class UpdateProjectState extends State<UpdateProject> {
 
   String _displayText(String begin, DateTime? date) {
     if (date != null) {
-      return '$begin Date: ${date.toString().split(' ')[0]}';
+      return '$begin ${date.toString().split(' ')[0]}';
     } else {
       return 'Choose The Date';
     }
