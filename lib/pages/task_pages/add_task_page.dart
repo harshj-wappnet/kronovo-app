@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
+import '../../utils/theme.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
 class AddTaskPage extends StatefulWidget {
@@ -20,9 +21,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members= [];
 
-  String _displayText(String begin, DateTime? date) {
+  String _displayText(DateTime? date) {
     if (date != null) {
-      return '$begin ${date.toString().split(' ')[0]}';
+      return '${date.toString().split(' ')[0]}';
     } else {
       return 'Choose The Date';
     }
@@ -49,35 +50,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
     });
   }
 
-
-  String? endDateValidator(value) {
-
-    if (endDate == null) return "select the date";
-    return null; // optional while already return type is null
-  }
-
-  String? get _errorText1 {
-    // at any time, we can get the text from _controller.value.text
-    final text = _task_title.value.text;
-
-    // Note: you can do your own custom validation here
-    // Move this logic this outside the widget for more testable code
-    if (text.trim().isEmpty) {
-      return "Project Title can't be empty";
-    } else {
-      // Return null if the entered password is valid
-      return null;
-    }
-  }
-
-  bool _submitted = false;
-
-  void _submit() {
-    // if there is no error text
-    setState(() => _submitted = true);
-    if (_errorText1 == null) {}
-  }
-
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
@@ -100,6 +72,19 @@ class _AddTaskPageState extends State<AddTaskPage> {
       });
     }
   }
+
+  final snackBar = SnackBar(
+    content:   Row(
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          color: Colors.red,
+        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+      ],
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.white,
+  );
 
   @override
   void initState() {
@@ -133,188 +118,191 @@ class _AddTaskPageState extends State<AddTaskPage> {
             child: Center(
               child: Column(
                 children: [
-                  Image.asset(
-                    'assets/images/tasks_image.jpg',
-                    height: 200,
-                    width: 300,
-                  ),
+                  SizedBox(height: 20.0,),
                   Form(
                     key: _formKey_task,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Container(
-                        margin: EdgeInsets.only(left: 20.0, right: 20.0),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              SizedBox(
-                                width: wp(100, context),
-                                child: TextFormField(
-                                  autovalidateMode:
+                    child: Container(
+                      padding: EdgeInsets.only(left: 20.0,right: 20.0),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Title",
+                              style: titleStyle,
+                            ),
+                            Container(
+                              height: 52,
+                              margin: EdgeInsets.only(top: 8.0),
+                              padding: EdgeInsets.only(left: 14),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Expanded(
+                                    child: TextFormField(
+                                      autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                  controller: _task_title,
-                                  decoration: InputDecoration(
-                                    prefixIcon: Icon(
-                                      Icons.edit_note,
-                                      color: Colors.grey,
-                                    ),
-                                    labelText: 'Title',
-                                    hintText: 'Enter Title',
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0)),
-                                    fillColor: Colors.transparent,
-                                    filled: true,
-                                    errorText: _submitted ? _errorText1 : null,
-                                  ),
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "Title can't be empty";
-                                    } else {
-                                      // Return null if the entered password is valid
-                                      return null;
-                                    }
-                                  },
-                                  onChanged: (_) => setState(() {}),
+                                      autofocus: false,
+                                      cursorColor: Colors.grey[700],
+                                      controller: _task_title,
+                                      style: subtitleStyle,
+                                      decoration: InputDecoration(
+                                          hintText: "Enter Title",
+                                          hintStyle: subtitleStyle,
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0)),
+                                          enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0))),
+                                      onChanged: (_) => setState(() {}),
+                                    )
                                 ),
-                              ),
-                              SizedBox(
-                                height: 15.0,
-                              ),
-                              SizedBox(
-                                width: wp(100, context),
-                                child: TextFormField(
-                                  maxLines: 4,
-                                  autovalidateMode:
+                              ]),
+                            ),
+                            SizedBox(height: 15.0,),
+
+                            Text(
+                              "Description",
+                              style: titleStyle,
+                            ),
+                            Container(
+                              height: 82,
+                              margin: EdgeInsets.only(top: 8.0),
+                              padding: EdgeInsets.only(left: 14),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Expanded(
+                                    child: TextFormField(
+                                      maxLines: 4,
+                                      autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                  controller: _task_description,
-                                  decoration: InputDecoration(
-                                    prefixIcon: Icon(
-                                      Icons.edit_note,
-                                      color: Colors.grey,
-                                    ),
-                                    labelText: 'Description',
-                                    hintText: 'Enter Description',
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0)),
-                                    fillColor: Colors.transparent,
-                                    filled: true,
-                                  ),
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "Description can't be empty";
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  onChanged: (_) => setState(() {}),
+                                      autofocus: false,
+                                      cursorColor: Colors.grey[700],
+                                      controller: _task_description,
+                                      style: subtitleStyle,
+                                      decoration: InputDecoration(
+                                          hintText: "Enter Description",
+                                          hintStyle: subtitleStyle,
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0)),
+                                          enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0))),
+
+                                      onChanged: (_) => setState(() {}),
+                                    )
                                 ),
-                              ),
-                              SizedBox(
-                                height: 15.0,
-                              ),
-                              SizedBox(
-                                width: wp(100, context),
-                                child: TextFormField(
-                                  controller: endDateController,
-                                  readOnly: true,
-                                  decoration: InputDecoration(
-                                    hintText: 'Choose Deadline',
-                                    prefixIcon: Icon(
-                                      Icons.calendar_today_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    labelText: 'Deadline',
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0)),
-                                    fillColor: Colors.transparent,
-                                    filled: true,
-                                  ),
-                                  onTap: () async {
-                                    endDate = await pickDate();
-                                    endDateController.text =
-                                        _displayText("", endDate);
-                                    setState(() {});
-                                  },
-                                  validator: endDateValidator,
-                                  style: const TextStyle(
-                                      fontSize: 15, color: Colors.black),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 15.0,
-                              ),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                child: ElevatedButton.icon(
-                                  icon: Icon(Icons.add),
-                                  onPressed: _showMultiSelect,
-                                  style: ButtonStyle(
-                                    textStyle: MaterialStateProperty.all(
-                                      TextStyle(
-                                          fontSize: 20, color: Colors.white),
-                                    ),
-                                    shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                    minimumSize: MaterialStateProperty.all(
-                                        const Size(150, 40)),
-                                  ),
-                                  label: const Text('Assign Peoples'),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10.0,
-                              ),
-                              // display selected items
-                              Wrap(
-                                children: _selectedItems
-                                    .map((e) => Container(
-                                          margin: EdgeInsets.only(
-                                              left: 6.0, right: 6.0),
-                                          child: Chip(
-                                            padding: EdgeInsets.all(8.0),
-                                            label: Text(
-                                              "${e.split(",").join(" ")}",
-                                              style: TextStyle(fontSize: 16.0),
-                                            ),
+                              ]),
+                            ),
+
+                            SizedBox(height: 15.0,),
+                            Text(
+                              "Deadline",
+                              style: titleStyle,
+                            ),
+                            Container(
+                              height: 52,
+                              margin: EdgeInsets.only(top: 8.0),
+                              padding: EdgeInsets.only(left: 14),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Expanded(
+                                    child: TextFormField(
+                                      autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                      autofocus: false,
+                                      cursorColor: Colors.grey[700],
+                                      controller: endDateController,
+                                      style: subtitleStyle,
+                                      decoration: InputDecoration(
+                                          prefixIcon: Icon(
+                                            Icons.calendar_today_outlined,
+                                            color: Colors.grey,
                                           ),
-                                        ))
-                                    .toList(),
-                              ),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  if (_formKey_task.currentState!.validate()) {
-                                    await _addTask(widget.id);
-                                    setState(() async {
-                                      Navigator.pop(context);
-                                    });
-                                  } else {
-                                    // _formKey.currentState!.validate();
-                                  }
-                                },
-                                style: ButtonStyle(
-                                  textStyle: MaterialStateProperty.all(
-                                    TextStyle(
-                                        fontSize: 20, color: Colors.white),
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  minimumSize: MaterialStateProperty.all(
-                                      Size(wp(100, context), 50)),
+                                          hintText: "Choose Deadline",
+                                          hintStyle: subtitleStyle,
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0)),
+                                          enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0))),
+                                      onTap: () async {
+                                        endDate = await pickDate();
+                                        endDateController.text =
+                                            _displayText(endDate);
+                                        setState(() {});
+                                      },
+                                      onChanged: (_) => setState(() {}),
+                                    )
                                 ),
-                                child: const Text("Add Task"),
+                              ]),
+                            ),
+
+                            SizedBox(height: 15.0,),
+
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.add),
+                              onPressed: _showMultiSelect,
+                              style: ButtonStyle(
+                                textStyle: MaterialStateProperty.all(
+                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
                               ),
-                            ]),
-                      ),
+                              label: const Text('Assign Peoples'),
+                            ),
+                            SizedBox(height: 10.0,),
+                            // display selected items
+                            Wrap(
+                              children: _selectedItems
+                                  .map((e) => Container(
+                                margin: EdgeInsets.only(left: 6.0,right: 6.0),
+                                child: Chip(
+                                  padding: EdgeInsets.all(8.0),
+                                  label: Text(
+                                    "${e.split(",").join(" ")}",
+                                    style: TextStyle(fontSize: 16.0),
+                                  ),
+                                ),
+                              ))
+                                  .toList(),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (_task_title.text.isEmpty || _task_description.text.isEmpty || endDateController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      snackBar);
+                                }else{
+                                  await _addTask(widget.id);
+                                  setState(() async {
+                                    Navigator.pop(context);
+                                  });
+                                }
+                              },
+                              style: ButtonStyle(
+                                textStyle: MaterialStateProperty.all(
+                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
+                              ),
+                              child: const Text("ADD Task"),
+                            ),
+                          ]),
                     ),
                   ),
                 ],

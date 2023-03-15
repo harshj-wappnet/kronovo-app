@@ -1,14 +1,14 @@
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:kronovo_app/utils/theme.dart';
 import '../../databases/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 
 class CreateProject extends StatefulWidget {
 
-  final ValueChanged<String> onSubmit;
 
-  CreateProject({super.key, required this.onSubmit});
+  CreateProject({super.key});
 
   @override
   State<CreateProject> createState() => _CreateProjectState();
@@ -61,44 +61,6 @@ class _CreateProjectState extends State<CreateProject> {
     );
   }
 
-  String? startDateValidator(value) {
-    if (startDate == null) return "select the date";
-  }
-
-  String? endDateValidator(value) {
-    if (startDate != null && endDate == null) {
-      return "select Both data";
-    }
-    if (endDate == null) return "select the date";
-    if (endDate!.isBefore(startDate!)) {
-      return "End date must be after startDate";
-    }
-    return null; // optional while already return type is null
-  }
-
-  String? get _errorText1 {
-    // at any time, we can get the text from _controller.value.text
-    final text = project_title_Controller.value.text;
-
-    // Note: you can do your own custom validation here
-    // Move this logic this outside the widget for more testable code
-    if (text.trim().isEmpty) {
-      return "Project Title can't be empty";
-    } else {
-      // Return null if the entered password is valid
-      return null;
-    }
-  }
-
-  bool _submitted = false;
-  void _submit() {
-    // if there is no error text
-    setState(() => _submitted = true);
-    if (_errorText1 == null) {
-      widget.onSubmit(project_title_Controller.value.text);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -141,9 +103,38 @@ class _CreateProjectState extends State<CreateProject> {
     }
   }
 
+  final snackBar = SnackBar(
+    content:   Row(
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          color: Colors.red,
+        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+      ],
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.white,
+  );
+
+  final date_snackBar = SnackBar(
+    content:   Row(
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          color: Colors.red,
+        ),Text('End date must be after startDate', style: TextStyle(color: Color(0xFFff4667)),),
+      ],
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.white,
+  );
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         title: Text('Create New Project'),
         backgroundColor: Colors.green,
@@ -164,198 +155,242 @@ class _CreateProjectState extends State<CreateProject> {
           child: Center(
             child: Column(
               children: [
-                SizedBox(height: 8.0,),
-                Image.asset('assets/images/createproject_image.jpg', height: 200, width: 300,),
+                SizedBox(height: 20.0,),
                 Form(
                   key: _formKey_project,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Container(
-                      margin: EdgeInsets.only(left: 20.0,right: 20.0),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            SizedBox(
-                              width: wp(100, context),
-                              child: TextFormField(
-                                autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                                controller: project_title_Controller,
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(
-                                    Icons.edit_note,
-                                    color: Colors.grey,
-                                  ),
-                                  labelText: 'Title',
-                                  hintText: 'Enter Title',
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0)),
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                  errorText: _submitted ? _errorText1 : null,
+                  child: Container(
+                    padding: EdgeInsets.only(left: 20.0,right: 20.0),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Title",
+                            style: titleStyle,
+                          ),
+                          Container(
+                            height: 52,
+                            margin: EdgeInsets.only(top: 8.0),
+                            padding: EdgeInsets.only(left: 14),
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey, width: 1.0),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Row(children: [
+                              Expanded(
+                                  child: TextFormField(
+                                    autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                    autofocus: false,
+                                    cursorColor: Colors.grey[700],
+                                    controller: project_title_Controller,
+                                    style: subtitleStyle,
+                                    decoration: InputDecoration(
+                                        hintText: "Enter Title",
+                                        hintStyle: subtitleStyle,
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0)),
+                                        enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0))),
+                                    onChanged: (_) => setState(() {}),
+                                  )
+                              ),
+                            ]),
+                          ),
+                          SizedBox(height: 15.0,),
+
+                          Text(
+                            "Description",
+                            style: titleStyle,
+                          ),
+                          Container(
+                            height: 82,
+                            margin: EdgeInsets.only(top: 8.0),
+                            padding: EdgeInsets.only(left: 14),
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey, width: 1.0),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Row(children: [
+                              Expanded(
+                                  child: TextFormField(
+                                    maxLines: 4,
+                                    autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                    autofocus: false,
+                                    cursorColor: Colors.grey[700],
+                                    controller: project_description_Controller,
+                                    style: subtitleStyle,
+                                    decoration: InputDecoration(
+                                        hintText: "Enter Description",
+                                        hintStyle: subtitleStyle,
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0)),
+                                        enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0))),
+
+                                    onChanged: (_) => setState(() {}),
+                                  )
+                              ),
+                            ]),
+                          ),
+
+                          SizedBox(height: 15.0,),
+
+
+                          Text(
+                            "Start Date",
+                            style: titleStyle,
+                          ),
+                          Container(
+                            height: 52,
+                            margin: EdgeInsets.only(top: 8.0),
+                            padding: EdgeInsets.only(left: 14),
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey, width: 1.0),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Row(children: [
+                              Expanded(
+                                  child: TextFormField(
+                                    autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                    autofocus: false,
+                                    cursorColor: Colors.grey[700],
+                                    controller: startDateController,
+                                    style: subtitleStyle,
+                                    decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.calendar_today_outlined,
+                                          color: Colors.grey,
+                                        ),
+                                        hintText: "Choose Start Date",
+                                        hintStyle: subtitleStyle,
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0)),
+                                        enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0))),
+                                    onTap: () async {
+                                      startDate = await pickDate();
+                                      startDateController.text =
+                                          _displayText(startDate);
+                                      setState(() {});
+                                    },
+                                    readOnly: true,
+                                    onChanged: (_) => setState(() {}),
+                                  )
+                              ),
+                            ]),
+                          ),
+
+                          SizedBox(height: 15.0,),
+                          Text(
+                            "End Date",
+                            style: titleStyle,
+                          ),
+                          Container(
+                            height: 52,
+                            margin: EdgeInsets.only(top: 8.0),
+                            padding: EdgeInsets.only(left: 14),
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey, width: 1.0),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Row(children: [
+                              Expanded(
+                                  child: TextFormField(
+                                    autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                    autofocus: false,
+                                    cursorColor: Colors.grey[700],
+                                    controller: endDateController,
+                                    style: subtitleStyle,
+                                    decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.calendar_today_outlined,
+                                          color: Colors.grey,
+                                        ),
+                                        hintText: "Choose End Date",
+                                        hintStyle: subtitleStyle,
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0)),
+                                        enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.white, width: 0))),
+                                    onTap: () async {
+                                      endDate = await pickDate();
+                                      endDateController.text =
+                                          _displayText(endDate);
+                                      setState(() {});
+                                    },
+                                    onChanged: (_) => setState(() {}),
+                                  )
+                              ),
+                            ]),
+                          ),
+
+                          SizedBox(height: 15.0,),
+
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.add),
+                            onPressed: _showMultiSelect,
+                            style: ButtonStyle(
+                              textStyle: MaterialStateProperty.all(
+                                TextStyle(fontSize: 20,color: Colors.white),),
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return "Title can't be empty";
-                                  } else {
-                                    // Return null if the entered password is valid
-                                    return null;
-                                  }
-                                },
-                                onChanged: (_) => setState(() {}),
+                              ),
+                              minimumSize: MaterialStateProperty.all(const Size(150, 50)),
+                            ),
+                            label: const Text('Assign Peoples'),
+                          ),
+                          SizedBox(height: 10.0,),
+                          // display selected items
+                          Wrap(
+                            children: _selectedItems
+                                .map((e) => Container(
+                              margin: EdgeInsets.only(left: 6.0,right: 6.0),
+                                  child: Chip(
+                                    padding: EdgeInsets.all(8.0),
+                              label: Text(
+                                  "${e.split(",").join(" ")}",
+                                style: TextStyle(fontSize: 16.0),
                               ),
                             ),
-                            SizedBox(height: 15.0,),
-                            SizedBox(
-                              width: wp(100, context),
-                              child: TextFormField(
-                                maxLines: 4,
-                                autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                                controller: project_description_Controller,
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(
-                                    Icons.edit_note,
-                                    color: Colors.grey,
-                                  ),
-                                  labelText: 'Description',
-                                  hintText: 'Enter Description',
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0)),
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                ),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return "Description can't be empty";
-                                  } else {
-                                    return null;
-                                  }
-                                },
-                                onChanged: (_) => setState(() {}),
-                              ),
-                            ),
-                            SizedBox(height: 15.0,),
-                            SizedBox(
-                              width: wp(100, context),
-                              child: TextFormField(
-                                controller: startDateController,
-                                decoration: InputDecoration(
-                                  hintText: 'Choose Start Date',
-                                  prefixIcon: Icon(
-                                    Icons.calendar_today_outlined,
-                                    color: Colors.grey,
-                                  ),
-                                  labelText: 'Start Date',
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0)),
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                ),
-                                onTap: () async {
-                                  startDate = await pickDate();
-                                  startDateController.text =
-                                      _displayText(startDate);
-                                  setState(() {});
-                                },
-                                readOnly: true,
-                                validator: startDateValidator,
-                                style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black),
-                              ),
-                            ),
-                            SizedBox(height: 15.0,),
-                            SizedBox(
-                              width: wp(100, context),
-                              child: TextFormField(
-                                controller: endDateController,
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  hintText: 'Choose End Date',
-                                  prefixIcon: Icon(
-                                    Icons.calendar_today_outlined,
-                                    color: Colors.grey,
-                                  ),
-                                  labelText: 'End Date',
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0)),
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                ),
-                                onTap: () async {
-                                  endDate = await pickDate();
-                                  endDateController.text =
-                                      _displayText(endDate);
-                                  setState(() {});
-                                },
-                                validator: endDateValidator,
-                                style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black),
-                              ),
-                            ),
-                            SizedBox(height: 15.0,),
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              child: ElevatedButton.icon(
-                                icon: Icon(Icons.add),
-                                onPressed: _showMultiSelect,
-                                style: ButtonStyle(
-                                  textStyle: MaterialStateProperty.all(
-                                    TextStyle(fontSize: 20,color: Colors.white),),
-                                  shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  minimumSize: MaterialStateProperty.all(const Size(150, 40)),
-                                ),
-                                label: const Text('Assign Peoples'),
-                              ),
-                            ),
-                            SizedBox(height: 10.0,),
-                            // display selected items
-                            Wrap(
-                              children: _selectedItems
-                                  .map((e) => Container(
-                                margin: EdgeInsets.only(left: 6.0,right: 6.0),
-                                    child: Chip(
-                                      padding: EdgeInsets.all(8.0),
-                                label: Text(
-                                    "${e.split(",").join(" ")}",
-                                  style: TextStyle(fontSize: 16.0),
+                                ))
+                                .toList(),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (project_title_Controller.text.isEmpty || project_description_Controller.text.isEmpty || startDateController.text.isEmpty || endDateController.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    snackBar);
+                              }else if(endDate!.isBefore(startDate!)){
+                                ScaffoldMessenger.of(context).showSnackBar(date_snackBar);
+                              }else{
+                                await _addProject();
+                                setState(() async {
+                                  Navigator.pop(context, 'return_value');
+                                });
+                              }
+                            },
+                            style: ButtonStyle(
+                              textStyle: MaterialStateProperty.all(
+                                TextStyle(fontSize: 20,color: Colors.white),),
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                                  ))
-                                  .toList(),
+                              minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
                             ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                if (_formKey_project.currentState!.validate()) {
-                                  await _addProject();
-                                  setState(() async{
-                                    Navigator.pop(context,'return_value');
-                                  });
-                                }else{
-                                 // _formKey.currentState!.validate();
-                                }
-                              },
-                              style: ButtonStyle(
-                                textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
-                                shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
-                              ),
-                              child: const Text("Create Project"),
-                            ),
-                          ]),
-                    ),
+                            child: const Text("Create Project"),
+                          ),
+                        ]),
                   ),
                 ),
               ],

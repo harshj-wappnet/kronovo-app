@@ -53,9 +53,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _navigateforResult(BuildContext context) async {
     final result = await Navigator.push(
         context, MaterialPageRoute(builder: (context) =>
-        CreateProject(onSubmit: (String value) {
-          null;
-        },)));
+        CreateProject()));
     if (!mounted) return;
     initState();
   }

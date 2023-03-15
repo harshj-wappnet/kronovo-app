@@ -34,3 +34,19 @@ TextStyle get headingStyle{
       )
   );
 }
+
+TextStyle get titleStyle {
+  return GoogleFonts.lato(
+      textStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: Colors.black));
+}
+
+TextStyle get subtitleStyle {
+  return GoogleFonts.lato(
+      textStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: Colors.grey[600]));
+}

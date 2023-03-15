@@ -116,7 +116,7 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                           child: Wrap(
                             children: _selectedItems
                                 .map((e) => Container(
-                              margin: EdgeInsets.only(left: 5.0,right: 5.0),
+                              margin: EdgeInsets.only(left: 5.0,right: 5.0, top: 5.0),
                               child: Chip(
                                 padding: EdgeInsets.all(12.0),
                                 backgroundColor: Colors.green.shade100,
