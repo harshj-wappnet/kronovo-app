@@ -203,9 +203,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
               SizedBox(height: 10.0,),
               Expanded(
                   child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                physics: const ClampingScrollPhysics(),
+                    primary: false,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
                 itemCount: _listSubTasks.length,
                 itemBuilder: (context, index) => Container(
                   margin: EdgeInsets.only(left: 20.0,right: 20.0),

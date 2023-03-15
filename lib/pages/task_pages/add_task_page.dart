@@ -217,6 +217,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                       autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
                                       autofocus: false,
+                                      readOnly: true,
                                       cursorColor: Colors.grey[700],
                                       controller: endDateController,
                                       style: subtitleStyle,

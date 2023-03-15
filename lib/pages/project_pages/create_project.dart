@@ -302,9 +302,9 @@ class _CreateProjectState extends State<CreateProject> {
                                   child: TextFormField(
                                     autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
-                                    autofocus: false,
                                     cursorColor: Colors.grey[700],
                                     controller: endDateController,
+                                    readOnly: true,
                                     style: subtitleStyle,
                                     decoration: InputDecoration(
                                         prefixIcon: Icon(

@@ -347,6 +347,7 @@ class UpdateProjectState extends State<UpdateProject> {
                                             _displayText(endDate);
                                         setState(() {});
                                       },
+                                      readOnly: true,
                                       onChanged: (_) => setState(() {}),
                                     )
                                 ),

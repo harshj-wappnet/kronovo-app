@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:kronovo_app/pages/members_page/members_details_page.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
+import '../../utils/theme.dart';
 
 class AddMembersPage extends StatefulWidget {
   const AddMembersPage({Key? key}) : super(key: key);
@@ -12,9 +13,9 @@ class AddMembersPage extends StatefulWidget {
 
 class _AddMembersPageState extends State<AddMembersPage> {
 
-  TextEditingController add_member_Controller = TextEditingController();
-  TextEditingController add_role_Controller = TextEditingController();
-  TextEditingController mobileno_controller = TextEditingController();
+  TextEditingController member_name_Controller = TextEditingController();
+  TextEditingController member_role_Controller = TextEditingController();
+  TextEditingController member_mobileno_controller = TextEditingController();
 
   final _formKey_add_members = GlobalKey<FormState>();
 
@@ -22,20 +23,18 @@ class _AddMembersPageState extends State<AddMembersPage> {
   String people_role = '';
   List<Map<String, dynamic>> _listProjects = [];
 
-  String? get _errorText1 {
-    // at any time, we can get the text from _controller.value.text
-    final text = add_member_Controller.value.text;
-
-    // Note: you can do your own custom validation here
-    // Move this logic this outside the widget for more testable code
-    if (text.trim().isEmpty) {
-      return "Name can't be empty";
-    } else {
-      // Return null if the entered password is valid
-      return null;
-    }
-  }
-
+  final snackBar = SnackBar(
+    content:   Row(
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          color: Colors.red,
+        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+      ],
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.white,
+  );
 
   @override
   void initState() {
@@ -57,139 +56,158 @@ class _AddMembersPageState extends State<AddMembersPage> {
         child: SafeArea(
           child: SingleChildScrollView(
             child: Center(
-              child: Container(
-                padding: EdgeInsets.all(20.0),
-                margin: EdgeInsets.all(20.0),
-                child: Form(
-                  key: _formKey_add_members,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: wp(80, context),
-                        child: TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          controller: add_member_Controller,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.person_add,
-                              color: Colors.grey,
+              child: Column(
+                children: [
+                  SizedBox(height: 20.0,),
+                  Form(
+                    key: _formKey_add_members,
+                    child: Container(
+                      padding: EdgeInsets.only(left: 20.0,right: 20.0),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Name",
+                              style: titleStyle,
                             ),
-                            labelText: 'Add Name',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0)),
-                            fillColor: Colors.transparent,
-                            filled: true,
-                            errorText: _errorText1 ,
-                            // TODO: add errorHint
-                          ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return "Name can't be empty";
-                            } else {
-                              // Return null if the entered password is valid
-                              return null;
-                            }
-                          },
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      SizedBox(
-                        height: hp(4, context),
-                      ),
-                      SizedBox(
-                        width: wp(80, context),
-                        child: TextFormField(
-                          controller: mobileno_controller,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            // for below version 2 use this
-                            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                            // for version 2 and greater youcan also use this
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.phone_android),
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0)),
-                            fillColor: Colors.transparent,
-                            labelText: "Enter your number",
-                            hintText: "Enter your number",
-                            errorText: _errorText1,
-                          ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return "Number can't be empty";
-                            } else {
-                              return null;
-                            }
-                          },
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      SizedBox(
-                        height: hp(4, context),
-                      ),
-                      SizedBox(
-                        width: wp(80, context),
-                        child: TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          controller: add_role_Controller,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.person_pin_rounded,
-                              color: Colors.grey,
+                            Container(
+                              height: 52,
+                              margin: EdgeInsets.only(top: 8.0),
+                              padding: EdgeInsets.only(left: 14),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Expanded(
+                                    child: TextFormField(
+                                      autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                      autofocus: false,
+                                      cursorColor: Colors.grey[700],
+                                      controller: member_name_Controller,
+                                      style: subtitleStyle,
+                                      decoration: InputDecoration(
+                                          hintText: "Enter Name",
+                                          hintStyle: subtitleStyle,
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0)),
+                                          enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0))),
+                                      onChanged: (_) => setState(() {}),
+                                    )
+                                ),
+                              ]),
                             ),
-                            labelText: 'Add his Role/Designation',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0)),
-                            fillColor: Colors.transparent,
-                            filled: true,
-                            errorText: _errorText1,
-                            // TODO: add errorHint
-                          ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return "Role/Designation can't be empty";
-                            } else {
-                              return null;
-                            }
-                          },
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      SizedBox(
-                        height: hp(4, context),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (_formKey_add_members.currentState?.validate() == true) {
-                            await _addMembers();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MembersDetailsPage()),
-                            );
-                          } else {
-                            _formKey_add_members.currentState?.validate();
-                          }
-                        },
-                        style: ButtonStyle(
-                          textStyle: MaterialStateProperty.all(
-                            TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                          shape: MaterialStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            SizedBox(height: 15.0,),
+
+                            Text(
+                              "Mobile No.",
+                              style: titleStyle,
                             ),
-                          ),
-                          fixedSize:
-                          MaterialStateProperty.all(const Size(350, 40)),
-                        ),
-                        child: const Text("Add Members"),
-                      ),
-                    ],
+                            Container(
+                              height: 52,
+                              margin: EdgeInsets.only(top: 8.0),
+                              padding: EdgeInsets.only(left: 14),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Expanded(
+                                    child: TextFormField(
+                                      autofocus: false,
+                                      keyboardType: TextInputType.number,
+                                      cursorColor: Colors.grey[700],
+                                      controller: member_mobileno_controller,
+                                      inputFormatters: <TextInputFormatter>[
+                                        // for below version 2 use this
+                                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                                        // for version 2 and greater youcan also use this
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
+                                      style: subtitleStyle,
+                                      decoration: InputDecoration(
+                                          hintText: "Enter Mobile No.",
+                                          hintStyle: subtitleStyle,
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0)),
+                                          enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0))),
+                                      onChanged: (_) => setState(() {}),
+                                    )
+                                ),
+                              ]),
+                            ),
+                            SizedBox(height: 15.0,),
+
+                            Text(
+                              "Role",
+                              style: titleStyle,
+                            ),
+                            Container(
+                              height: 52,
+                              margin: EdgeInsets.only(top: 8.0),
+                              padding: EdgeInsets.only(left: 14),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(children: [
+                                Expanded(
+                                    child: TextFormField(
+                                      autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                      autofocus: false,
+                                      cursorColor: Colors.grey[700],
+                                      controller: member_role_Controller,
+                                      style: subtitleStyle,
+                                      decoration: InputDecoration(
+                                          hintText: "Enter Role",
+                                          hintStyle: subtitleStyle,
+                                          focusedBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0)),
+                                          enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: Colors.white, width: 0))),
+                                      onChanged: (_) => setState(() {}),
+                                    )
+                                ),
+                              ]),
+                            ),
+                            SizedBox(height: 15.0,),
+
+                            SizedBox(height: 15.0,),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (member_name_Controller.text.isEmpty || member_mobileno_controller.text.isEmpty || member_role_Controller.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      snackBar);
+                                }else{
+                                  await _addMembers();
+                                  setState(() async {
+                                    Navigator.pop(context);
+                                  });
+                                }
+                              },
+                              style: ButtonStyle(
+                                textStyle: MaterialStateProperty.all(
+                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
+                              ),
+                              child: const Text("ADD Members"),
+                            ),
+                          ]),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -200,6 +218,6 @@ class _AddMembersPageState extends State<AddMembersPage> {
   Future<void> _addMembers() async {
     // String data = json.encode(_selectedItems);
     await SQLHelper.createMembers(
-        add_member_Controller.text, mobileno_controller.text, add_role_Controller.text);
+        member_name_Controller.text, member_mobileno_controller.text, member_role_Controller.text);
   }
 }

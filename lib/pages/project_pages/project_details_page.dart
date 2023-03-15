@@ -243,11 +243,12 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                   Text("Tasks", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
                   Divider(height: 4.0,),
                   SizedBox(height: 10.0,),
-                  Expanded(
+                  Container(
                     child: ListView.builder(
+                      primary: false,
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
-                      physics: const ClampingScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       itemCount: _listTasks.length,
                       itemBuilder: (context, index) => Container(
                         margin: EdgeInsets.only(left: 20.0,right: 20.0),

@@ -239,6 +239,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                       autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
                                       autofocus: false,
+                                      readOnly: true,
                                       cursorColor: Colors.grey[700],
                                       controller: endDateController,
                                       style: subtitleStyle,
