@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
@@ -17,6 +17,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
   final _task_description = TextEditingController();
   List<String> _selectedItems = [];
   String people_data = '';
+  List<Map<String, dynamic>> _listMembers = [];
+  List<String> members= [];
 
   String _displayText(String begin, DateTime? date) {
     if (date != null) {
@@ -38,6 +40,14 @@ class _AddTaskPageState extends State<AddTaskPage> {
     );
   }
 
+  void loadMembers() async {
+    final data = await SQLHelper.getMembers();
+
+    setState(() {
+      _listMembers = data;
+      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+    });
+  }
 
 
   String? endDateValidator(value) {
@@ -71,21 +81,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Akshay Patel',
-      'Arti Chauhan',
-      'Harsh Jani',
-      'Darshit Shah',
-      'Apurv Patel',
-      'Yassar Qureshi',
-      'Aditya Soni',
-      'Ram Ghumaliya'
-    ];
+
 
     final List<String>? results = await showDialog(
       context: this.context,
       builder: (BuildContext context) {
-        return MultiSelect(items: items);
+        return MultiSelect(items: members);
       },
     );
 
@@ -103,6 +104,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   @override
   void initState() {
     super.initState();
+    loadMembers();
     _task_title.text = "";
     _task_description.text = "";
     endDateController.text = "";
@@ -114,6 +116,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
         appBar: AppBar(
           title: Text('Add Tasks'),
           centerTitle: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(15),
+              bottomLeft: Radius.circular(15),
+            ),
+          ),
+          elevation: 0.0,
         ),
         backgroundColor: Colors.white,
         body: GestureDetector(

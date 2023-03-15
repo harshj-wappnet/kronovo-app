@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kronovo_app/pages/sub_task_pages/sub_task_details_page.dart';
 import 'package:kronovo_app/pages/sub_task_pages/add_subtask_page.dart';
-import '../../helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
+import '../../utils/theme.dart';
 import '../sub_task_pages/update_subtask_page.dart';
 
 class TaskDetailsPage extends StatefulWidget {
@@ -25,7 +28,14 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   List<String> _selectedItems = [];
   double progress = 0.0;
 
-
+  final List<Color> colors = [
+    Colors.green.shade400,
+    Colors.green.shade500,
+    Colors.green.shade600,
+    Colors.green.shade700,
+    Colors.green.shade800,
+  ];
+  Random random = new Random();
 
   void _showTask(int? id) async {
     if (id != null) {
@@ -66,6 +76,13 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
       appBar: AppBar(
         title: Text('Task Details'),
         centerTitle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
         actions: [
           IconButton(
               onPressed: () {
@@ -91,13 +108,13 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                 width: wp(100, context),
                 margin: EdgeInsets.only(left: 20.0,right: 20.0),
                 decoration: BoxDecoration(
-                  color: Color(0xffbcf5bc),
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green,
+                      color: Colors.grey,
                       offset: Offset(4,8),
-                      blurRadius: 12,
+                      blurRadius: 10,
                     )
                   ],
                 ),
@@ -108,28 +125,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       SizedBox(height: 10.0,),
                       Row(
                         children: [
-                          Icon(Icons.text_format, color: Colors.white,size: 35,),
-                          Text(
-                            'Title',
-                            style: TextStyle(
-                                fontSize: 30,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.0,),
-                      Row(
-                        children: [
                           Container(
                             width: wp(70, context),
                             padding: EdgeInsets.all(10),
                             child: Text(
-                              '$task_title',
-                              style: TextStyle(fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                '$task_title',
+                                style: headingStyle
                             ),
                           ),
                         ],
@@ -138,41 +139,12 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
                       Row(
                         children: [
-                          Icon(Icons.text_snippet, color: Colors.white,size: 35,),
-                          Text(
-                            'Description',
-                            style: TextStyle(
-                                fontSize: 30,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.0,),
-                      Row(
-                        children: [
                           Container(
                             width: wp(70, context),
                             padding: EdgeInsets.all(10),
                             child: Text(
-                              '$task_description',
-                              style: TextStyle(fontSize: 22,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.0,),
-                      Row(
-                        children: [
-                          Icon(Icons.person, color: Colors.white,size: 35,),
-                          Text(
-                            'Members',
-                            style: TextStyle(
-                                fontSize: 30,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold
+                                '$task_description',
+                                style: subHeadingStyle
                             ),
                           ),
                         ],
@@ -188,12 +160,13 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                                   .map((e) => Container(
                                 margin: EdgeInsets.only(left: 5.0,right: 5.0),
                                 child: Chip(
-                                  padding: EdgeInsets.all(6.0),
-                                  backgroundColor: Colors.white,
+                                  padding: EdgeInsets.all(12.0),
+                                  backgroundColor: Colors.green.shade100,
+                                  elevation: 5.0,
                                   label: Text(
                                     "${e.split(",").join()}",
                                     style: TextStyle(
-                                      fontSize: 16.0,
+                                      fontSize: 18.0,
                                     ),
                                   ),
                                 ),
@@ -207,31 +180,17 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       SizedBox(height: 10.0,),
                       Row(
                         children: [
-                          Icon(Icons.calendar_month, color: Colors.white,size: 35,),
-                          Text(
-                            'Deadline',
-                            style: TextStyle(
-                                fontSize: 30,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.0,),
-                      Row(
-                        children: [
                           Container(
                             width: wp(70, context),
                             padding: EdgeInsets.all(10),
                             child: Text(
-                              '$task_enddate',
-                              style: TextStyle(fontSize: 22,
-                                  color: Colors.white),
+                                'Deadline : $task_enddate',
+                                style: subHeadingStyle
                             ),
                           ),
                         ],
                       ),
+                      SizedBox(height: 15.0,)
                     ],
                   ),
                 ),
@@ -293,31 +252,66 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => SubTaskDetailsPage(id: _listSubTasks[index]['column_subtasks_id']),));
                       },
                       child: Card(
-                        color: _listSubTasks[index]['is_enable_subtasks'] == 1 ? Colors.grey : Colors.white,
-                        elevation: 5.0,
-                        shadowColor: _listSubTasks[index]['is_enable_subtasks'] == 1 ? Colors.grey : Colors.green,
+                        color: _listSubTasks[index]['is_enable_subtasks'] == 1 ? Colors.grey : colors[random.nextInt(4)],
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Container(
-                          padding: EdgeInsets.all(4.0),
-                          height: hp(16, context),
+                        elevation: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(height: 4.0,),
                               Text(
                                 '${_listSubTasks[index]['subtasks_name']}',
                                 style: TextStyle(
-                                    fontSize: 20.0, fontWeight: FontWeight.bold),
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              SizedBox(height: 8.0,),
+                              SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.task_alt_outlined),
                                   Text(
-                                      '  ${_listSubTasks[index]['subtasks_end_date']}'),
+                                    'Deadline :  ${_listSubTasks[index]['subtasks_end_date']}',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                              Stack(
+                                children: [
+                                  SizedBox(
+                                    height: 20,
+                                    child: LinearProgressIndicator(
+                                      value: _listSubTasks[index]['subtasks_progress'] /
+                                          _listSubTasks.length,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                      backgroundColor: Colors.green.shade100,
+                                    ),
+                                  ),
+                                  Positioned.fill(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        child: Text(
+                                          '${(_listSubTasks[index]['subtasks_progress'] /
+                                              _listSubTasks.length * 100).toInt()}%',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                               SizedBox(height: 15.0,),
@@ -326,15 +320,16 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Text(
-                                    '${convertToAgo(DateTime.parse(_listSubTasks[index]['createdAt']))}',
-                                    style: TextStyle(fontSize: 12.0),
+                                    '${convertToAgo(DateTime.parse(
+                                        _listSubTasks[index]['createdAt']))}',
+                                    style: TextStyle(fontSize: 12.0, color: Colors.white),
                                   )
                                 ],
                               )
                             ],
                           ),
                         ),
-                      ),
+                      )
                     ),
                   ),
                 ),

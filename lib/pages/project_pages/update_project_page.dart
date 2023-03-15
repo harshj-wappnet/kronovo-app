@@ -1,6 +1,6 @@
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
-import 'package:kronovo_app/helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 
@@ -30,7 +30,17 @@ class UpdateProjectState extends State<UpdateProject> {
   String people_data = '';
   List<Map<String, dynamic>> _listProjects = [];
   List<String> _peoplesList = [];
+  List<Map<String, dynamic>> _listMembers = [];
+  List<String> members= [];
 
+  void loadMembers() async {
+    final data = await SQLHelper.getMembers();
+
+    setState(() {
+      _listMembers = data;
+      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+    });
+  }
 
   void getProjectData(int id) async {
     final data = await SQLHelper.getProjects();
@@ -131,6 +141,7 @@ class UpdateProjectState extends State<UpdateProject> {
   void initState() {
     super.initState();
     getProjectData(widget.id);
+    loadMembers();
     cntMulti = MultiValueDropDownController();
   }
 
@@ -146,21 +157,11 @@ class UpdateProjectState extends State<UpdateProject> {
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Akshay Patel',
-      'Arti Chauhan',
-      'Harsh Jani',
-      'Darshit Shah',
-      'Apurv Patel',
-      'Yassar Qureshi',
-      'Aditya Soni',
-      'Ram Ghumaliya'
-    ];
 
     final List<String>? results = await showDialog(
       context: this.context,
       builder: (BuildContext context) {
-        return MultiSelect(items: items);
+        return MultiSelect(items: members);
       },
     );
 
@@ -180,7 +181,15 @@ class UpdateProjectState extends State<UpdateProject> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Update Project'),
+        centerTitle: true,
         backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
       ),
       backgroundColor: Colors.white,
       body: GestureDetector(

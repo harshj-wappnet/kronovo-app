@@ -1,6 +1,6 @@
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
-import 'package:kronovo_app/helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 
@@ -24,11 +24,25 @@ class _CreateProjectState extends State<CreateProject> {
   late TextEditingController project_description_Controller;
   List<String> _selectedItems = [];
   String people_data = '';
+  List<Map<String, dynamic>> _listMembers = [];
+  List<String> members= [];
 
 
-  String _displayText(String begin, DateTime? date) {
+
+  void loadMembers() async {
+    final data = await SQLHelper.getMembers();
+
+    setState(() {
+      _listMembers = data;
+      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+    });
+  }
+
+
+
+  String _displayText(DateTime? date) {
     if (date != null) {
-      return '$begin ${date.toString().split(' ')[0]}';
+      return '${date.toString().split(' ')[0]}';
     } else {
       return 'Choose The Date';
     }
@@ -40,7 +54,7 @@ class _CreateProjectState extends State<CreateProject> {
 
   Future<DateTime?> pickDate() async {
     return await showDatePicker(
-      context: this.context,
+      context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1999),
       lastDate: DateTime(2999),
@@ -87,12 +101,13 @@ class _CreateProjectState extends State<CreateProject> {
 
   @override
   void initState() {
+    super.initState();
+    loadMembers();
     cntMulti = MultiValueDropDownController();
     startDateController.text = "";
     endDateController.text = "";
     project_title_Controller = TextEditingController();
     project_description_Controller = TextEditingController();
-    super.initState();
   }
 
   @override
@@ -107,21 +122,11 @@ class _CreateProjectState extends State<CreateProject> {
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Akshay Patel',
-      'Arti Chauhan',
-      'Harsh Jani',
-      'Darshit Shah',
-      'Apurv Patel',
-      'Yassar Qureshi',
-      'Aditya Soni',
-      'Ram Ghumaliya'
-    ];
 
     final List<String>? results = await showDialog(
       context: this.context,
       builder: (BuildContext context) {
-        return MultiSelect(items: items);
+        return MultiSelect(items: members);
       },
     );
 
@@ -142,6 +147,13 @@ class _CreateProjectState extends State<CreateProject> {
       appBar: AppBar(
         title: Text('Create New Project'),
         backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
       ),
       backgroundColor: Colors.white,
       body: GestureDetector(
@@ -244,7 +256,7 @@ class _CreateProjectState extends State<CreateProject> {
                                 onTap: () async {
                                   startDate = await pickDate();
                                   startDateController.text =
-                                      _displayText("",startDate);
+                                      _displayText(startDate);
                                   setState(() {});
                                 },
                                 readOnly: true,
@@ -275,7 +287,7 @@ class _CreateProjectState extends State<CreateProject> {
                                 onTap: () async {
                                   endDate = await pickDate();
                                   endDateController.text =
-                                      _displayText("", endDate);
+                                      _displayText(endDate);
                                   setState(() {});
                                 },
                                 validator: endDateValidator,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
@@ -19,6 +19,8 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   final update_task_description = TextEditingController();
   String people_data = '';
   List<String> _selectedItems = [];
+  List<Map<String, dynamic>> _listMembers = [];
+  List<String> members= [];
 
   List<Map<String, dynamic>> _listTasks = [];
 
@@ -37,6 +39,16 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
       _selectedItems = people_data.split(",");
     });
   }
+
+  void loadMembers() async {
+    final data = await SQLHelper.getMembers();
+
+    setState(() {
+      _listMembers = data;
+      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+    });
+  }
+
 
   String _displayText(String begin, DateTime? date) {
     if (date != null) {
@@ -91,21 +103,11 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Akshay Patel',
-      'Arti Chauhan',
-      'Harsh Jani',
-      'Darshit Shah',
-      'Apurv Patel',
-      'Yassar Qureshi',
-      'Aditya Soni',
-      'Ram Ghumaliya'
-    ];
 
     final List<String>? results = await showDialog(
       context: this.context,
       builder: (BuildContext context) {
-        return MultiSelect(items: items);
+        return MultiSelect(items: members);
       },
     );
 
@@ -125,6 +127,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   @override
   void initState() {
     super.initState();
+    loadMembers();
     loadTasks(widget.id,widget.project_id);
   }
 
@@ -135,6 +138,13 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
       appBar: AppBar(
         title: Text('Update Task'),
         centerTitle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
       ),
         backgroundColor: Colors.white,
         body: GestureDetector(

@@ -1,10 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kronovo_app/pages/task_pages/task_details_page.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 import 'package:kronovo_app/pages/task_pages/add_task_page.dart';
 import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
-import '../../helpers/sql_helper.dart';
+import 'package:kronovo_app/utils/theme.dart';
+import '../../databases/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
@@ -31,6 +34,14 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   String project_peoples = "";
   int isenable = 0;
 
+  final List<Color> colors = [
+    Colors.green.shade400,
+    Colors.green.shade500,
+    Colors.green.shade600,
+    Colors.green.shade700,
+    Colors.green.shade800,
+  ];
+  Random random = new Random();
 
   void _showProject(int? id) async {
     if (id != null) {
@@ -112,6 +123,13 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
             title: Text("Project Details"),
             centerTitle: true,
             backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(15),
+                bottomLeft: Radius.circular(15),
+              ),
+            ),
+            elevation: 0.0,
             actions: [
               IconButton(
                   onPressed: () {
@@ -132,13 +150,13 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                     width: wp(100, context),
                     margin: EdgeInsets.only(left: 20.0,right: 20.0),
                     decoration: BoxDecoration(
-                      color: Color(0xffbcf5bc),
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
-                            color: Colors.green,
-                            offset: Offset(4,8),
-                          blurRadius: 12,
+                          color: Colors.grey,
+                          offset: Offset(4,8),
+                          blurRadius: 10,
                         )
                       ],
                     ),
@@ -149,28 +167,12 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           SizedBox(height: 10.0,),
                           Row(
                             children: [
-                              Icon(Icons.text_format, color: Colors.white,size: 35,),
-                              Text(
-                                'Title',
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
                               Container(
                                 width: wp(70, context),
                                 padding: EdgeInsets.all(10),
                                 child: Text(
                                   '$project_title',
-                                  style: TextStyle(fontSize: 26,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
+                                  style: headingStyle
                                 ),
                               ),
                             ],
@@ -179,41 +181,12 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
                           Row(
                             children: [
-                              Icon(Icons.text_snippet, color: Colors.white,size: 35,),
-                              Text(
-                                'Description',
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
                               Container(
                                 width: wp(70, context),
                                 padding: EdgeInsets.all(10),
                                 child: Text(
                                   '$project_description',
-                                  style: TextStyle(fontSize: 22,
-                                  color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
-                              Icon(Icons.person, color: Colors.white,size: 35,),
-                              Text(
-                                'Members',
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold
+                                  style: subHeadingStyle
                                 ),
                               ),
                             ],
@@ -229,12 +202,13 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                       .map((e) => Container(
                                     margin: EdgeInsets.only(left: 5.0,right: 5.0),
                                     child: Chip(
-                                      padding: EdgeInsets.all(6.0),
-                                      backgroundColor: Colors.white,
+                                      padding: EdgeInsets.all(12.0),
+                                      backgroundColor: Colors.green.shade100,
+                                      elevation: 5.0,
                                       label: Text(
                                         "${e.split(",").join()}",
                                         style: TextStyle(
-                                          fontSize: 16.0,
+                                          fontSize: 18.0,
                                         ),
                                       ),
                                     ),
@@ -248,27 +222,12 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           SizedBox(height: 10.0,),
                           Row(
                             children: [
-                              Icon(Icons.calendar_month, color: Colors.white,size: 35,),
-                              Text(
-                                'Deadline',
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
                               Container(
                                 width: wp(70, context),
                                 padding: EdgeInsets.all(10),
                                 child: Text(
-                                  '$project_enddate',
-                                  style: TextStyle(fontSize: 22,
-                                      color: Colors.white),
+                                  'Deadline : $project_enddate',
+                                  style: subHeadingStyle
                                 ),
                               ),
                             ],
@@ -340,44 +299,67 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                               ['column_task_id'])));
                             },
                             child: Card(
-                              color: _listTasks[index]['is_enable_tasks'] == 1 ? Colors.grey : Colors.white,
-                              elevation: 5.0,
-                              shadowColor: _listTasks[index]['is_enable_tasks'] == 1 ? Colors.grey : Colors.green,
+                              color: _listTasks[index]['is_enable_tasks'] == 1 ? Colors.grey : colors[random.nextInt(4)],
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Container(
-                                padding: EdgeInsets.all(4.0),
-                                height: hp(16, context),
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(height: 4.0,),
                                     Text(
                                       '${_listTasks[index]['tasks_name']}',
                                       style: TextStyle(
-                                          fontSize: 20.0,
-                                          fontWeight: FontWeight.bold),
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                    SizedBox(height: 8.0,),
+                                    SizedBox(height: 16),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.task_alt_outlined),
                                         Text(
-                                            '  ${_listTasks[index]['tasks_end_date']}'),
+                                          'Deadline :  ${_listTasks[index]['tasks_end_date']}',
+                                          style: TextStyle(
+                                            color: Colors.white.withOpacity(0.8),
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                    SizedBox(height: 8.0,),
-                                    Container(
-                                      margin:
-                                          EdgeInsets.only(left: 20.0, right: 20.0),
-                                      child: LinearProgressIndicator(
-                                        value: _listTasks[index]['tasks_progress'] / _listTasks.length,
-                                        valueColor:
-                                            AlwaysStoppedAnimation(Colors.green),
-                                        minHeight: 10.0,
-                                      ),
+                                    SizedBox(height: 16),
+                                    Stack(
+                                      children: [
+                                        SizedBox(
+                                          height: 20,
+                                          child: LinearProgressIndicator(
+                                            value: _listTasks[index]['tasks_progress'] /
+                                                _listTasks.length,
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                            backgroundColor: Colors.green.shade100,
+                                          ),
+                                        ),
+                                        Positioned.fill(
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(right: 8),
+                                              child: Text(
+                                                '${(_listTasks[index]['tasks_progress'] /
+                                                    _listTasks.length * 100).toInt()}%',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     SizedBox(height: 15.0,),
                                     Row(
@@ -385,15 +367,16 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
-                                          '${convertToAgo(DateTime.parse(_listTasks[index]['createdAt']))}',
-                                          style: TextStyle(fontSize: 12.0),
+                                          '${convertToAgo(DateTime.parse(
+                                              _listTasks[index]['createdAt']))}',
+                                          style: TextStyle(fontSize: 12.0, color: Colors.white),
                                         )
                                       ],
                                     )
                                   ],
                                 ),
                               ),
-                            ),
+                            )
                           ),
                         ),
                       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../../helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
+import '../../utils/theme.dart';
 
 class SubTaskDetailsPage extends StatefulWidget {
   const SubTaskDetailsPage({Key? key, required this.id}) : super(key: key);
@@ -49,6 +49,13 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
       appBar: AppBar(
         title: Text('Sub Task Details'),
         centerTitle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -59,13 +66,13 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
               width: wp(100, context),
               margin: EdgeInsets.only(left: 20.0,right: 20.0),
               decoration: BoxDecoration(
-                color: Color(0xffbcf5bc),
-                borderRadius: BorderRadius.all(Radius.circular(20)),
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(15)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.green,
+                    color: Colors.grey,
                     offset: Offset(4,8),
-                    blurRadius: 12,
+                    blurRadius: 10,
                   )
                 ],
               ),
@@ -76,28 +83,12 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                     SizedBox(height: 10.0,),
                     Row(
                       children: [
-                        Icon(Icons.text_format, color: Colors.white,size: 35,),
-                        Text(
-                          'Title',
-                          style: TextStyle(
-                              fontSize: 30,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.0,),
-                    Row(
-                      children: [
                         Container(
                           width: wp(70, context),
                           padding: EdgeInsets.all(10),
                           child: Text(
-                            '$sub_task_title',
-                            style: TextStyle(fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              '$sub_task_title',
+                              style: headingStyle
                           ),
                         ),
                       ],
@@ -106,41 +97,12 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                     //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
                     Row(
                       children: [
-                        Icon(Icons.text_snippet, color: Colors.white,size: 35,),
-                        Text(
-                          'Description',
-                          style: TextStyle(
-                              fontSize: 30,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.0,),
-                    Row(
-                      children: [
                         Container(
                           width: wp(70, context),
                           padding: EdgeInsets.all(10),
                           child: Text(
-                            '$sub_task_description',
-                            style: TextStyle(fontSize: 22,
-                                color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.0,),
-                    Row(
-                      children: [
-                        Icon(Icons.person, color: Colors.white,size: 35,),
-                        Text(
-                          'Members',
-                          style: TextStyle(
-                              fontSize: 30,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold
+                              '$sub_task_description',
+                              style: subHeadingStyle
                           ),
                         ),
                       ],
@@ -156,12 +118,13 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                                 .map((e) => Container(
                               margin: EdgeInsets.only(left: 5.0,right: 5.0),
                               child: Chip(
-                                padding: EdgeInsets.all(6.0),
-                                backgroundColor: Colors.white,
+                                padding: EdgeInsets.all(12.0),
+                                backgroundColor: Colors.green.shade100,
+                                elevation: 5.0,
                                 label: Text(
                                   "${e.split(",").join()}",
                                   style: TextStyle(
-                                    fontSize: 16.0,
+                                    fontSize: 18.0,
                                   ),
                                 ),
                               ),
@@ -175,31 +138,17 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                     SizedBox(height: 10.0,),
                     Row(
                       children: [
-                        Icon(Icons.calendar_month, color: Colors.white,size: 35,),
-                        Text(
-                          'Deadline',
-                          style: TextStyle(
-                              fontSize: 30,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.0,),
-                    Row(
-                      children: [
                         Container(
                           width: wp(70, context),
                           padding: EdgeInsets.all(10),
                           child: Text(
-                            '$sub_task_enddate',
-                            style: TextStyle(fontSize: 22,
-                                color: Colors.white),
+                              'Deadline : $sub_task_enddate',
+                              style: subHeadingStyle
                           ),
                         ),
                       ],
                     ),
+                    SizedBox(height: 15.0,)
                   ],
                 ),
               ),

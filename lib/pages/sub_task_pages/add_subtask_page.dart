@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
@@ -16,8 +16,20 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   final sub_task_description = TextEditingController();
   List<String> _selectedItems = [];
   String people_data = '';
+  List<Map<String, dynamic>> _listMembers = [];
+  List<String> members= [];
 
   final _formKey_sub_task = GlobalKey<FormState>();
+
+  void loadMembers() async {
+    final data = await SQLHelper.getMembers();
+
+    setState(() {
+      _listMembers = data;
+      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+    });
+  }
+
 
   String _displayText(String begin, DateTime? date) {
     if (date != null) {
@@ -69,21 +81,11 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Akshay Patel',
-      'Arti Chauhan',
-      'Harsh Jani',
-      'Darshit Shah',
-      'Apurv Patel',
-      'Yassar Qureshi',
-      'Aditya Soni',
-      'Ram Ghumaliya'
-    ];
 
     final List<String>? results = await showDialog(
       context: this.context,
       builder: (BuildContext context) {
-        return MultiSelect(items: items);
+        return MultiSelect(items: members);
       },
     );
 
@@ -101,6 +103,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   @override
   void initState() {
     super.initState();
+    loadMembers();
     sub_task_title.text = "";
     sub_task_description.text = "";
     endDateController.text = "";
@@ -112,6 +115,13 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
         appBar: AppBar(
           title: Text('Add Sub Task'),
           centerTitle: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(15),
+              bottomLeft: Radius.circular(15),
+            ),
+          ),
+          elevation: 0.0,
         ),
         backgroundColor: Colors.white,
         body: GestureDetector(

@@ -13,6 +13,12 @@ class SQLHelper {
   static final project_table = 'tb_project';
   static final task_table = 'tb_task';
   static final sub_task_table = 'tb_sub_task';
+  static final members_table = 'tb_members';
+
+  static final members_columnId = 'members_id';
+  static final members_name = 'members_name';
+  static final members_phone = 'members_phone';
+  static final members_role = 'members_role';
 
   static final project_columnId = 'project_id';
   static final project_name = 'project_name';
@@ -54,6 +60,8 @@ class SQLHelper {
           print('task table created');
           await createTableSubTask(database);
           print('sub task table created');
+          await createTableMembers(database);
+          print('members table created');
     },
     );
   }
@@ -99,6 +107,17 @@ class SQLHelper {
     $subtasks_isEnable INTEGER,
     $subtasks_progress REAL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    ''');
+  }
+
+  static Future<void> createTableMembers(sql.Database database) async {
+    await database.execute('''
+    CREATE TABLE $members_table(
+    $members_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    $members_name TEXT,
+    $members_phone TEXT,
+    $members_role TEXT
     );
     ''');
   }
@@ -181,6 +200,20 @@ class SQLHelper {
     return id;
   }
 
+  static Future<int> createMembers(
+      String m_name, String m_phone, String m_role) async {
+    final db = await SQLHelper.db();
+
+    final data = {
+      'members_name': m_name,
+      'members_phone': m_phone,
+      'members_role': m_role,
+    };
+    final id = await db.insert(members_table, data);
+    print('members inserted');
+    return id;
+  }
+
   static Future<List<Map<String, dynamic>>> getProjects() async {
     final db = await SQLHelper.db();
     return db.query(project_table, orderBy: 'project_id');
@@ -216,6 +249,17 @@ class SQLHelper {
     final db = await SQLHelper.db();
     return db.query(
         sub_task_table, where: 'column_subtasks_id = ?', whereArgs: [id]);
+  }
+
+  static Future<List<Map<String, dynamic>>> getMembers() async {
+    final db = await SQLHelper.db();
+    return db.query(members_table, orderBy: 'members_id');
+  }
+
+  static Future<List<Map<String, dynamic>>> getMember(int id) async {
+    final db = await SQLHelper.db();
+    return db.query(members_table,
+        where: 'members_id = ?', whereArgs: [id], limit: 1);
   }
 
   static Future<int> updateProject(
@@ -359,4 +403,27 @@ class SQLHelper {
         sub_task_table, data, where: 'column_subtasks_id = ?', whereArgs: [id]);
     return result;
   }
+
+  static Future<int> updateMembers(
+      int id, String m_name, String m_phone, String m_role) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'members_name': m_name,
+      'members_phone': m_phone,
+      'members_role': m_role,
+    };
+    final result = await db
+        .update(members_table, data, where: 'members_id = ?', whereArgs: [id]);
+    return result;
+  }
+
+  static Future<void> deleteMembers(int id) async {
+    final db = await SQLHelper.db();
+    try {
+      await db.delete(members_table, where: 'members_id = ?', whereArgs: [id]);
+    } catch (err) {
+      debugPrint('$err');
+    }
+  }
+
 }

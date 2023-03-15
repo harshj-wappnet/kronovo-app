@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../helpers/sql_helper.dart';
+import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/assignmembers_dialog.dart';
 
@@ -21,6 +21,8 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
   String people_data = '';
 
   final _formKey_update_subtask = GlobalKey<FormState>();
+  List<Map<String, dynamic>> _listMembers = [];
+  List<String> members= [];
 
   void showSubTasks(int id, int task_id) async {
     final data = await SQLHelper.getAllSubTasksByTask(task_id);
@@ -36,6 +38,15 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
           .replaceAll('[', '')
           .replaceAll(']', '');
       _selectedItems = people_data.split(",");
+    });
+  }
+
+  void loadMembers() async {
+    final data = await SQLHelper.getMembers();
+
+    setState(() {
+      _listMembers = data;
+      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
     });
   }
 
@@ -91,21 +102,10 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Akshay Patel',
-      'Arti Chauhan',
-      'Harsh Jani',
-      'Darshit Shah',
-      'Apurv Patel',
-      'Yassar Qureshi',
-      'Aditya Soni',
-      'Ram Ghumaliya'
-    ];
-
     final List<String>? results = await showDialog(
       context: this.context,
       builder: (BuildContext context) {
-        return MultiSelect(items: items);
+        return MultiSelect(items: members);
       },
     );
 
@@ -123,6 +123,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
   @override
   void initState() {
     super.initState();
+    loadMembers();
     showSubTasks(widget.id,widget.task_id);
   }
 
@@ -132,6 +133,13 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
       appBar: AppBar(
         title: Text('Update Sub Task'),
         centerTitle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
       ),
         backgroundColor: Colors.white,
         body: GestureDetector(
