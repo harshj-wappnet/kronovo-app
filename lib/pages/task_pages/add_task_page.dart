@@ -41,12 +41,15 @@ class _AddTaskPageState extends State<AddTaskPage> {
     );
   }
 
-  void loadMembers() async {
-    final data = await SQLHelper.getMembers();
+  void loadMembers(int id) async {
+    final data = await SQLHelper.getProject(id);
 
     setState(() {
       _listMembers = data;
-      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+      final project_data =
+      _listMembers.firstWhere((element) => element['project_id'] == id);
+      people_data = project_data['project_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+      members = people_data.split(",");
     });
   }
 
@@ -89,7 +92,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   @override
   void initState() {
     super.initState();
-    loadMembers();
+    loadMembers(widget.id);
     _task_title.text = "";
     _task_description.text = "";
     endDateController.text = "";
@@ -317,6 +320,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
     await SQLHelper.createTask(id, _task_title.text, _task_description.text,
-        endDateController.text,_selectedItems.toString(),0,0.0,current_date);
+        endDateController.text,_selectedItems.toString(),0,0.0,0,current_date);
   }
 }

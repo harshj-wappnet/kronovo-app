@@ -9,11 +9,9 @@ import 'package:kronovo_app/pages/navigation_drawer/drawer_header.dart';
 import 'package:kronovo_app/pages/project_pages/create_project.dart';
 import 'package:kronovo_app/pages/project_pages/update_project_page.dart';
 import 'package:kronovo_app/pages/project_pages/project_details_page.dart';
-import 'package:kronovo_app/utils/responsive.dart';
 import 'package:kronovo_app/utils/theme.dart';
 import '../databases/sql_helper.dart';
 import 'members_page/add_members_page.dart';
-import 'navigation_drawer/main_drawer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -28,13 +26,10 @@ class _HomePageState extends State<HomePage> {
   int? id;
   List<String> _peoplesList = [];
   late final item;
-  int? project_id;
+  int project_id = 0;
   List<Map<String, dynamic>> _listTasks = [];
   double project_progress = 0.0;
-  int? task_id;
   DateTime _selectedDate = DateTime.now();
-
-
 
   void getAllProjects() async {
     final data = await SQLHelper.getProjects();
@@ -47,8 +42,18 @@ class _HomePageState extends State<HomePage> {
         project_id = _listProjects[index]['project_id'];
       }
       );
+      getTotalTask(project_id);
     });
   }
+
+  void getTotalTask(int id) async {
+    final task_data = await SQLHelper.getAllTasksByProject(id);
+    setState(() {
+      _listTasks = task_data;
+    });
+  }
+
+
 
   Future<void> _navigateforResult(BuildContext context) async {
     final result = await Navigator.push(
@@ -57,6 +62,7 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
     initState();
   }
+
   final List<Color> colors = [
     Colors.green.shade400,
     Colors.green.shade500,
@@ -67,13 +73,16 @@ class _HomePageState extends State<HomePage> {
   Random random = new Random();
 
 
-
+@override
+  void dispose() {
+    super.dispose();
+  }
   @override
   void initState() {
     super.initState();
     getAllProjects();
-    //loadTasks(task_id!);
     print('number of items ${_listProjects.length}');
+
   }
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -81,6 +90,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      backgroundColor: Colors.white,
       key: scaffoldKey,
       appBar: AppBar(
         title: Text('Kronovo'),
@@ -143,7 +153,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          initState();
+          getAllProjects();
         },
 
         child:  Column(
@@ -238,10 +248,8 @@ class _HomePageState extends State<HomePage> {
                                       context,
                                       MaterialPageRoute(builder: (context) =>
                                           UpdateProject(
-                                            id: _listProjects[index]['project_id'],
-                                            onSubmit: (String value) {
-                                              null;
-                                            },)));
+                                            id: _listProjects[index]['project_id']
+                                            )));
                                 });
                               },
                               backgroundColor: Colors.blueAccent,
@@ -272,13 +280,33 @@ class _HomePageState extends State<HomePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    '${_listProjects[index]['project_name']}',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${_listProjects[index]['project_name']}',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          Icon(Icons.task_alt_rounded, color: Colors.white,),
+                                          SizedBox(width: 4.0,),
+                                          Text(
+                                            '${_listProjects[index]["project_milestone"]}/${_listTasks.length}',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
                                   SizedBox(height: 16),
                                   Row(

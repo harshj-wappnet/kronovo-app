@@ -27,6 +27,7 @@ class SQLHelper {
   static final project_endDate = 'project_end_date';
   static final project_assigned_peoples = 'project_assigned_peoples';
   static final project_progress = "project_progress";
+  static final project_milestone = "project_milestone";
 
   //static final project_people = 'project_people';
 
@@ -38,6 +39,7 @@ class SQLHelper {
   static final tasks_assigned_peoples = 'tasks_assigned_peoples';
   static final tasks_isEnable = "is_enable_tasks";
   static final tasks_progress = "tasks_progress";
+  static final tasks_milestone = "tasks_milestone";
 
   static final subtasks_columnId = 'column_subtasks_id';
   static final subtasks_name = 'subtasks_name';
@@ -76,6 +78,7 @@ class SQLHelper {
     $project_endDate TEXT,
     $project_assigned_peoples TEXT,
     $project_progress REAL,
+    $project_milestone INTEGER,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
@@ -91,6 +94,7 @@ class SQLHelper {
     $tasks_assigned_peoples TEXT,
     $tasks_isEnable INTEGER,
     $tasks_progress REAL,
+    $tasks_milestone INTEGER,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
@@ -129,6 +133,7 @@ class SQLHelper {
       String e_date,
       String a_peoples,
       double project_progress,
+      int project_milestone,
       String current_date) async {
     final db = await SQLHelper.db();
 
@@ -139,6 +144,7 @@ class SQLHelper {
       'project_end_date': e_date,
       'project_assigned_peoples': a_peoples,
       'project_progress': project_progress,
+      'project_milestone': project_milestone,
       'createdAt': current_date,
     };
     final id = await db.insert(project_table, data);
@@ -154,6 +160,7 @@ class SQLHelper {
       String assign_peoples,
       int isEnable,
       double task_progress,
+      int task_milestone,
       String current_date
      ) async {
     final db = await SQLHelper.db();
@@ -166,6 +173,7 @@ class SQLHelper {
       'tasks_assigned_peoples' : assign_peoples,
       'is_enable_tasks' : isEnable,
       'tasks_progress' : task_progress,
+      'tasks_milestone' : task_milestone,
       'createdAt': current_date,
     };
     final id = await db.insert(task_table, data);
@@ -354,11 +362,13 @@ class SQLHelper {
 
   static Future<int> updateProgressProject(
       int id,
-      double task_progress
+      double task_progress,
+      int milestone
       ) async {
     final db = await SQLHelper.db();
     final data = {
       'project_progress' : task_progress,
+      'project_milestone' : milestone,
     };
     final result = await db.update(
         project_table, data, where: 'project_id = ?', whereArgs: [id]);
@@ -381,10 +391,12 @@ class SQLHelper {
   static Future<int> updateProgressTask(
       int id,
       double task_progress,
+      int milestone
       ) async {
     final db = await SQLHelper.db();
     final data = {
       'tasks_progress' : task_progress,
+      'tasks_milestone' : milestone,
     };
     final result = await db.update(
         task_table, data, where: 'column_task_id = ?', whereArgs: [id]);

@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kronovo_app/pages/sub_task_pages/sub_task_details_page.dart';
 import 'package:kronovo_app/pages/sub_task_pages/add_subtask_page.dart';
+import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../utils/theme.dart';
 import '../sub_task_pages/update_subtask_page.dart';
 
 class TaskDetailsPage extends StatefulWidget {
-  const TaskDetailsPage({Key? key, required this.id}) : super(key: key);
+  const TaskDetailsPage({Key? key, required this.id, required this.project_id}) : super(key: key);
   final id;
+  final project_id;
 
   @override
   State<TaskDetailsPage> createState() => _TaskDetailsPageState();
@@ -27,6 +29,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   String task_peoples = '';
   List<String> _selectedItems = [];
   double progress = 0.0;
+  int counter = 0;
 
   final List<Color> colors = [
     Colors.green.shade400,
@@ -37,7 +40,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   ];
   Random random = new Random();
 
-  void _showTask(int? id) async {
+  void _showTask(int id) async {
     if (id != null) {
       final data = await SQLHelper.getTask(id);
       setState(() {
@@ -63,8 +66,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _showTask(widget.id);
       showSubTasks(widget.id);
     });
@@ -73,6 +75,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('Task Details'),
         centerTitle: true,
@@ -102,35 +105,23 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Column(
-            children: [
-              SizedBox(height: 25.0,),
+            children: <Widget>[
               Container(
                 width: wp(100, context),
-                margin: EdgeInsets.only(left: 20.0,right: 20.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey,
-                      offset: Offset(4,8),
-                      blurRadius: 10,
-                    )
-                  ],
-                ),
+                margin: EdgeInsets.only(left: 20.0,),
                 child: Container(
-                  margin: EdgeInsets.only(left: 20.0),
                   child: Column(
                     children: [
-                      SizedBox(height: 10.0,),
+                      //Image.asset("assets/images/tasks_image.jpg",height: 230,width: wp(100, context),fit: BoxFit.fill,),
+                      SizedBox(height: 15.0,),
                       Row(
                         children: [
                           Container(
-                            width: wp(70, context),
+                            width: wp(90, context),
                             padding: EdgeInsets.all(10),
                             child: Text(
-                                '$task_title',
-                                style: headingStyle
+                                '$task_title'.toUpperCase(),
+                                style: subHeadingStyleblack
                             ),
                           ),
                         ],
@@ -140,11 +131,23 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       Row(
                         children: [
                           Container(
-                            width: wp(70, context),
-                            padding: EdgeInsets.all(10),
+                            width: wp(90, context),
+                            padding: EdgeInsets.all(8),
+                            child: Text(
+                                'Description : ',
+                                style: titleStyle
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: wp(90, context),
+                            padding: EdgeInsets.all(8),
                             child: Text(
                                 '$task_description',
-                                style: subHeadingStyle
+                                style: subtitleStyle
                             ),
                           ),
                         ],
@@ -153,20 +156,32 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       Row(
                         children: [
                           Container(
-                            width: wp(70, context),
+                            width: wp(90, context),
                             padding: EdgeInsets.all(10),
+                            child: Text(
+                                'Members : ',
+                                style: titleStyle
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: wp(90, context),
+                            //padding: EdgeInsets.all(10),
                             child: Wrap(
                               children: _selectedItems
                                   .map((e) => Container(
                                 margin: EdgeInsets.only(left: 5.0,right: 5.0, top: 5.0),
                                 child: Chip(
-                                  padding: EdgeInsets.all(12.0),
+                                  padding: EdgeInsets.all(8.0),
                                   backgroundColor: Colors.green.shade100,
-                                  elevation: 5.0,
+                                  elevation: 2.0,
                                   label: Text(
                                     "${e.split(",").join()}",
                                     style: TextStyle(
-                                      fontSize: 18.0,
+                                      fontSize: 16.0,
                                     ),
                                   ),
                                 ),
@@ -181,27 +196,94 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                       Row(
                         children: [
                           Container(
-                            width: wp(70, context),
+                            width: wp(90, context),
                             padding: EdgeInsets.all(10),
                             child: Text(
-                                'Deadline : $task_enddate',
-                                style: subHeadingStyle
+                                'Deadline : ',
+                                style: titleStyle
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 15.0,)
+                      Row(
+                        children: [
+                          Container(
+                            width: wp(90, context),
+                            padding: EdgeInsets.all(10),
+                            child: Text(
+                                '$task_enddate',
+                                style: subtitleStyle
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 15.0,),
+
+                      Row(children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateTaskPage(id: widget.id,project_id: widget.project_id),));
+                          },
+                          child: const Text('UPDATE TASK'),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Colors.blueAccent),
+                            foregroundColor: MaterialStateProperty.all(Colors.white),
+                            fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                          ),
+                        )
+                      ]
+                      ),
+                      SizedBox(height: 8.0,),
+                      Row(children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            SQLHelper.deleteTask(widget.id);
+                            setState(() {
+                              Navigator.pop(context);
+                            });
+                          },
+                          child: const Text('DELETE TASK'),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Colors.red),
+                            foregroundColor: MaterialStateProperty.all(Colors.white),
+                            fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                          ),
+                        )
+                      ]
+                      ),
+
+                      SizedBox(
+                        height: hp(4, context),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: wp(70, context),
+                            padding: EdgeInsets.all(10),
+                            child: Text(
+                              'Sub Tasks',
+                              style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(height: 4.0,),
+                      SizedBox(height: 10.0,),
                     ],
                   ),
                 ),
               ),
-              SizedBox(
-                height: hp(4, context),
-              ),
-              Text("Sub Tasks", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-              Divider(height: 4.0,),
-              SizedBox(height: 10.0,),
-              Expanded(
+              Container(
                   child: ListView.builder(
                     primary: false,
                     scrollDirection: Axis.vertical,
@@ -221,7 +303,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                           autoClose: true,
                           onPressed: (value) {
                             progress += 0.1;
-                            SQLHelper.updateProgressTask(widget.id, progress);
+                            counter += 1;
+                            SQLHelper.updateProgressTask(widget.id, progress,counter);
                             SQLHelper.changeValuesSubTask(_listSubTasks[index]['column_subtasks_id'], 1);
                             setState(() {
                               showSubTasks(widget.id);
@@ -250,7 +333,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                     ),
                     child: InkWell(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => SubTaskDetailsPage(id: _listSubTasks[index]['column_subtasks_id']),));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => SubTaskDetailsPage(id: _listSubTasks[index]['column_subtasks_id'], task_id : widget.id)));
                       },
                       child: Card(
                         color: _listSubTasks[index]['is_enable_subtasks'] == 1 ? Colors.grey : colors[random.nextInt(4)],

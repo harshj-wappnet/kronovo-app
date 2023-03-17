@@ -22,12 +22,15 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
 
   final _formKey_sub_task = GlobalKey<FormState>();
 
-  void loadMembers() async {
-    final data = await SQLHelper.getMembers();
+  void loadMembers(int id) async {
+    final data = await SQLHelper.getTask(id);
 
     setState(() {
       _listMembers = data;
-      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+      final subtask_data =
+      _listMembers.firstWhere((element) => element['column_task_id'] == id);
+      people_data = subtask_data['tasks_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+      members = people_data.split(",");
     });
   }
 
@@ -91,7 +94,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   @override
   void initState() {
     super.initState();
-    loadMembers();
+    loadMembers(widget.id);
     sub_task_title.text = "";
     sub_task_description.text = "";
     endDateController.text = "";

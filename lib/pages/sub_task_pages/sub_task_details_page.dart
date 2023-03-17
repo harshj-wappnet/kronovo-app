@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:kronovo_app/pages/sub_task_pages/update_subtask_page.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../utils/theme.dart';
 
 class SubTaskDetailsPage extends StatefulWidget {
-  const SubTaskDetailsPage({Key? key, required this.id}) : super(key: key);
+  const SubTaskDetailsPage({Key? key, required this.id, required this.task_id}) : super(key: key);
   final id;
+  final task_id;
   @override
   State<SubTaskDetailsPage> createState() => _SubTaskDetailsPageState();
 }
@@ -46,6 +48,7 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('Sub Task Details'),
         centerTitle: true,
@@ -61,34 +64,22 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
         scrollDirection: Axis.vertical,
         child: Column(
           children: [
-            SizedBox(height: 25.0,),
             Container(
               width: wp(100, context),
-              margin: EdgeInsets.only(left: 20.0,right: 20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey,
-                    offset: Offset(4,8),
-                    blurRadius: 10,
-                  )
-                ],
-              ),
+              margin: EdgeInsets.only(left: 20.0,),
               child: Container(
-                margin: EdgeInsets.only(left: 20.0),
                 child: Column(
                   children: [
-                    SizedBox(height: 10.0,),
+                    //Image.asset("assets/images/tasks_image.jpg",height: 230,width: wp(100, context),fit: BoxFit.fill,),
+                    SizedBox(height: 15.0,),
                     Row(
                       children: [
                         Container(
-                          width: wp(70, context),
+                          width: wp(90, context),
                           padding: EdgeInsets.all(10),
                           child: Text(
-                              '$sub_task_title',
-                              style: headingStyle
+                              '$sub_task_title'.toUpperCase(),
+                              style: subHeadingStyleblack
                           ),
                         ),
                       ],
@@ -98,11 +89,23 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                     Row(
                       children: [
                         Container(
-                          width: wp(70, context),
-                          padding: EdgeInsets.all(10),
+                          width: wp(90, context),
+                          padding: EdgeInsets.all(8),
+                          child: Text(
+                              'Description : ',
+                              style: titleStyle
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          width: wp(90, context),
+                          padding: EdgeInsets.all(8),
                           child: Text(
                               '$sub_task_description',
-                              style: subHeadingStyle
+                              style: subtitleStyle
                           ),
                         ),
                       ],
@@ -111,20 +114,32 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                     Row(
                       children: [
                         Container(
-                          width: wp(70, context),
+                          width: wp(90, context),
                           padding: EdgeInsets.all(10),
+                          child: Text(
+                              'Members : ',
+                              style: titleStyle
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          width: wp(90, context),
+                          //padding: EdgeInsets.all(10),
                           child: Wrap(
                             children: _selectedItems
                                 .map((e) => Container(
                               margin: EdgeInsets.only(left: 5.0,right: 5.0, top: 5.0),
                               child: Chip(
-                                padding: EdgeInsets.all(12.0),
+                                padding: EdgeInsets.all(8.0),
                                 backgroundColor: Colors.green.shade100,
-                                elevation: 5.0,
+                                elevation: 2.0,
                                 label: Text(
                                   "${e.split(",").join()}",
                                   style: TextStyle(
-                                    fontSize: 18.0,
+                                    fontSize: 16.0,
                                   ),
                                 ),
                               ),
@@ -139,22 +154,78 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                     Row(
                       children: [
                         Container(
-                          width: wp(70, context),
+                          width: wp(90, context),
                           padding: EdgeInsets.all(10),
                           child: Text(
-                              'Deadline : $sub_task_enddate',
-                              style: subHeadingStyle
+                              'Deadline : ',
+                              style: titleStyle
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 15.0,)
+                    Row(
+                      children: [
+                        Container(
+                          width: wp(90, context),
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                              '$sub_task_enddate',
+                              style: subtitleStyle
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 15.0,),
+
+                    Row(children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateSubTaskPage(id: widget.id,task_id: widget.task_id),));
+                        },
+                        child: const Text('UPDATE SUB TASK'),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(Colors.blueAccent),
+                          foregroundColor: MaterialStateProperty.all(Colors.white),
+                          fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      )
+                    ]
+                    ),
+                    SizedBox(height: 8.0,),
+                    Row(children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          SQLHelper.deleteSubTask(widget.id);
+                          setState(() {
+                            Navigator.pop(context);
+                          });
+                        },
+                        child: const Text('DELETE SUB TASK'),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(Colors.red),
+                          foregroundColor: MaterialStateProperty.all(Colors.white),
+                          fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      )
+                    ]
+                    ),
+
+                    SizedBox(
+                      height: hp(15, context),
+                    ),
                   ],
                 ),
               ),
-            ),
-            SizedBox(
-              height: hp(4, context),
             ),
           ],
         ),

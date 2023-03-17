@@ -2,13 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:kronovo_app/pages/project_pages/update_project_page.dart';
 import 'package:kronovo_app/pages/task_pages/task_details_page.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 import 'package:kronovo_app/pages/task_pages/add_task_page.dart';
 import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
 import 'package:kronovo_app/utils/theme.dart';
 import '../../databases/sql_helper.dart';
-import '../../widgets/assignmembers_dialog.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
   const ProjectDetailsPage({Key? key, required this.id}) : super(key: key);
@@ -21,9 +21,10 @@ class ProjectDetailsPage extends StatefulWidget {
 class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   List<Map<String, dynamic>> _listProjects = [];
   List<Map<String, dynamic>> _listTasks = [];
+  List<Map<String, dynamic>> _listSubTasks = [];
   List<String> _selectedItems = [];
   String people_data = '';
-  int? task_id;
+  int task_id = 0;
 
   double task_progress = 0.0;
   double progress = 0.0;
@@ -33,7 +34,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   String project_enddate = "";
   String project_peoples = "";
   int isenable = 0;
-
+  int counter = 0;
   final List<Color> colors = [
     Colors.green.shade400,
     Colors.green.shade500,
@@ -59,6 +60,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
       });
     }
   }
+
   void showTasks(int id) async {
     final task_data = await SQLHelper.getAllTasksByProject(id);
 
@@ -67,7 +69,18 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
       final existing_task_data =
       _listTasks.firstWhere((element) => element['column_task_id'] == id);
       isenable = existing_task_data['is_enable_tasks'];
+      task_id = existing_task_data['column_task_id'];
       task_progress = existing_task_data['tasks_progress'];
+      getTotalSubtask(task_id);
+    });
+  }
+
+
+  void getTotalSubtask(int id) async {
+    final subtask_data = await SQLHelper.getAllSubTasksByTask(id);
+
+    setState(() {
+      _listSubTasks = subtask_data;
     });
   }
 
@@ -75,50 +88,16 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _showProject(widget.id);
       showTasks(widget.id);
     });
   }
 
-  void _showMultiSelect() async {
-    // a list of selectable items
-    // these items can be hard-coded or dynamically fetched from a database/API
-    final List<String> items = [
-      'Akshay Patel',
-      'Arti Chauhan',
-      'Harsh Jani',
-      'Darshit Shah',
-      'Apurv Patel',
-      'Yassar Qureshi',
-      'Aditya Soni',
-      'Ram Ghumaliya'
-    ];
-
-    final List<String>? results = await showDialog(
-      context: this.context,
-      builder: (BuildContext context) {
-        return MultiSelect(items: items);
-      },
-    );
-
-    // Update UI
-    if (results != null) {
-      setState(() {
-        _selectedItems = results;
-        // String data = jsonEncode(_selectedItems);
-        // _selectedItems.forEach((element) {
-        //   people_data += element;
-        //   people_data += ',';
-        // });
-        //print(people_data);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
         appBar: AppBar(
             title: Text("Project Details"),
             centerTitle: true,
@@ -145,34 +124,22 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
               scrollDirection: Axis.vertical,
               child: Column(
                 children: <Widget>[
-                  SizedBox(height: 25.0,),
                   Container(
                     width: wp(100, context),
                     margin: EdgeInsets.only(left: 20.0,right: 20.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey,
-                          offset: Offset(4,8),
-                          blurRadius: 10,
-                        )
-                      ],
-                    ),
                     child: Container(
-                      margin: EdgeInsets.only(left: 20.0),
                       child: Column(
                         children: [
-                          SizedBox(height: 10.0,),
+                          //Image.asset("assets/images/project_image.jpg",height: 250,width: wp(100, context),fit: BoxFit.fill,),
+                          SizedBox(height: 15.0,),
                           Row(
                             children: [
                               Container(
-                                width: wp(70, context),
+                                width: wp(90, context),
                                 padding: EdgeInsets.all(10),
                                 child: Text(
-                                  '$project_title',
-                                  style: headingStyle
+                                    '$project_title'.toUpperCase(),
+                                    style: subHeadingStyleblack,
                                 ),
                               ),
                             ],
@@ -182,11 +149,23 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           Row(
                             children: [
                               Container(
-                                width: wp(70, context),
-                                padding: EdgeInsets.all(10),
+                                width: wp(90, context),
+                                padding: EdgeInsets.all(8),
                                 child: Text(
-                                  '$project_description',
-                                  style: subHeadingStyle
+                                    'Description : ',
+                                    style: titleStyle
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(90, context),
+                                padding: EdgeInsets.all(8),
+                                child: Text(
+                                    '$project_description',
+                                    style: subtitleStyle
                                 ),
                               ),
                             ],
@@ -195,20 +174,32 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           Row(
                             children: [
                               Container(
-                                width: wp(70, context),
+                                width: wp(90, context),
                                 padding: EdgeInsets.all(10),
+                                child: Text(
+                                    'Members : ',
+                                    style: titleStyle
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(90, context),
+                                //padding: EdgeInsets.all(10),
                                 child: Wrap(
                                   children: _selectedItems
                                       .map((e) => Container(
                                     margin: EdgeInsets.only(left: 5.0,right: 5.0, top: 5.0),
                                     child: Chip(
-                                      padding: EdgeInsets.all(12.0),
+                                      padding: EdgeInsets.all(8.0),
                                       backgroundColor: Colors.green.shade100,
-                                      elevation: 5.0,
+                                      elevation: 2.0,
                                       label: Text(
                                         "${e.split(",").join()}",
                                         style: TextStyle(
-                                          fontSize: 18.0,
+                                          fontSize: 16.0,
                                         ),
                                       ),
                                     ),
@@ -223,32 +214,107 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           Row(
                             children: [
                               Container(
-                                width: wp(70, context),
+                                width: wp(90, context),
                                 padding: EdgeInsets.all(10),
                                 child: Text(
-                                  'Deadline : $project_enddate',
-                                  style: subHeadingStyle
+                                    'Deadline : ',
+                                    style: titleStyle
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 15.0,)
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(70, context),
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                    '$project_enddate',
+                                    style: subtitleStyle
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15.0,),
+
+                          Row(children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) =>
+                                          UpdateProject(
+                                              id: widget.id
+                                          )));
+                                });
+                              },
+                              child: const Text('UPDATE PROJECT'),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(Colors.blueAccent),
+                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                                fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ]
+                          ),
+                          SizedBox(height: 8.0,),
+                          Row(children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                SQLHelper.deleteProject(widget.id);
+                                setState(() {
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: const Text('DELETE PROJECT'),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(Colors.red),
+                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                                fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                                shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ]
+                            ),
+
+                          SizedBox(
+                            height: hp(4, context),
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                width: wp(70, context),
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  'Tasks',
+                                  style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(height: 4.0,),
+                          SizedBox(height: 10.0,),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: hp(4, context),
-                  ),
-                  Text("Tasks", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                  Divider(height: 4.0,),
-                  SizedBox(height: 10.0,),
+
                   Container(
                     child: ListView.builder(
                       primary: false,
                       scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
                       itemCount: _listTasks.length,
                       itemBuilder: (context, index) => Container(
                         margin: EdgeInsets.only(left: 20.0,right: 20.0),
@@ -263,7 +329,8 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 autoClose: true,
                                 onPressed: (value) {
                                   progress += 0.1;
-                                  SQLHelper.updateProgressProject(widget.id, progress);
+                                  counter += 1;
+                                  SQLHelper.updateProgressProject(widget.id, progress,counter);
                                   SQLHelper.changeValuesTask(_listTasks[index]['column_task_id'], 1);
                                   setState(() {
                                     showTasks(widget.id);
@@ -297,7 +364,10 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                   MaterialPageRoute(
                                       builder: (context) => TaskDetailsPage(
                                           id: _listTasks[index]
-                                              ['column_task_id'])));
+                                              ['column_task_id'],
+                                      project_id : widget.id)
+                                  )
+                              );
                             },
                             child: Card(
                               color: _listTasks[index]['is_enable_tasks'] == 1 ? Colors.grey : colors[random.nextInt(4)],
@@ -310,13 +380,33 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      '${_listTasks[index]['tasks_name']}',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '${_listTasks[index]['tasks_name']}',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Icon(Icons.task_alt_rounded, color: Colors.white,),
+                                            SizedBox(width: 4.0,),
+                                            Text(
+                                              '${_listTasks[index]["tasks_milestone"]}/${_listSubTasks.length}',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
                                     ),
                                     SizedBox(height: 16),
                                     Row(
@@ -337,7 +427,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                           height: 20,
                                           child: LinearProgressIndicator(
                                             value: _listTasks[index]['tasks_progress'] /
-                                                _listTasks.length,
+                                                _listTasks.length.toDouble(),
                                             valueColor: AlwaysStoppedAnimation<Color>(
                                               Colors.white,
                                             ),

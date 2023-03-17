@@ -46,6 +46,7 @@ class _AddMembersPageState extends State<AddMembersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text("Add Members"),
       ),
@@ -188,7 +189,7 @@ class _AddMembersPageState extends State<AddMembersPage> {
                                 }else{
                                   await _addMembers();
                                   setState(() async {
-                                    Navigator.pop(context);
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => MembersDetailsPage(),));
                                   });
                                 }
                               },

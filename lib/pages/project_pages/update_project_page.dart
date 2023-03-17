@@ -6,11 +6,9 @@ import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 
 class UpdateProject extends StatefulWidget {
-
-  final ValueChanged<String> onSubmit;
   final id;
 
-  UpdateProject({super.key, required this.onSubmit, required this.id});
+  UpdateProject({super.key, required this.id});
 
 
   @override
@@ -396,8 +394,8 @@ class UpdateProjectState extends State<UpdateProject> {
                                   ScaffoldMessenger.of(context).showSnackBar(date_snackBar);
                                 }else{
                                   await _updateProject(widget.id);
-                                  setState(() async {
-                                    Navigator.pop(context, 'return_value');
+                                  setState((){
+                                    Navigator.pop(context);
                                   });
                                 }
                               },

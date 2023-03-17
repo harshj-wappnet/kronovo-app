@@ -7,7 +7,6 @@ const Color darkgreen = Color(0xFF227027);
 const Color lightgreen = Color(0xFF49F054);
 const Color bluishGreen = Color(0xFF90F096);
 
-
 class Theme{
 
   static final theme = ThemeData(
@@ -23,6 +22,16 @@ TextStyle get subHeadingStyle{
     fontWeight: FontWeight.bold,
       color: Colors.grey
   )
+  );
+}
+
+TextStyle get subHeadingStyleblack{
+  return GoogleFonts.lato(
+      textStyle: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+      )
   );
 }
 

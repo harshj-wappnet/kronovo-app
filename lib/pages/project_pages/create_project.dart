@@ -4,6 +4,7 @@ import 'package:kronovo_app/utils/theme.dart';
 import '../../databases/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
+import 'package:kronovo_app/pages/home_page.dart';
 
 class CreateProject extends StatefulWidget {
 
@@ -373,8 +374,8 @@ class _CreateProjectState extends State<CreateProject> {
                                 ScaffoldMessenger.of(context).showSnackBar(date_snackBar);
                               }else{
                                 await _addProject();
-                                setState(() async {
-                                  Navigator.pop(context, 'return_value');
+                                setState(() {
+                                  Navigator.pop(context, 'update');
                                 });
                               }
                             },
@@ -404,6 +405,6 @@ class _CreateProjectState extends State<CreateProject> {
   Future<void> _addProject() async{
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.createProject(project_title_Controller.text, project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),0.0,current_date);
+    await SQLHelper.createProject(project_title_Controller.text, project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),0.0,0,current_date);
   }
 }
