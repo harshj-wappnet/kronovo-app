@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../utils/theme.dart';
@@ -102,7 +101,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('All Fields are requiered', style: TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
       ],
     ),
     duration: Duration(seconds: 3),
@@ -121,7 +120,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Update Task'),
+        title: Text('Update Task', style: TextStyle(fontFamily: 'lato'),),
         centerTitle: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -245,7 +244,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                       style: subtitleStyle,
                                       decoration: InputDecoration(
                                           prefixIcon: Icon(
-                                            Icons.calendar_today_outlined,
+                                            Icons.calendar_month,
                                             color: Colors.grey,
                                           ),
                                           hintText: "Choose Deadline",
@@ -275,7 +274,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                               onPressed: _showMultiSelect,
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -295,7 +294,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                                   padding: EdgeInsets.all(8.0),
                                   label: Text(
                                     "${e.split(",").join(" ")}",
-                                    style: TextStyle(fontSize: 16.0),
+                                    style: TextStyle(fontFamily: 'lato',fontSize: 16.0),
                                   ),
                                 ),
                               ))
@@ -315,7 +314,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -336,6 +335,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
     );
   }
 
+  //this method is used to update task details in task table in database
   Future<void> _updateTask(int tid) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);

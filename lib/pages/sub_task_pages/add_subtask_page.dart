@@ -7,7 +7,6 @@ import '../../widgets/assignmembers_dialog.dart';
 class AddSubTaskPage extends StatefulWidget {
   const AddSubTaskPage({Key? key, required this.id}) : super(key: key);
   final id;
-
   @override
   State<AddSubTaskPage> createState() => _AddSubTaskPageState();
 }
@@ -19,12 +18,9 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   String people_data = '';
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members= [];
-
   final _formKey_sub_task = GlobalKey<FormState>();
-
   void loadMembers(int id) async {
     final data = await SQLHelper.getTask(id);
-
     setState(() {
       _listMembers = data;
       final subtask_data =
@@ -33,7 +29,6 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
       members = people_data.split(",");
     });
   }
-
 
   String _displayText(DateTime? date) {
     if (date != null) {
@@ -45,7 +40,6 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
 
   final TextEditingController endDateController = TextEditingController();
   DateTime? endDate;
-
   Future<DateTime?> pickDate() async {
     return await showDatePicker(
       context: this.context,
@@ -83,13 +77,12 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('All Fields are requiered', style: TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
       ],
     ),
     duration: Duration(seconds: 3),
     backgroundColor: Colors.white,
   );
-
 
   @override
   void initState() {
@@ -104,7 +97,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Sub Task'),
+          title: Text('Add Sub Task', style: TextStyle(fontFamily: 'lato'),),
           centerTitle: true,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -228,7 +221,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                       style: subtitleStyle,
                                       decoration: InputDecoration(
                                           prefixIcon: Icon(
-                                            Icons.calendar_today_outlined,
+                                            Icons.calendar_month,
                                             color: Colors.grey,
                                           ),
                                           hintText: "Choose Deadline",
@@ -250,15 +243,13 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                 ),
                               ]),
                             ),
-
                             SizedBox(height: 15.0,),
-
                             ElevatedButton.icon(
                               icon: Icon(Icons.add),
                               onPressed: _showMultiSelect,
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -278,7 +269,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                   padding: EdgeInsets.all(8.0),
                                   label: Text(
                                     "${e.split(",").join(" ")}",
-                                    style: TextStyle(fontSize: 16.0),
+                                    style: TextStyle(fontFamily: 'lato',fontSize: 16.0),
                                   ),
                                 ),
                               ))
@@ -292,13 +283,13 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                                 }else{
                                   await _addSubTask(widget.id);
                                   setState(() async {
-                                    Navigator.pop(context);
+                                    Navigator.pop(context, 'subtask');
                                   });
                                 }
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -318,6 +309,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
         ));
   }
 
+  // used to insert user input data to sub task table in database
   Future<void> _addSubTask(int id) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);

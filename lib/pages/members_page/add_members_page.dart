@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kronovo_app/pages/members_page/members_details_page.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../utils/theme.dart';
@@ -23,13 +22,29 @@ class _AddMembersPageState extends State<AddMembersPage> {
   String people_role = '';
   List<Map<String, dynamic>> _listProjects = [];
 
+  // used for show alert for not null validation to user
   final snackBar = SnackBar(
     content:   Row(
       children: [
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667), fontFamily: 'lato' ),),
+      ],
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.white,
+  );
+
+  final phonesnackBar = SnackBar(
+    content: Row(
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          color: Colors.red,
+        ),
+        Text('Enter Valid Phone No.',
+          style: TextStyle(color: Color(0xFFff4667), fontFamily: 'lato'),),
       ],
     ),
     duration: Duration(seconds: 3),
@@ -38,7 +53,6 @@ class _AddMembersPageState extends State<AddMembersPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -48,7 +62,16 @@ class _AddMembersPageState extends State<AddMembersPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Add Members"),
+        centerTitle: true,
+        title: Text("Add Members", style: TextStyle(fontFamily: 'lato'),),
+        backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
       ),
       body: GestureDetector(
         onTap: () {
@@ -123,7 +146,7 @@ class _AddMembersPageState extends State<AddMembersPage> {
                                       controller: member_mobileno_controller,
                                       inputFormatters: <TextInputFormatter>[
                                         // for below version 2 use this
-                                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                                        FilteringTextInputFormatter.allow(RegExp(r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$')),
                                         // for version 2 and greater youcan also use this
                                         FilteringTextInputFormatter.digitsOnly
                                       ],
@@ -178,24 +201,28 @@ class _AddMembersPageState extends State<AddMembersPage> {
                                 ),
                               ]),
                             ),
-                            SizedBox(height: 15.0,),
-
-                            SizedBox(height: 15.0,),
+                            SizedBox(height: 20.0,),
                             ElevatedButton(
                               onPressed: () async {
                                 if (member_name_Controller.text.isEmpty || member_mobileno_controller.text.isEmpty || member_role_Controller.text.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       snackBar);
-                                }else{
+                                }else if(RegExp(r'^[0-9]{10}$').stringMatch(member_mobileno_controller.text) != null){
                                   await _addMembers();
                                   setState(() async {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => MembersDetailsPage(),));
+                                    Navigator.pop(context);
+                                    member_name_Controller.text = "";
+                                    member_mobileno_controller.text = "";
+                                    member_role_Controller.text = "";
                                   });
+                                }
+                                else{
+                                  ScaffoldMessenger.of(context).showSnackBar(phonesnackBar);
                                 }
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontSize: 20,color: Colors.white,fontFamily: 'lato'),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -203,7 +230,7 @@ class _AddMembersPageState extends State<AddMembersPage> {
                                 ),
                                 minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
                               ),
-                              child: const Text("ADD Members"),
+                              child: const Text("Add Member"),
                             ),
                           ]),
                     ),
@@ -216,8 +243,8 @@ class _AddMembersPageState extends State<AddMembersPage> {
       ),
     );
   }
+  // used to insert user data to members table in database
   Future<void> _addMembers() async {
-    // String data = json.encode(_selectedItems);
     await SQLHelper.createMembers(
         member_name_Controller.text, member_mobileno_controller.text, member_role_Controller.text);
   }

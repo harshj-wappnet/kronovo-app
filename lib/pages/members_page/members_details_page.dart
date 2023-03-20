@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:kronovo_app/pages/members_page/add_members_page.dart';
 import 'package:kronovo_app/pages/members_page/update_members_page.dart';
-
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
+import '../../widgets/confirmation_dialog.dart';
 
 class MembersDetailsPage extends StatefulWidget {
   const MembersDetailsPage({Key? key}) : super(key: key);
@@ -19,12 +20,11 @@ class _MembersDetailsPageState extends State<MembersDetailsPage> {
   String members_number = "";
   String members_role = "";
   List<Map<String, dynamic>> _listMembers = [];
-  bool _isChecked = false;
   int? mem_id;
 
+  // this method is used for fetch all members records for displaying in list
   void _showMembers() async {
     final data = await SQLHelper.getMembers();
-
     setState(() {
       _listMembers = data;
     });
@@ -32,21 +32,28 @@ class _MembersDetailsPageState extends State<MembersDetailsPage> {
 
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _showMembers();
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("KRONOVO"),
+        title: Text("Members Details", style: TextStyle(fontFamily: 'lato'),),
+        centerTitle: true,
         backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(15),
+            bottomLeft: Radius.circular(15),
+          ),
+        ),
+        elevation: 0.0,
         actions: [
           IconButton(onPressed: () {
-            Navigator.pop(context);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => AddMembersPage(),));
           }, icon: Icon(Icons.add)),
         ],
       ),
@@ -56,7 +63,7 @@ class _MembersDetailsPageState extends State<MembersDetailsPage> {
           },
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
+            child: _listMembers.isNotEmpty ? ListView.builder(
               shrinkWrap: true,
               itemCount: _listMembers.length,
               itemBuilder: (context, index) => Container(
@@ -69,11 +76,24 @@ class _MembersDetailsPageState extends State<MembersDetailsPage> {
                         flex: 1,
                         autoClose: true,
                         onPressed: (value) {
-                          SQLHelper.deleteMembers(
-                              _listMembers[index]['members_id']);
-                          setState(() {
-                            _showMembers();
-                          });
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ConfirmationDialog(
+                                title: 'Delete Member',
+                                content: 'Are you sure you want to delete this Member ?',
+                                onConfirm: () {
+                                  // used to delete member
+                                  SQLHelper.deleteMembers(
+                                      _listMembers[index]['members_id']);
+                                  setState(() {
+                                    _showMembers();
+                                  });
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          );
                         },
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
@@ -122,18 +142,32 @@ class _MembersDetailsPageState extends State<MembersDetailsPage> {
                           Text(
                             '${_listMembers[index]['members_name']}',
                             style: TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.bold),
+                                fontSize: 20.0, fontWeight: FontWeight.bold,fontFamily: 'lato'),
                           ),
                           Icon(Icons.phone),
                           Text('  ${_listMembers[index]['members_phone']}' +
-                              '    '),
+                              '    ', style: TextStyle(fontFamily: 'lato'),),
                           Icon(Icons.people),
-                          Text('  ${_listMembers[index]['members_role']}'),
+                          Text('  ${_listMembers[index]['members_role']}', style: TextStyle(fontFamily: 'lato'),),
                         ],
                       ),
                     ),
                   ),
                 ),
+              ),
+            ) : Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(top: hp(30, context)),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Image.asset("assets/images/add_peoples.png", height: 100,width: 100),
+                  ),
+                  SizedBox(height: 6,),
+                  Text("NO MEMBERS", style: TextStyle(fontFamily: 'lato'),),
+                  Text("Click On + to add Members", style: TextStyle(fontFamily: 'lato'),),
+                ],
               ),
             ),
           )),

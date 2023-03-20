@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kronovo_app/pages/project_pages/update_project_page.dart';
@@ -9,6 +8,7 @@ import 'package:kronovo_app/pages/task_pages/add_task_page.dart';
 import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
 import 'package:kronovo_app/utils/theme.dart';
 import '../../databases/sql_helper.dart';
+import '../../widgets/confirmation_dialog.dart';
 
 class ProjectDetailsPage extends StatefulWidget {
   const ProjectDetailsPage({Key? key, required this.id}) : super(key: key);
@@ -25,10 +25,8 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   List<String> _selectedItems = [];
   String people_data = '';
   int task_id = 0;
-
   double task_progress = 0.0;
   double progress = 0.0;
-
   String project_title = "";
   String project_description = "";
   String project_enddate = "";
@@ -44,6 +42,8 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   ];
   Random random = new Random();
 
+  // this method is used for fetch project for display to user
+  // we get specific project using project id
   void _showProject(int? id) async {
     if (id != null) {
       final data = await SQLHelper.getProject(id);
@@ -61,9 +61,10 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
     }
   }
 
+  // this method is used for fetching all tasks which are under specific project
+  // we fetch that using project id.
   void showTasks(int id) async {
     final task_data = await SQLHelper.getAllTasksByProject(id);
-
     setState(() {
       _listTasks = task_data;
       final existing_task_data =
@@ -75,14 +76,39 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
     });
   }
 
-
+  // used for display mileston's total task available in project
   void getTotalSubtask(int id) async {
     final subtask_data = await SQLHelper.getAllSubTasksByTask(id);
-
     setState(() {
       _listSubTasks = subtask_data;
     });
   }
+
+  final snackBar = SnackBar(
+    content:   Row(
+      children: [
+        Icon(
+          Icons.warning_amber_rounded,
+          color: Colors.red,
+        ),Text('  All Sub Task Must be completed', style: TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
+      ],
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.white,
+  );
+
+  final completeSnackBar = SnackBar(
+    content:   Row(
+      children: [
+        Icon(
+          Icons.celebration,
+          color: Colors.green,
+        ),Text('      Task is Completed', style: TextStyle(fontFamily: 'lato',color: Colors.black),),
+      ],
+    ),
+    duration: Duration(seconds: 3),
+    backgroundColor: Colors.white,
+  );
 
 
   @override
@@ -94,12 +120,20 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
     });
   }
 
+  Future<void> _navigateforResult(BuildContext context) async {
+    final result = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) =>
+        AddTaskPage(id: widget.id)));
+    if (!mounted) return;
+    initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
         appBar: AppBar(
-            title: Text("Project Details"),
+            title: Text("Project Details", style: TextStyle(fontFamily: 'lato'),),
             centerTitle: true,
             backgroundColor: Colors.green,
             shape: RoundedRectangleBorder(
@@ -112,7 +146,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
             actions: [
               IconButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => AddTaskPage(id: widget.id),));
+                    _navigateforResult(context);
                    },
                   icon: Icon(Icons.add))
             ]),
@@ -127,191 +161,206 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                   Container(
                     width: wp(100, context),
                     margin: EdgeInsets.only(left: 20.0,right: 20.0),
-                    child: Container(
-                      child: Column(
-                        children: [
-                          //Image.asset("assets/images/project_image.jpg",height: 250,width: wp(100, context),fit: BoxFit.fill,),
-                          SizedBox(height: 15.0,),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(90, context),
-                                padding: EdgeInsets.all(10),
-                                child: Text(
-                                    '$project_title'.toUpperCase(),
-                                    style: subHeadingStyleblack,
-                                ),
+                    child: Column(
+                      children: [
+                        //Image.asset("assets/images/project_image.jpg",height: 250,width: wp(100, context),fit: BoxFit.fill,),
+                        SizedBox(height: 15.0,),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(90, context),
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                  '$project_title'.toUpperCase(),
+                                  style: subHeadingStyleblack,
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(90, context),
-                                padding: EdgeInsets.all(8),
-                                child: Text(
-                                    'Description : ',
-                                    style: titleStyle
-                                ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.0,),
+                        //Text("Description", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(90, context),
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                  'Description : ',
+                                  style: titleStyle
                               ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(90, context),
-                                padding: EdgeInsets.all(8),
-                                child: Text(
-                                    '$project_description',
-                                    style: subtitleStyle
-                                ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(90, context),
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                  '$project_description',
+                                  style: subtitleStyle
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(90, context),
-                                padding: EdgeInsets.all(10),
-                                child: Text(
-                                    'Members : ',
-                                    style: titleStyle
-                                ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.0,),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(90, context),
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                  'Members : ',
+                                  style: titleStyle
                               ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(90, context),
-                                //padding: EdgeInsets.all(10),
-                                child: Wrap(
-                                  children: _selectedItems
-                                      .map((e) => Container(
-                                    margin: EdgeInsets.only(left: 5.0,right: 5.0, top: 5.0),
-                                    child: Chip(
-                                      padding: EdgeInsets.all(8.0),
-                                      backgroundColor: Colors.green.shade100,
-                                      elevation: 2.0,
-                                      label: Text(
-                                        "${e.split(",").join()}",
-                                        style: TextStyle(
-                                          fontSize: 16.0,
-                                        ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(90, context),
+                              //padding: EdgeInsets.all(10),
+                              child: Wrap(
+                                children: _selectedItems
+                                    .map((e) => Container(
+                                  margin: EdgeInsets.only(left: 5.0,right: 5.0, top: 5.0),
+                                  child: Chip(
+                                    padding: EdgeInsets.all(8.0),
+                                    backgroundColor: Colors.green.shade100,
+                                    elevation: 2.0,
+                                    label: Text(
+                                      "${e.split(",").join()}",
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                          fontFamily: 'lato'
                                       ),
                                     ),
-                                  )
-                                  )
-                                      .toList(),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(90, context),
-                                padding: EdgeInsets.all(10),
-                                child: Text(
-                                    'Deadline : ',
-                                    style: titleStyle
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(70, context),
-                                padding: EdgeInsets.all(10),
-                                child: Text(
-                                    '$project_enddate',
-                                    style: subtitleStyle
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 15.0,),
-
-                          Row(children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) =>
-                                          UpdateProject(
-                                              id: widget.id
-                                          )));
-                                });
-                              },
-                              child: const Text('UPDATE PROJECT'),
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(Colors.blueAccent),
-                                foregroundColor: MaterialStateProperty.all(Colors.white),
-                                fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
-                                shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                ),
+                                )
+                                )
+                                    .toList(),
                               ),
-                            )
-                          ]
-                          ),
-                          SizedBox(height: 8.0,),
-                          Row(children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                SQLHelper.deleteProject(widget.id);
-                                setState(() {
-                                  Navigator.pop(context);
-                                });
-                              },
-                              child: const Text('DELETE PROJECT'),
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(Colors.red),
-                                foregroundColor: MaterialStateProperty.all(Colors.white),
-                                fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
-                                shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                              ),
-                            )
-                          ]
                             ),
+                          ],
+                        ),
+                        SizedBox(height: 10.0,),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(90, context),
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                  'Deadline : ',
+                                  style: titleStyle
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(70, context),
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                  '$project_enddate',
+                                  style: subtitleStyle
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 15.0,),
 
-                          SizedBox(
-                            height: hp(4, context),
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: wp(70, context),
-                                padding: EdgeInsets.all(10),
-                                child: Text(
-                                  'Tasks',
-                                  style:TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        Row(children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) =>
+                                        UpdateProject(
+                                            id: widget.id
+                                        )));
+                              });
+                            },
+                            child: const Text('UPDATE PROJECT'),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(Colors.blueAccent),
+                              foregroundColor: MaterialStateProperty.all(Colors.white),
+                              fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                              textStyle: MaterialStateProperty.all(
+                                TextStyle(fontSize: 16,color: Colors.white, fontFamily: 'lato'),),
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                            ],
+                            ),
+                          )
+                        ]
+                        ),
+                        SizedBox(height: 8.0,),
+                        Row(children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return ConfirmationDialog(
+                                    title: 'Delete Project',
+                                    content: 'Are you sure you want to delete this Projet ?',
+                                    onConfirm: () {
+                                      SQLHelper.deleteProject(widget.id);
+                                      setState(() {
+                                        Navigator.pop(context);
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                            child: const Text('DELETE PROJECT'),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(Colors.red),
+                              foregroundColor: MaterialStateProperty.all(Colors.white),
+                              textStyle: MaterialStateProperty.all(
+                                TextStyle(fontSize: 16,color: Colors.white, fontFamily: 'lato'),),
+                              fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                          )
+                        ]
                           ),
-                          Divider(height: 4.0,),
-                          SizedBox(height: 10.0,),
-                        ],
-                      ),
+
+                        SizedBox(
+                          height: hp(4, context),
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              width: wp(70, context),
+                              padding: EdgeInsets.all(10),
+                              child: Text(
+                                'Tasks',
+                                style: TextStyle(fontFamily: 'lato',fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Divider(height: 4.0,),
+                        SizedBox(height: 10.0,),
+                      ],
                     ),
                   ),
 
                   Container(
-                    child: ListView.builder(
-                      primary: false,
+                    child: _listTasks.isNotEmpty ? ListView.builder(
+                      primary: true,
                       scrollDirection: Axis.vertical,
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
@@ -330,11 +379,17 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                 onPressed: (value) {
                                   progress += 0.1;
                                   counter += 1;
-                                  SQLHelper.updateProgressProject(widget.id, progress,counter);
-                                  SQLHelper.changeValuesTask(_listTasks[index]['column_task_id'], 1);
-                                  setState(() {
-                                    showTasks(widget.id);
-                                  });
+
+                                  if(_listTasks[index]["tasks_milestone"] == _listSubTasks.length){
+                                    SQLHelper.changeValuesTask(_listTasks[index]['column_task_id'], 1);
+                                    SQLHelper.updateProgressProject(widget.id, progress,counter);
+                                    ScaffoldMessenger.of(context).showSnackBar(completeSnackBar);
+                                    setState(() {
+                                      showTasks(widget.id);
+                                    });
+                                  }else{
+                                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                  }
                                   // SQLHelper.deleteTask(
                                   //     _listTasks[index]['column_task_id']);
                                   // showTasks(widget.id);
@@ -374,7 +429,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              elevation: 4,
+                              elevation: 2,
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                                 child: Column(
@@ -386,6 +441,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                         Text(
                                           '${_listTasks[index]['tasks_name']}',
                                           style: TextStyle(
+                                            fontFamily: 'lato',
                                             color: Colors.white,
                                             fontSize: 24,
                                             fontWeight: FontWeight.bold,
@@ -399,6 +455,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                             Text(
                                               '${_listTasks[index]["tasks_milestone"]}/${_listSubTasks.length}',
                                               style: TextStyle(
+                                                fontFamily: 'lato',
                                                 color: Colors.white,
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
@@ -415,6 +472,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                         Text(
                                           'Deadline :  ${_listTasks[index]['tasks_end_date']}',
                                           style: TextStyle(
+                                            fontFamily: 'lato',
                                             color: Colors.white.withOpacity(0.8),
                                           ),
                                         ),
@@ -443,6 +501,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                                 '${(_listTasks[index]['tasks_progress'] /
                                                     _listTasks.length * 100).toInt()}%',
                                                 style: TextStyle(
+                                                  fontFamily: 'lato',
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -460,7 +519,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                         Text(
                                           '${convertToAgo(DateTime.parse(
                                               _listTasks[index]['createdAt']))}',
-                                          style: TextStyle(fontSize: 12.0, color: Colors.white),
+                                          style: TextStyle(fontFamily: 'lato',fontSize: 12.0, color: Colors.white),
                                         )
                                       ],
                                     )
@@ -471,15 +530,30 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           ),
                         ),
                       ),
+                    ) : Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(top: hp(3, context)),
+                      child: Column(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child: Image.asset("assets/images/default_icon.png", height: 100,width: 100),
+                          ),
+                          SizedBox(height: 6,),
+                          Text("NO TASKS", style: TextStyle(fontFamily: 'lato'),),
+                          Text("Click On + to add Task", style: TextStyle(fontFamily: 'lato'),),
+                        ],
+                      ),
                     ),
                   ),
-                ]
+                 ]
               ),
             ),
         )
     );
   }
 
+  // this method is used to convert raw time data to (1 day ago) type data.
   String convertToAgo(DateTime input) {
     Duration diff = DateTime.now().difference(input);
     if (diff.inDays > 365)

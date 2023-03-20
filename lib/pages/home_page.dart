@@ -3,14 +3,16 @@ import 'dart:math';
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:kronovo_app/pages/members_page/members_details_page.dart';
 import 'package:kronovo_app/pages/navigation_drawer/drawer_header.dart';
 import 'package:kronovo_app/pages/project_pages/create_project.dart';
 import 'package:kronovo_app/pages/project_pages/update_project_page.dart';
 import 'package:kronovo_app/pages/project_pages/project_details_page.dart';
+import 'package:kronovo_app/utils/responsive.dart';
 import 'package:kronovo_app/utils/theme.dart';
 import '../databases/sql_helper.dart';
+import '../widgets/confirmation_dialog.dart';
 import 'members_page/add_members_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,7 +32,9 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> _listTasks = [];
   double project_progress = 0.0;
   DateTime _selectedDate = DateTime.now();
+  int daycount = 500;
 
+  // this method is used for retriving all projects records from database
   void getAllProjects() async {
     final data = await SQLHelper.getProjects();
     setState(() {
@@ -46,6 +50,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // get all task number for milestione functionality
   void getTotalTask(int id) async {
     final task_data = await SQLHelper.getAllTasksByProject(id);
     setState(() {
@@ -62,6 +67,7 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) return;
     initState();
   }
+
 
   final List<Color> colors = [
     Colors.green.shade400,
@@ -86,14 +92,14 @@ class _HomePageState extends State<HomePage> {
   }
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       key: scaffoldKey,
       appBar: AppBar(
-        title: Text('Kronovo'),
+        title: Text('Kronovo', style: TextStyle(fontFamily: 'lato'),),
         centerTitle: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -117,11 +123,13 @@ class _HomePageState extends State<HomePage> {
               children: [
                 HeaderDrawer(),
                 ListTile(
+                  tileColor: Colors.grey.shade200,
                   leading: Icon(Icons.home),
                   title: Text(
                     "Home",
                     style: TextStyle(
                       fontSize: 18.0,
+                        fontFamily: 'lato'
                     ),
                   ),
                   onTap: () {
@@ -139,11 +147,12 @@ class _HomePageState extends State<HomePage> {
                   title: Text(
                     "Members",
                     style: TextStyle(
+                      fontFamily: 'lato',
                       fontSize: 18.0,
                     ),
                   ),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => AddMembersPage(),));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MembersDetailsPage(),));
                   },
                 ),
               ],
@@ -155,7 +164,6 @@ class _HomePageState extends State<HomePage> {
         onRefresh: () async {
           getAllProjects();
         },
-
         child:  Column(
           children: [
             Container(
@@ -175,32 +183,29 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     margin: EdgeInsets.only(top: 20.0,left: 20.0),
                     child: DatePicker(
-                      DateTime.now(),
+                      DateTime(2023),
+                      initialSelectedDate: DateTime.now(),
                       height: 100.0,
                       width: 80.0,
-                      initialSelectedDate: DateTime.now(),
                       selectionColor: primarygreen,
                       selectedTextColor: white,
-                      dateTextStyle: GoogleFonts.lato(
-                       textStyle: TextStyle(
+                      dateTextStyle: TextStyle(
+                          fontFamily: 'lato',
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
                             color: Colors.grey
-                        ),
                       ),
-                      dayTextStyle: GoogleFonts.lato(
-                        textStyle: TextStyle(
+                      dayTextStyle: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey
-                        ),
+                            color: Colors.grey,
+                          fontFamily: 'lato'
                       ),
-                      monthTextStyle: GoogleFonts.lato(
-                        textStyle: TextStyle(
+                      monthTextStyle: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey
-                        ),
+                            color: Colors.grey,
+                          fontFamily: 'lato'
                       ),
                       onDateChange: (date){
                         setState(() {
@@ -227,11 +232,23 @@ class _HomePageState extends State<HomePage> {
                               flex: 1,
                               autoClose: true,
                               onPressed: (value) {
-                                SQLHelper.deleteProject(
-                                    _listProjects[index]['project_id']);
-                                setState(() {
-                                  getAllProjects();
-                                });
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return ConfirmationDialog(
+                                      title: 'Delete Project',
+                                      content: 'Are you sure you want to delete this Projet ?',
+                                      onConfirm: () {
+                                        SQLHelper.deleteProject(
+                                            _listProjects[index]['project_id']);
+                                        setState(() {
+                                          getAllProjects();
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                    );
+                                  },
+                                );
                               },
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
@@ -268,7 +285,6 @@ class _HomePageState extends State<HomePage> {
                                         ProjectDetailsPage(
                                             id: _listProjects[index]['project_id'])));
                           },
-
                           child: Card(
                             color: colors[random.nextInt(4)],
                             shape: RoundedRectangleBorder(
@@ -286,6 +302,7 @@ class _HomePageState extends State<HomePage> {
                                       Text(
                                         '${_listProjects[index]['project_name']}',
                                         style: TextStyle(
+                                          fontFamily: 'lato',
                                           color: Colors.white,
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
@@ -299,6 +316,7 @@ class _HomePageState extends State<HomePage> {
                                           Text(
                                             '${_listProjects[index]["project_milestone"]}/${_listTasks.length}',
                                             style: TextStyle(
+                                              fontFamily: 'lato',
                                               color: Colors.white,
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -315,12 +333,14 @@ class _HomePageState extends State<HomePage> {
                                       Text(
                                         'Start Date:  ${_listProjects[index]['project_start_date']}',
                                         style: TextStyle(
+                                            fontFamily: 'lato',
                                           color: Colors.white.withOpacity(0.8),
                                         ),
                                       ),
                                       Text(
                                         'End Date:  ${_listProjects[index]['project_end_date']}',
                                         style: TextStyle(
+                                            fontFamily: 'lato',
                                           color: Colors.white.withOpacity(0.8),
                                         ),
                                       ),
@@ -333,7 +353,7 @@ class _HomePageState extends State<HomePage> {
                                         height: 20,
                                         child: LinearProgressIndicator(
                                           value: _listProjects[index]['project_progress'] /
-                                              _listProjects.length,
+                                              _listTasks.length,
                                           valueColor: AlwaysStoppedAnimation<Color>(
                                             Colors.white,
                                           ),
@@ -347,8 +367,9 @@ class _HomePageState extends State<HomePage> {
                                             padding: const EdgeInsets.only(right: 8),
                                             child: Text(
                                               '${(_listProjects[index]['project_progress'] /
-                                                  _listProjects.length * 100).toInt()}%',
+                                                  _listTasks.length.toDouble() * 100).toInt()}%',
                                               style: TextStyle(
+                                                fontFamily: 'lato',
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -366,7 +387,7 @@ class _HomePageState extends State<HomePage> {
                                       Text(
                                         '${convertToAgo(DateTime.parse(
                                             _listProjects[index]['createdAt']))}',
-                                        style: TextStyle(fontSize: 12.0, color: Colors.white),
+                                        style: TextStyle(fontFamily: 'lato',fontSize: 12.0, color: Colors.white),
                                       )
                                     ],
                                   )
@@ -375,9 +396,23 @@ class _HomePageState extends State<HomePage> {
                             ),
                           )
                       ),
-                    )
-              ) : Container(),
-            ),
+                    ),
+              ) : Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(top: hp(20, context)),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Image.asset("assets/images/default_icon.png", height: 100,width: 100),
+                      ),
+                      SizedBox(height: 6,),
+                      Text("NO PROJECTS"),
+                      Text("Click On + to add project"),
+                    ],
+                  ),
+                ),
+            )
             )
           ],
         )
@@ -385,6 +420,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // this method is used to convert raw time data to (1 day ago) type data.
   String convertToAgo(DateTime input) {
     Duration diff = DateTime.now().difference(input);
     if (diff.inDays > 365)

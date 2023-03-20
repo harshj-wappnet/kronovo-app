@@ -82,7 +82,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('All Fields are requiered', style:  TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
       ],
     ),
     duration: Duration(seconds: 3),
@@ -226,7 +226,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                       style: subtitleStyle,
                                       decoration: InputDecoration(
                                           prefixIcon: Icon(
-                                            Icons.calendar_today_outlined,
+                                            Icons.calendar_month,
                                             color: Colors.grey,
                                           ),
                                           hintText: "Choose Deadline",
@@ -256,7 +256,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               onPressed: _showMultiSelect,
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -276,7 +276,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                   padding: EdgeInsets.all(8.0),
                                   label: Text(
                                     "${e.split(",").join(" ")}",
-                                    style: TextStyle(fontSize: 16.0),
+                                    style:  TextStyle(fontFamily: 'lato',fontSize: 16.0),
                                   ),
                                 ),
                               ))
@@ -290,13 +290,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                 }else{
                                   await _addTask(widget.id);
                                   setState(() async {
-                                    Navigator.pop(context);
+                                    Navigator.pop(context,'task');
                                   });
                                 }
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -316,6 +316,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
         ));
   }
 
+  // used to user inserted data to task table in database
   Future<void> _addTask(int id) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);

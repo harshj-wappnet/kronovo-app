@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,8 +28,6 @@ class SQLHelper {
   static final project_progress = "project_progress";
   static final project_milestone = "project_milestone";
 
-  //static final project_people = 'project_people';
-
   static final tasks_columnId = 'column_task_id';
   static final task_id = 'task_id';
   static final tasks_name = 'tasks_name';
@@ -49,6 +46,7 @@ class SQLHelper {
   static final subtasks_isEnable = "is_enable_subtasks";
   static final subtasks_progress = "subtasks_progress";
 
+  // main method for database in this method database is opened and all tables is created
   static Future<sql.Database> db() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
@@ -126,6 +124,7 @@ class SQLHelper {
     ''');
   }
 
+  // insert method of project
   static Future<int> createProject(
       String p_name,
       String p_description,
@@ -152,6 +151,7 @@ class SQLHelper {
     return id;
   }
 
+  // insert method of tasks
   static Future<int> createTask(
       int tid,
       String task_name,
@@ -181,6 +181,7 @@ class SQLHelper {
     return id;
   }
 
+  // insert method of sub tasks
   static Future<int> createSubTask(
       int sub_task_id,
       String subtask_name,
@@ -208,6 +209,7 @@ class SQLHelper {
     return id;
   }
 
+  // insert method of membbers
   static Future<int> createMembers(
       String m_name, String m_phone, String m_role) async {
     final db = await SQLHelper.db();
@@ -222,17 +224,20 @@ class SQLHelper {
     return id;
   }
 
+  // retriving all project records available in project table
   static Future<List<Map<String, dynamic>>> getProjects() async {
     final db = await SQLHelper.db();
     return db.query(project_table, orderBy: 'project_id');
   }
 
+  // retriving specific project for project details page using project_id
   static Future<List<Map<String, dynamic>>> getProject(int id) async {
     final db = await SQLHelper.db();
     return db.query(
         project_table, where: 'project_id = ?', whereArgs: [id], limit: 1);
   }
 
+  // retriving all tasks under a specific project using project_id used as foreign key
   static Future<List<Map<String, dynamic>>> getAllTasksByProject(int id) async {
     final db = await SQLHelper.db();
     return await db.rawQuery('''
@@ -240,12 +245,14 @@ class SQLHelper {
     ''');
   }
 
+  // retriving specific task for task details page using task_id
   static Future<List<Map<String, dynamic>>> getTask(int id) async {
     final db = await SQLHelper.db();
     return db.query(
         task_table, where: 'column_task_id = ?', whereArgs: [id]);
   }
 
+  // retriving all sub tasks under a specific task using task_id used as foreign key
   static Future<List<Map<String, dynamic>>> getAllSubTasksByTask(int id) async {
     final db = await SQLHelper.db();
     return await db.rawQuery('''
@@ -253,23 +260,27 @@ class SQLHelper {
     ''');
   }
 
+  // retriving specific sub task for sub task details page using subtask_id
   static Future<List<Map<String, dynamic>>> getSubTask(int id) async {
     final db = await SQLHelper.db();
     return db.query(
         sub_task_table, where: 'column_subtasks_id = ?', whereArgs: [id]);
   }
 
+  // retriving all members records available in database
   static Future<List<Map<String, dynamic>>> getMembers() async {
     final db = await SQLHelper.db();
     return db.query(members_table, orderBy: 'members_id');
   }
 
+  // retriving specific member for members details page using member_id
   static Future<List<Map<String, dynamic>>> getMember(int id) async {
     final db = await SQLHelper.db();
     return db.query(members_table,
         where: 'members_id = ?', whereArgs: [id], limit: 1);
   }
 
+  // this function is used for update details in project table using project id
   static Future<int> updateProject(
       int id,
       String p_name,
@@ -292,6 +303,7 @@ class SQLHelper {
     return result;
   }
 
+  // this fuction is used for delete record in project table using project id
   static Future<void> deleteProject(int id) async {
     final db = await SQLHelper.db();
     try {
@@ -301,7 +313,7 @@ class SQLHelper {
     }
   }
 
-
+  // this function is used for update details in task table using task id
   static Future<int> updateTask(
       int id,
       String u_task_name,
@@ -322,6 +334,7 @@ class SQLHelper {
     return result;
   }
 
+  // this function is used for delete details in task table using task id
   static Future<void> deleteTask(int id) async {
     final db = await SQLHelper.db();
     try {
@@ -331,6 +344,7 @@ class SQLHelper {
     }
   }
 
+  // this function is used for update details in sub task table using subtask id
   static Future<int> updateSubTask(
       int id,
       String u_subtask_name,
@@ -351,6 +365,7 @@ class SQLHelper {
     return result;
   }
 
+  // this function is used for delete details in subtask table using subtask id
   static Future<void> deleteSubTask(int id) async {
     final db = await SQLHelper.db();
     try {
@@ -360,6 +375,8 @@ class SQLHelper {
     }
   }
 
+  /*this method is used for update progress of project
+  it update two value one for progress bar and another is for milestone*/
   static Future<int> updateProgressProject(
       int id,
       double task_progress,
@@ -374,7 +391,9 @@ class SQLHelper {
         project_table, data, where: 'project_id = ?', whereArgs: [id]);
     return result;
   }
-
+  /* this method is used for change values for task table which helps set enable disable
+  property to task
+  * */
   static Future<int> changeValuesTask(
       int id,
       int isEnable,
@@ -388,6 +407,8 @@ class SQLHelper {
     return result;
   }
 
+  /*this method is used for update progress of task
+  it update two value one for progress bar and another is for milestone*/
   static Future<int> updateProgressTask(
       int id,
       double task_progress,
@@ -403,6 +424,9 @@ class SQLHelper {
     return result;
   }
 
+  /* this method is used for change values for subtask table which helps set enable disable
+  property to subtask
+  * */
   static Future<int> changeValuesSubTask(
       int id,
       int isEnable,
@@ -416,6 +440,7 @@ class SQLHelper {
     return result;
   }
 
+  //this method is used to update details of members table using member id
   static Future<int> updateMembers(
       int id, String m_name, String m_phone, String m_role) async {
     final db = await SQLHelper.db();
@@ -429,6 +454,7 @@ class SQLHelper {
     return result;
   }
 
+  // this method is used for delete member using member id
   static Future<void> deleteMembers(int id) async {
     final db = await SQLHelper.db();
     try {

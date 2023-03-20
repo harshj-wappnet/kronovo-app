@@ -4,13 +4,9 @@ import 'package:kronovo_app/utils/theme.dart';
 import '../../databases/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
-import 'package:kronovo_app/pages/home_page.dart';
 
 class CreateProject extends StatefulWidget {
-
-
   CreateProject({super.key});
-
   @override
   State<CreateProject> createState() => _CreateProjectState();
 }
@@ -28,8 +24,8 @@ class _CreateProjectState extends State<CreateProject> {
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members= [];
 
-
-
+  // this method is used for fetch members list.
+  // used as input for assigning members to project
   void loadMembers() async {
     final data = await SQLHelper.getMembers();
 
@@ -38,8 +34,6 @@ class _CreateProjectState extends State<CreateProject> {
       List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
     });
   }
-
-
 
   String _displayText(DateTime? date) {
     if (date != null) {
@@ -81,7 +75,7 @@ class _CreateProjectState extends State<CreateProject> {
     super.dispose();
   }
 
-
+  // used for showing assign members dialog to user
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
@@ -104,40 +98,42 @@ class _CreateProjectState extends State<CreateProject> {
     }
   }
 
+  // used for give alert on not null validation
   final snackBar = SnackBar(
+    behavior: SnackBarBehavior.floating,
+    margin: EdgeInsets.only(bottom: 100,),
     content:   Row(
       children: [
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667), fontFamily: 'lato'),),
       ],
     ),
     duration: Duration(seconds: 3),
     backgroundColor: Colors.white,
   );
 
+  // used for date validation
   final date_snackBar = SnackBar(
     content:   Row(
       children: [
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('End date must be after startDate', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('End date must be after startDate', style: TextStyle(color: Color(0xFFff4667), fontFamily: 'lato'),),
       ],
     ),
     duration: Duration(seconds: 3),
     backgroundColor: Colors.white,
   );
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
 
       appBar: AppBar(
-        title: Text('Create New Project'),
+        title: Text('Create New Project', style: TextStyle(fontFamily: 'lato'),),
         backgroundColor: Colors.green,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -199,7 +195,6 @@ class _CreateProjectState extends State<CreateProject> {
                             ]),
                           ),
                           SizedBox(height: 15.0,),
-
                           Text(
                             "Description",
                             style: titleStyle,
@@ -230,16 +225,12 @@ class _CreateProjectState extends State<CreateProject> {
                                         enabledBorder: UnderlineInputBorder(
                                             borderSide: BorderSide(
                                                 color: Colors.white, width: 0))),
-
                                     onChanged: (_) => setState(() {}),
                                   )
                               ),
                             ]),
                           ),
-
                           SizedBox(height: 15.0,),
-
-
                           Text(
                             "Start Date",
                             style: titleStyle,
@@ -262,7 +253,7 @@ class _CreateProjectState extends State<CreateProject> {
                                     style: subtitleStyle,
                                     decoration: InputDecoration(
                                         prefixIcon: Icon(
-                                          Icons.calendar_today_outlined,
+                                          Icons.calendar_month,
                                           color: Colors.grey,
                                         ),
                                         hintText: "Choose Start Date",
@@ -285,7 +276,6 @@ class _CreateProjectState extends State<CreateProject> {
                               ),
                             ]),
                           ),
-
                           SizedBox(height: 15.0,),
                           Text(
                             "End Date",
@@ -309,7 +299,7 @@ class _CreateProjectState extends State<CreateProject> {
                                     style: subtitleStyle,
                                     decoration: InputDecoration(
                                         prefixIcon: Icon(
-                                          Icons.calendar_today_outlined,
+                                          Icons.calendar_month,
                                           color: Colors.grey,
                                         ),
                                         hintText: "Choose End Date",
@@ -331,15 +321,13 @@ class _CreateProjectState extends State<CreateProject> {
                               ),
                             ]),
                           ),
-
                           SizedBox(height: 15.0,),
-
                           ElevatedButton.icon(
                             icon: Icon(Icons.add),
                             onPressed: _showMultiSelect,
                             style: ButtonStyle(
                               textStyle: MaterialStateProperty.all(
-                                TextStyle(fontSize: 20,color: Colors.white),),
+                                TextStyle(fontSize: 20,color: Colors.white, fontFamily: 'lato'),),
                               shape: MaterialStateProperty.all(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
@@ -359,7 +347,7 @@ class _CreateProjectState extends State<CreateProject> {
                                     padding: EdgeInsets.all(8.0),
                               label: Text(
                                   "${e.split(",").join(" ")}",
-                                style: TextStyle(fontSize: 16.0),
+                                style: TextStyle(fontSize: 16.0, fontFamily: 'lato'),
                               ),
                             ),
                                 ))
@@ -375,13 +363,13 @@ class _CreateProjectState extends State<CreateProject> {
                               }else{
                                 await _addProject();
                                 setState(() {
-                                  Navigator.pop(context, 'update');
+                                  Navigator.pop(context, 'project');
                                 });
                               }
                             },
                             style: ButtonStyle(
                               textStyle: MaterialStateProperty.all(
-                                TextStyle(fontSize: 20,color: Colors.white),),
+                                TextStyle(fontSize: 20,color: Colors.white, fontFamily: 'lato'),),
                               shape: MaterialStateProperty.all(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
@@ -391,7 +379,8 @@ class _CreateProjectState extends State<CreateProject> {
                             ),
                             child: const Text("Create Project"),
                           ),
-                        ]),
+                        ]
+                    ),
                   ),
                 ),
               ],
@@ -402,6 +391,7 @@ class _CreateProjectState extends State<CreateProject> {
     );
   }
 
+  // this method is used insert user data to project table in database
   Future<void> _addProject() async{
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);

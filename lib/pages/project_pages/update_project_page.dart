@@ -28,15 +28,17 @@ class UpdateProjectState extends State<UpdateProject> {
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members= [];
 
+  // this method is used for fetch members list.
+  // used as input for assigning members to project
   void loadMembers() async {
     final data = await SQLHelper.getMembers();
-
     setState(() {
       _listMembers = data;
       List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
     });
   }
 
+  // this method is used for get project data to update
   void getProjectData(int id) async {
     final data = await SQLHelper.getProjects();
     setState(() {
@@ -100,8 +102,6 @@ class UpdateProjectState extends State<UpdateProject> {
     update_project_description_Controller.dispose();
     super.dispose();
   }
-
-
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
@@ -130,7 +130,7 @@ class UpdateProjectState extends State<UpdateProject> {
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('All Fields are requiered', style: TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
       ],
     ),
     duration: Duration(seconds: 3),
@@ -143,7 +143,7 @@ class UpdateProjectState extends State<UpdateProject> {
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('End date must be after startDate', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('End date must be after startDate', style: TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
       ],
     ),
     duration: Duration(seconds: 3),
@@ -154,7 +154,7 @@ class UpdateProjectState extends State<UpdateProject> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Update Project'),
+        title: Text('Update Project', style: TextStyle(fontFamily: 'lato'),),
         centerTitle: true,
         backgroundColor: Colors.green,
         shape: RoundedRectangleBorder(
@@ -281,7 +281,7 @@ class UpdateProjectState extends State<UpdateProject> {
                                       style: subtitleStyle,
                                       decoration: InputDecoration(
                                           prefixIcon: Icon(
-                                            Icons.calendar_today_outlined,
+                                            Icons.calendar_month,
                                             color: Colors.grey,
                                           ),
                                           hintText: "Choose Start Date",
@@ -328,7 +328,7 @@ class UpdateProjectState extends State<UpdateProject> {
                                       style: subtitleStyle,
                                       decoration: InputDecoration(
                                           prefixIcon: Icon(
-                                            Icons.calendar_today_outlined,
+                                            Icons.calendar_month,
                                             color: Colors.grey,
                                           ),
                                           hintText: "Choose End Date",
@@ -359,7 +359,7 @@ class UpdateProjectState extends State<UpdateProject> {
                               onPressed: _showMultiSelect,
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -379,7 +379,7 @@ class UpdateProjectState extends State<UpdateProject> {
                                   padding: EdgeInsets.all(8.0),
                                   label: Text(
                                     "${e.split(",").join(" ")}",
-                                    style: TextStyle(fontSize: 16.0),
+                                    style: TextStyle(fontFamily: 'lato',fontSize: 16.0),
                                   ),
                                 ),
                               ))
@@ -401,7 +401,7 @@ class UpdateProjectState extends State<UpdateProject> {
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -423,6 +423,7 @@ class UpdateProjectState extends State<UpdateProject> {
     );
   }
 
+  // this method is used for update project details using project id
   Future<void> _updateProject(int pid) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);

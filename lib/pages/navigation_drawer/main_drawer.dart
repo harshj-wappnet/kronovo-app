@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kronovo_app/pages/home_page.dart';
 import 'package:kronovo_app/pages/members_page/add_members_page.dart';
-
-
+import 'package:kronovo_app/pages/members_page/members_details_page.dart';
 import 'drawer_header.dart';
-
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({Key? key}) : super(key: key);
@@ -23,6 +21,7 @@ class MainDrawer extends StatelessWidget {
                   "Home",
                   style: TextStyle(
                     fontSize: 18.0,
+                      fontFamily: 'lato'
                   ),
                 ),
                 onTap: () {
@@ -35,10 +34,11 @@ class MainDrawer extends StatelessWidget {
                   "Members",
                   style: TextStyle(
                     fontSize: 18.0,
+                      fontFamily: 'lato'
                   ),
                 ),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => AddMembersPage(),));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => MembersDetailsPage(),));
                 },
               ),
             ],

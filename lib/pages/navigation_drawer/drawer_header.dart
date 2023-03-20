@@ -20,7 +20,7 @@ class _HeaderDrawerState extends State<HeaderDrawer> {
         children: [
           Container(
             margin: EdgeInsets.only(bottom: 10.0),
-            child: Image.asset('assets/images/kronovo-logo.png',height: 100,width: 160,),
+            child: Image.asset('assets/images/kronovo-logo.png',height: 150,width: 220,),
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
             ),

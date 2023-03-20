@@ -25,9 +25,9 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members= [];
 
+  // used to load subtask data for updating by user
   void showSubTasks(int id, int task_id) async {
     final data = await SQLHelper.getAllSubTasksByTask(task_id);
-
     setState(() {
       _listSubTasks = data;
       final existingData = _listSubTasks
@@ -44,7 +44,6 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
 
   void loadMembers() async {
     final data = await SQLHelper.getMembers();
-
     setState(() {
       _listMembers = data;
       List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
@@ -97,7 +96,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
         Icon(
           Icons.warning_amber_rounded,
           color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667)),),
+        ),Text('All Fields are requiered', style:  TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
       ],
     ),
     duration: Duration(seconds: 3),
@@ -115,7 +114,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Update Sub Task'),
+        title: Text('Update Sub Task', style:  TextStyle(fontFamily: 'lato'),),
         centerTitle: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -239,7 +238,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                                       style: subtitleStyle,
                                       decoration: InputDecoration(
                                           prefixIcon: Icon(
-                                            Icons.calendar_today_outlined,
+                                            Icons.calendar_month,
                                             color: Colors.grey,
                                           ),
                                           hintText: "Choose Deadline",
@@ -269,7 +268,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                               onPressed: _showMultiSelect,
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -289,7 +288,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                                   padding: EdgeInsets.all(8.0),
                                   label: Text(
                                     "${e.split(",").join(" ")}",
-                                    style: TextStyle(fontSize: 16.0),
+                                    style:  TextStyle(fontFamily: 'lato',fontSize: 16.0),
                                   ),
                                 ),
                               ))
@@ -309,7 +308,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontSize: 20,color: Colors.white),),
+                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
@@ -330,6 +329,7 @@ class _UpdateSubTaskPageState extends State<UpdateSubTaskPage> {
     );
   }
 
+  // used to update subtask details using subtask id in database
   Future<void> _updateSubTask(int stid) async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);

@@ -3,6 +3,7 @@ import 'package:kronovo_app/pages/sub_task_pages/update_subtask_page.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../utils/theme.dart';
+import '../../widgets/confirmation_dialog.dart';
 
 class SubTaskDetailsPage extends StatefulWidget {
   const SubTaskDetailsPage({Key? key, required this.id, required this.task_id}) : super(key: key);
@@ -22,6 +23,7 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
   String sub_task_peoples = '';
   List<String> _selectedItems = [];
 
+  // use fetch specic subtask record for display using subtask id
   void _showSubTask(int? id) async {
     if (id != null) {
       final data = await SQLHelper.getSubTask(id);
@@ -50,7 +52,7 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Sub Task Details'),
+        title: Text('Sub Task Details', style: TextStyle(fontFamily: 'lato'),),
         centerTitle: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -139,6 +141,7 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                                 label: Text(
                                   "${e.split(",").join()}",
                                   style: TextStyle(
+                                    fontFamily: 'lato',
                                     fontSize: 16.0,
                                   ),
                                 ),
@@ -186,6 +189,8 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(Colors.blueAccent),
                           foregroundColor: MaterialStateProperty.all(Colors.white),
+                          textStyle: MaterialStateProperty.all(
+                            TextStyle(fontFamily: 'lato',fontSize: 16,color: Colors.white),),
                           fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
                           shape: MaterialStateProperty.all(
                             RoundedRectangleBorder(
@@ -200,15 +205,29 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                     Row(children: [
                       ElevatedButton(
                         onPressed: () {
-                          SQLHelper.deleteSubTask(widget.id);
-                          setState(() {
-                            Navigator.pop(context);
-                          });
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ConfirmationDialog(
+                                title: 'Delete Project',
+                                content: 'Are you sure you want to delete this Projet ?',
+                                onConfirm: () {
+                                  SQLHelper.deleteSubTask(widget.id);
+                                  setState(() {
+                                    Navigator.pop(context);
+                                  });
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          );
                         },
                         child: const Text('DELETE SUB TASK'),
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(Colors.red),
                           foregroundColor: MaterialStateProperty.all(Colors.white),
+                          textStyle: MaterialStateProperty.all(
+                            TextStyle(fontFamily: 'lato',fontSize: 16,color: Colors.white),),
                           fixedSize: MaterialStateProperty.all(Size(wp(90, context), 50)),
                           shape: MaterialStateProperty.all(
                             RoundedRectangleBorder(
@@ -219,7 +238,6 @@ class _SubTaskDetailsPageState extends State<SubTaskDetailsPage> {
                       )
                     ]
                     ),
-
                     SizedBox(
                       height: hp(15, context),
                     ),
