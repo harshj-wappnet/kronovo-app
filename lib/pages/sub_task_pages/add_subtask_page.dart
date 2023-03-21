@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../utils/theme.dart';
@@ -7,6 +9,7 @@ import '../../widgets/assignmembers_dialog.dart';
 class AddSubTaskPage extends StatefulWidget {
   const AddSubTaskPage({Key? key, required this.id}) : super(key: key);
   final id;
+
   @override
   State<AddSubTaskPage> createState() => _AddSubTaskPageState();
 }
@@ -16,16 +19,20 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   final sub_task_description = TextEditingController();
   List<String> _selectedItems = [];
   String people_data = '';
+  int subtask_counter = 0;
   List<Map<String, dynamic>> _listMembers = [];
-  List<String> members= [];
+  List<String> members = [];
   final _formKey_sub_task = GlobalKey<FormState>();
+
   void loadMembers(int id) async {
     final data = await SQLHelper.getTask(id);
     setState(() {
       _listMembers = data;
       final subtask_data =
-      _listMembers.firstWhere((element) => element['column_task_id'] == id);
-      people_data = subtask_data['tasks_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+          _listMembers.firstWhere((element) => element['column_task_id'] == id);
+      people_data = subtask_data['tasks_assigned_peoples']
+          .replaceAll('[', '')
+          .replaceAll(']', '');
       members = people_data.split(",");
     });
   }
@@ -40,6 +47,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
 
   final TextEditingController endDateController = TextEditingController();
   DateTime? endDate;
+
   Future<DateTime?> pickDate() async {
     return await showDatePicker(
       context: this.context,
@@ -71,19 +79,6 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
     }
   }
 
-  final snackBar = SnackBar(
-    content:   Row(
-      children: [
-        Icon(
-          Icons.warning_amber_rounded,
-          color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
-      ],
-    ),
-    duration: Duration(seconds: 3),
-    backgroundColor: Colors.white,
-  );
-
   @override
   void initState() {
     super.initState();
@@ -97,7 +92,10 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Sub Task', style: TextStyle(fontFamily: 'lato'),),
+          title: Text(
+            'Add Sub Task',
+            style: TextStyle(fontFamily: 'lato'),
+          ),
           centerTitle: true,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -116,11 +114,13 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
             child: Center(
               child: Column(
                 children: [
-                  SizedBox(height: 20.0,),
+                  SizedBox(
+                    height: 20.0,
+                  ),
                   Form(
                     key: _formKey_sub_task,
                     child: Container(
-                      padding: EdgeInsets.only(left: 20.0,right: 20.0),
+                      padding: EdgeInsets.only(left: 20.0, right: 20.0),
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -133,32 +133,34 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                               margin: EdgeInsets.only(top: 8.0),
                               padding: EdgeInsets.only(left: 14),
                               decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  border: Border.all(
+                                      color: Colors.grey, width: 1.0),
                                   borderRadius: BorderRadius.circular(12)),
                               child: Row(children: [
                                 Expanded(
                                     child: TextFormField(
-                                      autovalidateMode:
+                                  autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                      autofocus: false,
-                                      cursorColor: Colors.grey[700],
-                                      controller: sub_task_title,
-                                      style: subtitleStyle,
-                                      decoration: InputDecoration(
-                                          hintText: "Enter Title",
-                                          hintStyle: subtitleStyle,
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0)),
-                                          enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0))),
-                                      onChanged: (_) => setState(() {}),
-                                    )
-                                ),
+                                  autofocus: false,
+                                  cursorColor: Colors.grey[700],
+                                  controller: sub_task_title,
+                                  style: subtitleStyle,
+                                  decoration: InputDecoration(
+                                      hintText: "Enter Title",
+                                      hintStyle: subtitleStyle,
+                                      focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0)),
+                                      enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0))),
+                                  onChanged: (_) => setState(() {}),
+                                )),
                               ]),
                             ),
-                            SizedBox(height: 15.0,),
+                            SizedBox(
+                              height: 15.0,
+                            ),
 
                             Text(
                               "Description",
@@ -169,35 +171,36 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                               margin: EdgeInsets.only(top: 8.0),
                               padding: EdgeInsets.only(left: 14),
                               decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  border: Border.all(
+                                      color: Colors.grey, width: 1.0),
                                   borderRadius: BorderRadius.circular(12)),
                               child: Row(children: [
                                 Expanded(
                                     child: TextFormField(
-                                      maxLines: 4,
-                                      autovalidateMode:
+                                  maxLines: 4,
+                                  autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                      autofocus: false,
-                                      cursorColor: Colors.grey[700],
-                                      controller: sub_task_description,
-                                      style: subtitleStyle,
-                                      decoration: InputDecoration(
-                                          hintText: "Enter Description",
-                                          hintStyle: subtitleStyle,
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0)),
-                                          enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0))),
-
-                                      onChanged: (_) => setState(() {}),
-                                    )
-                                ),
+                                  autofocus: false,
+                                  cursorColor: Colors.grey[700],
+                                  controller: sub_task_description,
+                                  style: subtitleStyle,
+                                  decoration: InputDecoration(
+                                      hintText: "Enter Description",
+                                      hintStyle: subtitleStyle,
+                                      focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0)),
+                                      enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0))),
+                                  onChanged: (_) => setState(() {}),
+                                )),
                               ]),
                             ),
 
-                            SizedBox(height: 15.0,),
+                            SizedBox(
+                              height: 15.0,
+                            ),
                             Text(
                               "Deadline",
                               style: titleStyle,
@@ -207,80 +210,98 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                               margin: EdgeInsets.only(top: 8.0),
                               padding: EdgeInsets.only(left: 14),
                               decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  border: Border.all(
+                                      color: Colors.grey, width: 1.0),
                                   borderRadius: BorderRadius.circular(12)),
                               child: Row(children: [
                                 Expanded(
                                     child: TextFormField(
-                                      autovalidateMode:
+                                  autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                      autofocus: false,
-                                      readOnly: true,
-                                      cursorColor: Colors.grey[700],
-                                      controller: endDateController,
-                                      style: subtitleStyle,
-                                      decoration: InputDecoration(
-                                          prefixIcon: Icon(
-                                            Icons.calendar_month,
-                                            color: Colors.grey,
-                                          ),
-                                          hintText: "Choose Deadline",
-                                          hintStyle: subtitleStyle,
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0)),
-                                          enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0))),
-                                      onTap: () async {
-                                        endDate = await pickDate();
-                                        endDateController.text =
-                                            _displayText(endDate);
-                                        setState(() {});
-                                      },
-                                      onChanged: (_) => setState(() {}),
-                                    )
-                                ),
+                                  autofocus: false,
+                                  readOnly: true,
+                                  cursorColor: Colors.grey[700],
+                                  controller: endDateController,
+                                  style: subtitleStyle,
+                                  decoration: InputDecoration(
+                                      prefixIcon: Icon(
+                                        Icons.calendar_month,
+                                        color: Colors.grey,
+                                      ),
+                                      hintText: "Choose Deadline",
+                                      hintStyle: subtitleStyle,
+                                      focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0)),
+                                      enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0))),
+                                  onTap: () async {
+                                    endDate = await pickDate();
+                                    endDateController.text =
+                                        _displayText(endDate);
+                                    setState(() {});
+                                  },
+                                  onChanged: (_) => setState(() {}),
+                                )),
                               ]),
                             ),
-                            SizedBox(height: 15.0,),
+                            SizedBox(
+                              height: 15.0,
+                            ),
                             ElevatedButton.icon(
                               icon: Icon(Icons.add),
                               onPressed: _showMultiSelect,
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
+                                  TextStyle(
+                                      fontFamily: 'lato',
+                                      fontSize: 20,
+                                      color: Colors.white),
+                                ),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
-                                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
+                                minimumSize: MaterialStateProperty.all(
+                                    const Size(150, 50)),
                               ),
                               label: const Text('Assign Peoples'),
                             ),
-                            SizedBox(height: 10.0,),
+                            SizedBox(
+                              height: 10.0,
+                            ),
                             // display selected items
                             Wrap(
                               children: _selectedItems
                                   .map((e) => Container(
-                                margin: EdgeInsets.only(left: 6.0,right: 6.0),
-                                child: Chip(
-                                  padding: EdgeInsets.all(8.0),
-                                  label: Text(
-                                    "${e.split(",").join(" ")}",
-                                    style: TextStyle(fontFamily: 'lato',fontSize: 16.0),
-                                  ),
-                                ),
-                              ))
+                                        margin: EdgeInsets.only(
+                                            left: 6.0, right: 6.0),
+                                        child: Chip(
+                                          padding: EdgeInsets.all(8.0),
+                                          label: Text(
+                                            "${e.split(",").join(" ")}",
+                                            style: TextStyle(
+                                                fontFamily: 'lato',
+                                                fontSize: 16.0),
+                                          ),
+                                        ),
+                                      ))
                                   .toList(),
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                if (sub_task_title.text.isEmpty || sub_task_description.text.isEmpty || endDateController.text.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      snackBar);
-                                }else{
+                                if (sub_task_title.text.isEmpty ||
+                                    sub_task_description.text.isEmpty ||
+                                    endDateController.text.isEmpty) {
+                                  showTopSnackBar(
+                                    Overlay.of(context),
+                                    const CustomSnackBar.error(
+                                      message: 'All Fields are requiered',
+                                    ),
+                                  );
+                                } else {
                                   await _addSubTask(widget.id);
                                   setState(() async {
                                     Navigator.pop(context, 'subtask');
@@ -289,13 +310,18 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
+                                  TextStyle(
+                                      fontFamily: 'lato',
+                                      fontSize: 20,
+                                      color: Colors.white),
+                                ),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
-                                minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
+                                minimumSize: MaterialStateProperty.all(
+                                    Size(wp(100, context), 50)),
                               ),
                               child: const Text("ADD Sub Task"),
                             ),
@@ -312,7 +338,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   // used to insert user input data to sub task table in database
   Future<void> _addSubTask(int id) async {
     String current_date = DateTime.now().toString();
-    // String data = json.encode(_selectedItems);
+    subtask_counter++;
     await SQLHelper.createSubTask(
         id,
         sub_task_title.text,
@@ -321,7 +347,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
         _selectedItems.toString(),
         0,
         0.0,
-        current_date
-       );
+        subtask_counter,
+        current_date);
   }
 }

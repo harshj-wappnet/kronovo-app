@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import '../../databases/sql_helper.dart';
 import '../../utils/responsive.dart';
 import '../../utils/theme.dart';
@@ -19,7 +21,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
   List<String> _selectedItems = [];
   String people_data = '';
   List<Map<String, dynamic>> _listMembers = [];
-  List<String> members= [];
+  List<String> members = [];
+  int task_counter = 0;
 
   String _displayText(DateTime? date) {
     if (date != null) {
@@ -30,7 +33,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   final TextEditingController endDateController = TextEditingController();
-  DateTime?  endDate;
+  DateTime? endDate;
 
   Future<DateTime?> pickDate() async {
     return await showDatePicker(
@@ -43,12 +46,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   void loadMembers(int id) async {
     final data = await SQLHelper.getProject(id);
-
     setState(() {
       _listMembers = data;
       final project_data =
-      _listMembers.firstWhere((element) => element['project_id'] == id);
-      people_data = project_data['project_assigned_peoples'].replaceAll('[', '').replaceAll(']','');
+          _listMembers.firstWhere((element) => element['project_id'] == id);
+      people_data = project_data['project_assigned_peoples']
+          .replaceAll('[', '')
+          .replaceAll(']', '');
       members = people_data.split(",");
     });
   }
@@ -56,7 +60,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
   void _showMultiSelect() async {
     // a list of selectable items
     // these items can be hard-coded or dynamically fetched from a database/API
-
 
     final List<String>? results = await showDialog(
       context: this.context,
@@ -75,19 +78,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
       });
     }
   }
-
-  final snackBar = SnackBar(
-    content:   Row(
-      children: [
-        Icon(
-          Icons.warning_amber_rounded,
-          color: Colors.red,
-        ),Text('All Fields are requiered', style:  TextStyle(fontFamily: 'lato',color: Color(0xFFff4667)),),
-      ],
-    ),
-    duration: Duration(seconds: 3),
-    backgroundColor: Colors.white,
-  );
 
   @override
   void initState() {
@@ -121,11 +111,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
             child: Center(
               child: Column(
                 children: [
-                  SizedBox(height: 20.0,),
+                  SizedBox(
+                    height: 20.0,
+                  ),
                   Form(
                     key: _formKey_task,
                     child: Container(
-                      padding: EdgeInsets.only(left: 20.0,right: 20.0),
+                      padding: EdgeInsets.only(left: 20.0, right: 20.0),
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -138,32 +130,34 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               margin: EdgeInsets.only(top: 8.0),
                               padding: EdgeInsets.only(left: 14),
                               decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  border: Border.all(
+                                      color: Colors.grey, width: 1.0),
                                   borderRadius: BorderRadius.circular(12)),
                               child: Row(children: [
                                 Expanded(
                                     child: TextFormField(
-                                      autovalidateMode:
+                                  autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                      autofocus: false,
-                                      cursorColor: Colors.grey[700],
-                                      controller: _task_title,
-                                      style: subtitleStyle,
-                                      decoration: InputDecoration(
-                                          hintText: "Enter Title",
-                                          hintStyle: subtitleStyle,
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0)),
-                                          enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0))),
-                                      onChanged: (_) => setState(() {}),
-                                    )
-                                ),
+                                  autofocus: false,
+                                  cursorColor: Colors.grey[700],
+                                  controller: _task_title,
+                                  style: subtitleStyle,
+                                  decoration: InputDecoration(
+                                      hintText: "Enter Title",
+                                      hintStyle: subtitleStyle,
+                                      focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0)),
+                                      enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0))),
+                                  onChanged: (_) => setState(() {}),
+                                )),
                               ]),
                             ),
-                            SizedBox(height: 15.0,),
+                            SizedBox(
+                              height: 15.0,
+                            ),
 
                             Text(
                               "Description",
@@ -174,35 +168,36 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               margin: EdgeInsets.only(top: 8.0),
                               padding: EdgeInsets.only(left: 14),
                               decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  border: Border.all(
+                                      color: Colors.grey, width: 1.0),
                                   borderRadius: BorderRadius.circular(12)),
                               child: Row(children: [
                                 Expanded(
                                     child: TextFormField(
-                                      maxLines: 4,
-                                      autovalidateMode:
+                                  maxLines: 4,
+                                  autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                      autofocus: false,
-                                      cursorColor: Colors.grey[700],
-                                      controller: _task_description,
-                                      style: subtitleStyle,
-                                      decoration: InputDecoration(
-                                          hintText: "Enter Description",
-                                          hintStyle: subtitleStyle,
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0)),
-                                          enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0))),
-
-                                      onChanged: (_) => setState(() {}),
-                                    )
-                                ),
+                                  autofocus: false,
+                                  cursorColor: Colors.grey[700],
+                                  controller: _task_description,
+                                  style: subtitleStyle,
+                                  decoration: InputDecoration(
+                                      hintText: "Enter Description",
+                                      hintStyle: subtitleStyle,
+                                      focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0)),
+                                      enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0))),
+                                  onChanged: (_) => setState(() {}),
+                                )),
                               ]),
                             ),
 
-                            SizedBox(height: 15.0,),
+                            SizedBox(
+                              height: 15.0,
+                            ),
                             Text(
                               "Deadline",
                               style: titleStyle,
@@ -212,97 +207,120 @@ class _AddTaskPageState extends State<AddTaskPage> {
                               margin: EdgeInsets.only(top: 8.0),
                               padding: EdgeInsets.only(left: 14),
                               decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey, width: 1.0),
+                                  border: Border.all(
+                                      color: Colors.grey, width: 1.0),
                                   borderRadius: BorderRadius.circular(12)),
                               child: Row(children: [
                                 Expanded(
                                     child: TextFormField(
-                                      autovalidateMode:
+                                  autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                      autofocus: false,
-                                      readOnly: true,
-                                      cursorColor: Colors.grey[700],
-                                      controller: endDateController,
-                                      style: subtitleStyle,
-                                      decoration: InputDecoration(
-                                          prefixIcon: Icon(
-                                            Icons.calendar_month,
-                                            color: Colors.grey,
-                                          ),
-                                          hintText: "Choose Deadline",
-                                          hintStyle: subtitleStyle,
-                                          focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0)),
-                                          enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 0))),
-                                      onTap: () async {
-                                        endDate = await pickDate();
-                                        endDateController.text =
-                                            _displayText(endDate);
-                                        setState(() {});
-                                      },
-                                      onChanged: (_) => setState(() {}),
-                                    )
-                                ),
+                                  autofocus: false,
+                                  readOnly: true,
+                                  cursorColor: Colors.grey[700],
+                                  controller: endDateController,
+                                  style: subtitleStyle,
+                                  decoration: InputDecoration(
+                                      prefixIcon: Icon(
+                                        Icons.calendar_month,
+                                        color: Colors.grey,
+                                      ),
+                                      hintText: "Choose Deadline",
+                                      hintStyle: subtitleStyle,
+                                      focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0)),
+                                      enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.white, width: 0))),
+                                  onTap: () async {
+                                    endDate = await pickDate();
+                                    endDateController.text =
+                                        _displayText(endDate);
+                                    setState(() {});
+                                  },
+                                  onChanged: (_) => setState(() {}),
+                                )),
                               ]),
                             ),
 
-                            SizedBox(height: 15.0,),
+                            SizedBox(
+                              height: 15.0,
+                            ),
 
                             ElevatedButton.icon(
                               icon: Icon(Icons.add),
                               onPressed: _showMultiSelect,
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
+                                  TextStyle(
+                                      fontFamily: 'lato',
+                                      fontSize: 20,
+                                      color: Colors.white),
+                                ),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
-                                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
+                                minimumSize: MaterialStateProperty.all(
+                                    const Size(150, 50)),
                               ),
                               label: const Text('Assign Peoples'),
                             ),
-                            SizedBox(height: 10.0,),
+                            SizedBox(
+                              height: 10.0,
+                            ),
                             // display selected items
                             Wrap(
                               children: _selectedItems
                                   .map((e) => Container(
-                                margin: EdgeInsets.only(left: 6.0,right: 6.0),
-                                child: Chip(
-                                  padding: EdgeInsets.all(8.0),
-                                  label: Text(
-                                    "${e.split(",").join(" ")}",
-                                    style:  TextStyle(fontFamily: 'lato',fontSize: 16.0),
-                                  ),
-                                ),
-                              ))
+                                        margin: EdgeInsets.only(
+                                            left: 6.0, right: 6.0),
+                                        child: Chip(
+                                          padding: EdgeInsets.all(8.0),
+                                          label: Text(
+                                            "${e.split(",").join(" ")}",
+                                            style: TextStyle(
+                                                fontFamily: 'lato',
+                                                fontSize: 16.0),
+                                          ),
+                                        ),
+                                      ))
                                   .toList(),
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                if (_task_title.text.isEmpty || _task_description.text.isEmpty || endDateController.text.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      snackBar);
-                                }else{
+                                if (_task_title.text.isEmpty ||
+                                    _task_description.text.isEmpty ||
+                                    endDateController.text.isEmpty) {
+                                  showTopSnackBar(
+                                    Overlay.of(context),
+                                    const CustomSnackBar.error(
+                                      message: 'All Fields are requiered',
+                                    ),
+                                  );
+                                } else {
                                   await _addTask(widget.id);
                                   setState(() async {
-                                    Navigator.pop(context,'task');
+                                    Navigator.pop(context, 'task');
                                   });
                                 }
                               },
                               style: ButtonStyle(
                                 textStyle: MaterialStateProperty.all(
-                                  TextStyle(fontFamily: 'lato',fontSize: 20,color: Colors.white),),
+                                  TextStyle(
+                                      fontFamily: 'lato',
+                                      fontSize: 20,
+                                      color: Colors.white),
+                                ),
                                 shape: MaterialStateProperty.all(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
-                                minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
+                                minimumSize: MaterialStateProperty.all(
+                                    Size(wp(100, context), 50)),
                               ),
                               child: const Text("ADD Task"),
                             ),
@@ -319,8 +337,17 @@ class _AddTaskPageState extends State<AddTaskPage> {
   // used to user inserted data to task table in database
   Future<void> _addTask(int id) async {
     String current_date = DateTime.now().toString();
-    // String data = json.encode(_selectedItems);
-    await SQLHelper.createTask(id, _task_title.text, _task_description.text,
-        endDateController.text,_selectedItems.toString(),0,0.0,0,current_date);
+    task_counter++;
+    await SQLHelper.createTask(
+        id,
+        _task_title.text,
+        _task_description.text,
+        endDateController.text,
+        _selectedItems.toString(),
+        0,
+        0.0,
+        0,
+        task_counter,
+        current_date);
   }
 }

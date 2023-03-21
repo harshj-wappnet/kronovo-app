@@ -1,12 +1,15 @@
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:kronovo_app/utils/theme.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import '../../databases/sql_helper.dart';
 import '../../widgets/assignmembers_dialog.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 
 class CreateProject extends StatefulWidget {
   CreateProject({super.key});
+
   @override
   State<CreateProject> createState() => _CreateProjectState();
 }
@@ -22,7 +25,7 @@ class _CreateProjectState extends State<CreateProject> {
   List<String> _selectedItems = [];
   String people_data = '';
   List<Map<String, dynamic>> _listMembers = [];
-  List<String> members= [];
+  List<String> members = [];
 
   // this method is used for fetch members list.
   // used as input for assigning members to project
@@ -31,7 +34,8 @@ class _CreateProjectState extends State<CreateProject> {
 
     setState(() {
       _listMembers = data;
-      List.generate(_listMembers.length, (index) => members.add(_listMembers[index]['members_name']));
+      List.generate(_listMembers.length,
+          (index) => members.add(_listMembers[index]['members_name']));
     });
   }
 
@@ -92,48 +96,21 @@ class _CreateProjectState extends State<CreateProject> {
       setState(() {
         _selectedItems = results;
         // String data = jsonEncode(_selectedItems);
-       // _selectedItems.forEach((element) { people_data += element; people_data += ','; });
+        // _selectedItems.forEach((element) { people_data += element; people_data += ','; });
         //print(people_data);
       });
     }
   }
 
-  // used for give alert on not null validation
-  final snackBar = SnackBar(
-    behavior: SnackBarBehavior.floating,
-    margin: EdgeInsets.only(bottom: 100,),
-    content:   Row(
-      children: [
-        Icon(
-          Icons.warning_amber_rounded,
-          color: Colors.red,
-        ),Text('All Fields are requiered', style: TextStyle(color: Color(0xFFff4667), fontFamily: 'lato'),),
-      ],
-    ),
-    duration: Duration(seconds: 3),
-    backgroundColor: Colors.white,
-  );
-
-  // used for date validation
-  final date_snackBar = SnackBar(
-    content:   Row(
-      children: [
-        Icon(
-          Icons.warning_amber_rounded,
-          color: Colors.red,
-        ),Text('End date must be after startDate', style: TextStyle(color: Color(0xFFff4667), fontFamily: 'lato'),),
-      ],
-    ),
-    duration: Duration(seconds: 3),
-    backgroundColor: Colors.white,
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-        title: Text('Create New Project', style: TextStyle(fontFamily: 'lato'),),
+        centerTitle: true,
+        title: Text(
+          'Create New Project',
+          style: TextStyle(fontFamily: 'lato'),
+        ),
         backgroundColor: Colors.green,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -152,11 +129,13 @@ class _CreateProjectState extends State<CreateProject> {
           child: Center(
             child: Column(
               children: [
-                SizedBox(height: 20.0,),
+                SizedBox(
+                  height: 20.0,
+                ),
                 Form(
                   key: _formKey_project,
                   child: Container(
-                    padding: EdgeInsets.only(left: 20.0,right: 20.0),
+                    padding: EdgeInsets.only(left: 20.0, right: 20.0),
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -169,32 +148,34 @@ class _CreateProjectState extends State<CreateProject> {
                             margin: EdgeInsets.only(top: 8.0),
                             padding: EdgeInsets.only(left: 14),
                             decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey, width: 1.0),
+                                border:
+                                    Border.all(color: Colors.grey, width: 1.0),
                                 borderRadius: BorderRadius.circular(12)),
                             child: Row(children: [
                               Expanded(
                                   child: TextFormField(
-                                    autovalidateMode:
+                                autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
-                                    autofocus: false,
-                                    cursorColor: Colors.grey[700],
-                                    controller: project_title_Controller,
-                                    style: subtitleStyle,
-                                    decoration: InputDecoration(
-                                        hintText: "Enter Title",
-                                        hintStyle: subtitleStyle,
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0)),
-                                        enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0))),
-                                    onChanged: (_) => setState(() {}),
-                                  )
-                              ),
+                                autofocus: false,
+                                cursorColor: Colors.grey[700],
+                                controller: project_title_Controller,
+                                style: subtitleStyle,
+                                decoration: InputDecoration(
+                                    hintText: "Enter Title",
+                                    hintStyle: subtitleStyle,
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0)),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0))),
+                                onChanged: (_) => setState(() {}),
+                              )),
                             ]),
                           ),
-                          SizedBox(height: 15.0,),
+                          SizedBox(
+                            height: 15.0,
+                          ),
                           Text(
                             "Description",
                             style: titleStyle,
@@ -204,33 +185,35 @@ class _CreateProjectState extends State<CreateProject> {
                             margin: EdgeInsets.only(top: 8.0),
                             padding: EdgeInsets.only(left: 14),
                             decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey, width: 1.0),
+                                border:
+                                    Border.all(color: Colors.grey, width: 1.0),
                                 borderRadius: BorderRadius.circular(12)),
                             child: Row(children: [
                               Expanded(
                                   child: TextFormField(
-                                    maxLines: 4,
-                                    autovalidateMode:
+                                maxLines: 4,
+                                autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
-                                    autofocus: false,
-                                    cursorColor: Colors.grey[700],
-                                    controller: project_description_Controller,
-                                    style: subtitleStyle,
-                                    decoration: InputDecoration(
-                                        hintText: "Enter Description",
-                                        hintStyle: subtitleStyle,
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0)),
-                                        enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0))),
-                                    onChanged: (_) => setState(() {}),
-                                  )
-                              ),
+                                autofocus: false,
+                                cursorColor: Colors.grey[700],
+                                controller: project_description_Controller,
+                                style: subtitleStyle,
+                                decoration: InputDecoration(
+                                    hintText: "Enter Description",
+                                    hintStyle: subtitleStyle,
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0)),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0))),
+                                onChanged: (_) => setState(() {}),
+                              )),
                             ]),
                           ),
-                          SizedBox(height: 15.0,),
+                          SizedBox(
+                            height: 15.0,
+                          ),
                           Text(
                             "Start Date",
                             style: titleStyle,
@@ -240,43 +223,45 @@ class _CreateProjectState extends State<CreateProject> {
                             margin: EdgeInsets.only(top: 8.0),
                             padding: EdgeInsets.only(left: 14),
                             decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey, width: 1.0),
+                                border:
+                                    Border.all(color: Colors.grey, width: 1.0),
                                 borderRadius: BorderRadius.circular(12)),
                             child: Row(children: [
                               Expanded(
                                   child: TextFormField(
-                                    autovalidateMode:
+                                autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
-                                    autofocus: false,
-                                    cursorColor: Colors.grey[700],
-                                    controller: startDateController,
-                                    style: subtitleStyle,
-                                    decoration: InputDecoration(
-                                        prefixIcon: Icon(
-                                          Icons.calendar_month,
-                                          color: Colors.grey,
-                                        ),
-                                        hintText: "Choose Start Date",
-                                        hintStyle: subtitleStyle,
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0)),
-                                        enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0))),
-                                    onTap: () async {
-                                      startDate = await pickDate();
-                                      startDateController.text =
-                                          _displayText(startDate);
-                                      setState(() {});
-                                    },
-                                    readOnly: true,
-                                    onChanged: (_) => setState(() {}),
-                                  )
-                              ),
+                                autofocus: false,
+                                cursorColor: Colors.grey[700],
+                                controller: startDateController,
+                                style: subtitleStyle,
+                                decoration: InputDecoration(
+                                    prefixIcon: Icon(
+                                      Icons.calendar_month,
+                                      color: Colors.grey,
+                                    ),
+                                    hintText: "Choose Start Date",
+                                    hintStyle: subtitleStyle,
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0)),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0))),
+                                onTap: () async {
+                                  startDate = await pickDate();
+                                  startDateController.text =
+                                      _displayText(startDate);
+                                  setState(() {});
+                                },
+                                readOnly: true,
+                                onChanged: (_) => setState(() {}),
+                              )),
                             ]),
                           ),
-                          SizedBox(height: 15.0,),
+                          SizedBox(
+                            height: 15.0,
+                          ),
                           Text(
                             "End Date",
                             style: titleStyle,
@@ -286,81 +271,106 @@ class _CreateProjectState extends State<CreateProject> {
                             margin: EdgeInsets.only(top: 8.0),
                             padding: EdgeInsets.only(left: 14),
                             decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey, width: 1.0),
+                                border:
+                                    Border.all(color: Colors.grey, width: 1.0),
                                 borderRadius: BorderRadius.circular(12)),
                             child: Row(children: [
                               Expanded(
                                   child: TextFormField(
-                                    autovalidateMode:
+                                autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
-                                    cursorColor: Colors.grey[700],
-                                    controller: endDateController,
-                                    readOnly: true,
-                                    style: subtitleStyle,
-                                    decoration: InputDecoration(
-                                        prefixIcon: Icon(
-                                          Icons.calendar_month,
-                                          color: Colors.grey,
-                                        ),
-                                        hintText: "Choose End Date",
-                                        hintStyle: subtitleStyle,
-                                        focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0)),
-                                        enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.white, width: 0))),
-                                    onTap: () async {
-                                      endDate = await pickDate();
-                                      endDateController.text =
-                                          _displayText(endDate);
-                                      setState(() {});
-                                    },
-                                    onChanged: (_) => setState(() {}),
-                                  )
-                              ),
+                                cursorColor: Colors.grey[700],
+                                controller: endDateController,
+                                readOnly: true,
+                                style: subtitleStyle,
+                                decoration: InputDecoration(
+                                    prefixIcon: Icon(
+                                      Icons.calendar_month,
+                                      color: Colors.grey,
+                                    ),
+                                    hintText: "Choose End Date",
+                                    hintStyle: subtitleStyle,
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0)),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 0))),
+                                onTap: () async {
+                                  endDate = await pickDate();
+                                  endDateController.text =
+                                      _displayText(endDate);
+                                  setState(() {});
+                                },
+                                onChanged: (_) => setState(() {}),
+                              )),
                             ]),
                           ),
-                          SizedBox(height: 15.0,),
+                          SizedBox(
+                            height: 15.0,
+                          ),
                           ElevatedButton.icon(
                             icon: Icon(Icons.add),
                             onPressed: _showMultiSelect,
                             style: ButtonStyle(
                               textStyle: MaterialStateProperty.all(
-                                TextStyle(fontSize: 20,color: Colors.white, fontFamily: 'lato'),),
+                                TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontFamily: 'lato'),
+                              ),
                               shape: MaterialStateProperty.all(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                              minimumSize: MaterialStateProperty.all(const Size(150, 50)),
+                              minimumSize: MaterialStateProperty.all(
+                                  const Size(150, 50)),
                             ),
                             label: const Text('Assign Peoples'),
                           ),
-                          SizedBox(height: 10.0,),
+                          SizedBox(
+                            height: 10.0,
+                          ),
                           // display selected items
                           Wrap(
                             children: _selectedItems
                                 .map((e) => Container(
-                              margin: EdgeInsets.only(left: 6.0,right: 6.0),
-                                  child: Chip(
-                                    padding: EdgeInsets.all(8.0),
-                              label: Text(
-                                  "${e.split(",").join(" ")}",
-                                style: TextStyle(fontSize: 16.0, fontFamily: 'lato'),
-                              ),
-                            ),
-                                ))
+                                      margin: EdgeInsets.only(
+                                          left: 6.0, right: 6.0),
+                                      child: Chip(
+                                        padding: EdgeInsets.all(8.0),
+                                        label: Text(
+                                          "${e.split(",").join(" ")}",
+                                          style: TextStyle(
+                                              fontSize: 16.0,
+                                              fontFamily: 'lato'),
+                                        ),
+                                      ),
+                                    ))
                                 .toList(),
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              if (project_title_Controller.text.isEmpty || project_description_Controller.text.isEmpty || startDateController.text.isEmpty || endDateController.text.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    snackBar);
-                              }else if(endDate!.isBefore(startDate!)){
-                                ScaffoldMessenger.of(context).showSnackBar(date_snackBar);
-                              }else{
+                              if (project_title_Controller.text.isEmpty ||
+                                  project_description_Controller.text.isEmpty ||
+                                  startDateController.text.isEmpty ||
+                                  endDateController.text.isEmpty) {
+                                showTopSnackBar(
+                                  Overlay.of(context),
+                                  const CustomSnackBar.error(
+                                    message: 'All Fields are requiered',
+                                  ),
+                                );
+                              } else if (endDate!.isBefore(startDate!)) {
+                                showTopSnackBar(
+                                  Overlay.of(context),
+                                  const CustomSnackBar.error(
+                                    message:
+                                        'End Date must be after Start Date',
+                                  ),
+                                );
+                              } else {
                                 await _addProject();
                                 setState(() {
                                   Navigator.pop(context, 'project');
@@ -369,18 +379,22 @@ class _CreateProjectState extends State<CreateProject> {
                             },
                             style: ButtonStyle(
                               textStyle: MaterialStateProperty.all(
-                                TextStyle(fontSize: 20,color: Colors.white, fontFamily: 'lato'),),
+                                TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontFamily: 'lato'),
+                              ),
                               shape: MaterialStateProperty.all(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                              minimumSize: MaterialStateProperty.all(Size(wp(100, context), 50)),
+                              minimumSize: MaterialStateProperty.all(
+                                  Size(wp(100, context), 50)),
                             ),
                             child: const Text("Create Project"),
                           ),
-                        ]
-                    ),
+                        ]),
                   ),
                 ),
               ],
@@ -392,9 +406,17 @@ class _CreateProjectState extends State<CreateProject> {
   }
 
   // this method is used insert user data to project table in database
-  Future<void> _addProject() async{
+  Future<void> _addProject() async {
     String current_date = DateTime.now().toString();
     // String data = json.encode(_selectedItems);
-    await SQLHelper.createProject(project_title_Controller.text, project_description_Controller.text, startDateController.text, endDateController.text, _selectedItems.toString(),0.0,0,current_date);
+    await SQLHelper.createProject(
+        project_title_Controller.text,
+        project_description_Controller.text,
+        startDateController.text,
+        endDateController.text,
+        _selectedItems.toString(),
+        0.0,
+        0,
+        current_date);
   }
 }

@@ -42,8 +42,8 @@ dependencies:
   path_provider: ^2.0.13
   path: ^1.8.2
   flutter_slidable: ^2.0.0
-  date_picker_timeline: ^1.2.3
   top_snackbar_flutter: ^3.0.0+1
+  flutter_date_picker_timeline: ^0.3.3
 
 dev_dependencies:
   flutter_test:

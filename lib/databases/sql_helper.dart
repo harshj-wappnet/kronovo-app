@@ -5,7 +5,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
 class SQLHelper {
-
   static final _databaseName = "db_project.db";
   static final _databaseVersion = 1;
 
@@ -37,6 +36,7 @@ class SQLHelper {
   static final tasks_isEnable = "is_enable_tasks";
   static final tasks_progress = "tasks_progress";
   static final tasks_milestone = "tasks_milestone";
+  static final tasks_counter = "tasks_counter";
 
   static final subtasks_columnId = 'column_subtasks_id';
   static final subtasks_name = 'subtasks_name';
@@ -45,28 +45,30 @@ class SQLHelper {
   static final subtasks_assigned_peoples = 'subtasks_assigned_peoples';
   static final subtasks_isEnable = "is_enable_subtasks";
   static final subtasks_progress = "subtasks_progress";
+  static final subtasks_counter = "subtasks_counter";
 
   // main method for database in this method database is opened and all tables is created
   static Future<sql.Database> db() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
     return sql.openDatabase(
-        path,
-        version: _databaseVersion,
-        onCreate:  (sql.Database database, int version) async {
-          await createTableProject(database);
-          print('project table created');
-          await createTableTask(database);
-          print('task table created');
-          await createTableSubTask(database);
-          print('sub task table created');
-          await createTableMembers(database);
-          print('members table created');
-    },
+      path,
+      version: _databaseVersion,
+      onCreate: (sql.Database database, int version) async {
+        await createTableProject(database);
+        print('project table created');
+        await createTableTask(database);
+        print('task table created');
+        await createTableSubTask(database);
+        print('sub task table created');
+        await createTableMembers(database);
+        print('members table created');
+      },
     );
   }
 
-  static Future<void> createTableProject(sql.Database database) async{
+  // this method is used to create project table in database
+  static Future<void> createTableProject(sql.Database database) async {
     await database.execute('''
     CREATE TABLE $project_table(
     $project_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -81,7 +83,9 @@ class SQLHelper {
     );
     ''');
   }
-  static Future<void> createTableTask(sql.Database database) async{
+
+  // this method is used to create task table in database
+  static Future<void> createTableTask(sql.Database database) async {
     await database.execute('''
     CREATE TABLE $task_table(
     $tasks_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -93,11 +97,14 @@ class SQLHelper {
     $tasks_isEnable INTEGER,
     $tasks_progress REAL,
     $tasks_milestone INTEGER,
+    $tasks_counter INTEGER,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
   }
-  static Future<void> createTableSubTask(sql.Database database) async{
+
+  // this method is used to craete sub task in database
+  static Future<void> createTableSubTask(sql.Database database) async {
     await database.execute('''
     CREATE TABLE $sub_task_table(
     $subtasks_columnId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -108,11 +115,13 @@ class SQLHelper {
     $subtasks_assigned_peoples TEXT,
     $subtasks_isEnable INTEGER,
     $subtasks_progress REAL,
+    $tasks_counter INTEGER,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
   }
 
+  // this method is used to create members table in database
   static Future<void> createTableMembers(sql.Database database) async {
     await database.execute('''
     CREATE TABLE $members_table(
@@ -161,19 +170,20 @@ class SQLHelper {
       int isEnable,
       double task_progress,
       int task_milestone,
-      String current_date
-     ) async {
+      int counter,
+      String current_date) async {
     final db = await SQLHelper.db();
 
     final data = {
-      'FK_task_id' : tid,
-      'tasks_name' : task_name,
-      'tasks_description' : task_description,
-      'tasks_end_date' : end_date,
-      'tasks_assigned_peoples' : assign_peoples,
-      'is_enable_tasks' : isEnable,
-      'tasks_progress' : task_progress,
-      'tasks_milestone' : task_milestone,
+      'FK_task_id': tid,
+      'tasks_name': task_name,
+      'tasks_description': task_description,
+      'tasks_end_date': end_date,
+      'tasks_assigned_peoples': assign_peoples,
+      'is_enable_tasks': isEnable,
+      'tasks_progress': task_progress,
+      'tasks_milestone': task_milestone,
+      'tasks_counter': counter,
       'createdAt': current_date,
     };
     final id = await db.insert(task_table, data);
@@ -190,18 +200,19 @@ class SQLHelper {
       String assign_peoples,
       int isEnable,
       double subtasks_progress,
-      String current_date
-     ) async {
+      int counter,
+      String current_date) async {
     final db = await SQLHelper.db();
 
     final data = {
-      'FK_sub_task_id' : sub_task_id,
-      'subtasks_name' : subtask_name,
-      'subtasks_description' : subtask_description,
-      'subtasks_end_date' : end_date,
-      'subtasks_assigned_peoples' : assign_peoples,
-      'is_enable_subtasks' : isEnable,
-      'subtasks_progress' : subtasks_progress,
+      'FK_sub_task_id': sub_task_id,
+      'subtasks_name': subtask_name,
+      'subtasks_description': subtask_description,
+      'subtasks_end_date': end_date,
+      'subtasks_assigned_peoples': assign_peoples,
+      'is_enable_subtasks': isEnable,
+      'subtasks_progress': subtasks_progress,
+      'subtasks_counter': counter,
       'createdAt': current_date,
     };
     final id = await db.insert(sub_task_table, data);
@@ -233,8 +244,8 @@ class SQLHelper {
   // retriving specific project for project details page using project_id
   static Future<List<Map<String, dynamic>>> getProject(int id) async {
     final db = await SQLHelper.db();
-    return db.query(
-        project_table, where: 'project_id = ?', whereArgs: [id], limit: 1);
+    return db.query(project_table,
+        where: 'project_id = ?', whereArgs: [id], limit: 1);
   }
 
   // retriving all tasks under a specific project using project_id used as foreign key
@@ -248,8 +259,7 @@ class SQLHelper {
   // retriving specific task for task details page using task_id
   static Future<List<Map<String, dynamic>>> getTask(int id) async {
     final db = await SQLHelper.db();
-    return db.query(
-        task_table, where: 'column_task_id = ?', whereArgs: [id]);
+    return db.query(task_table, where: 'column_task_id = ?', whereArgs: [id]);
   }
 
   // retriving all sub tasks under a specific task using task_id used as foreign key
@@ -263,8 +273,8 @@ class SQLHelper {
   // retriving specific sub task for sub task details page using subtask_id
   static Future<List<Map<String, dynamic>>> getSubTask(int id) async {
     final db = await SQLHelper.db();
-    return db.query(
-        sub_task_table, where: 'column_subtasks_id = ?', whereArgs: [id]);
+    return db.query(sub_task_table,
+        where: 'column_subtasks_id = ?', whereArgs: [id]);
   }
 
   // retriving all members records available in database
@@ -298,8 +308,8 @@ class SQLHelper {
       'project_assigned_peoples': a_peoples,
       'createdAt': current_date,
     };
-    final result = await db.update(
-        project_table, data, where: 'project_id = ?', whereArgs: [id]);
+    final result = await db
+        .update(project_table, data, where: 'project_id = ?', whereArgs: [id]);
     return result;
   }
 
@@ -323,14 +333,14 @@ class SQLHelper {
       String u_current_date) async {
     final db = await SQLHelper.db();
     final data = {
-      'tasks_name' : u_task_name,
-      'tasks_description' : u_task_description,
-      'tasks_end_date' : u_end_date,
-      'tasks_assigned_peoples' : u_assign_peoples,
-      'createdAt' : u_current_date,
+      'tasks_name': u_task_name,
+      'tasks_description': u_task_description,
+      'tasks_end_date': u_end_date,
+      'tasks_assigned_peoples': u_assign_peoples,
+      'createdAt': u_current_date,
     };
-    final result = await db.update(
-        task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
+    final result = await db
+        .update(task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
     return result;
   }
 
@@ -354,14 +364,14 @@ class SQLHelper {
       String u_current_date) async {
     final db = await SQLHelper.db();
     final data = {
-      'subtasks_name' : u_subtask_name,
-      'subtasks_description' : u_subtask_description,
-      'subtasks_end_date' : u_end_date,
-      'subtasks_assigned_peoples' : u_assign_peoples,
-      'createdAt' : u_current_date,
+      'subtasks_name': u_subtask_name,
+      'subtasks_description': u_subtask_description,
+      'subtasks_end_date': u_end_date,
+      'subtasks_assigned_peoples': u_assign_peoples,
+      'createdAt': u_current_date,
     };
-    final result = await db.update(
-        sub_task_table, data, where: 'column_subtasks_id = ?', whereArgs: [id]);
+    final result = await db.update(sub_task_table, data,
+        where: 'column_subtasks_id = ?', whereArgs: [id]);
     return result;
   }
 
@@ -369,7 +379,8 @@ class SQLHelper {
   static Future<void> deleteSubTask(int id) async {
     final db = await SQLHelper.db();
     try {
-      await db.delete(sub_task_table, where: 'column_subtasks_id = ?', whereArgs: [id]);
+      await db.delete(sub_task_table,
+          where: 'column_subtasks_id = ?', whereArgs: [id]);
     } catch (err) {
       debugPrint('$err');
     }
@@ -378,49 +389,44 @@ class SQLHelper {
   /*this method is used for update progress of project
   it update two value one for progress bar and another is for milestone*/
   static Future<int> updateProgressProject(
-      int id,
-      double task_progress,
-      int milestone
-      ) async {
+      int id, double task_progress, int milestone) async {
     final db = await SQLHelper.db();
     final data = {
-      'project_progress' : task_progress,
-      'project_milestone' : milestone,
+      'project_progress': task_progress,
+      'project_milestone': milestone,
     };
-    final result = await db.update(
-        project_table, data, where: 'project_id = ?', whereArgs: [id]);
+    final result = await db
+        .update(project_table, data, where: 'project_id = ?', whereArgs: [id]);
     return result;
   }
+
   /* this method is used for change values for task table which helps set enable disable
   property to task
   * */
   static Future<int> changeValuesTask(
-      int id,
-      int isEnable,
-      ) async {
+    int id,
+    int isEnable,
+  ) async {
     final db = await SQLHelper.db();
     final data = {
-      'is_enable_tasks' : isEnable,
+      'is_enable_tasks': isEnable,
     };
-    final result = await db.update(
-        task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
+    final result = await db
+        .update(task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
     return result;
   }
 
   /*this method is used for update progress of task
   it update two value one for progress bar and another is for milestone*/
   static Future<int> updateProgressTask(
-      int id,
-      double task_progress,
-      int milestone
-      ) async {
+      int id, double task_progress, int milestone) async {
     final db = await SQLHelper.db();
     final data = {
-      'tasks_progress' : task_progress,
-      'tasks_milestone' : milestone,
+      'tasks_progress': task_progress,
+      'tasks_milestone': milestone,
     };
-    final result = await db.update(
-        task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
+    final result = await db
+        .update(task_table, data, where: 'column_task_id = ?', whereArgs: [id]);
     return result;
   }
 
@@ -428,15 +434,15 @@ class SQLHelper {
   property to subtask
   * */
   static Future<int> changeValuesSubTask(
-      int id,
-      int isEnable,
-      ) async {
+    int id,
+    int isEnable,
+  ) async {
     final db = await SQLHelper.db();
     final data = {
-      'is_enable_subtasks' : isEnable,
+      'is_enable_subtasks': isEnable,
     };
-    final result = await db.update(
-        sub_task_table, data, where: 'column_subtasks_id = ?', whereArgs: [id]);
+    final result = await db.update(sub_task_table, data,
+        where: 'column_subtasks_id = ?', whereArgs: [id]);
     return result;
   }
 
@@ -463,5 +469,4 @@ class SQLHelper {
       debugPrint('$err');
     }
   }
-
 }
