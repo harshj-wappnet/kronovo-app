@@ -36,7 +36,6 @@ class SQLHelper {
   static final tasks_isEnable = "is_enable_tasks";
   static final tasks_progress = "tasks_progress";
   static final tasks_milestone = "tasks_milestone";
-  static final tasks_counter = "tasks_counter";
 
   static final subtasks_columnId = 'column_subtasks_id';
   static final subtasks_name = 'subtasks_name';
@@ -45,7 +44,6 @@ class SQLHelper {
   static final subtasks_assigned_peoples = 'subtasks_assigned_peoples';
   static final subtasks_isEnable = "is_enable_subtasks";
   static final subtasks_progress = "subtasks_progress";
-  static final subtasks_counter = "subtasks_counter";
 
   // main method for database in this method database is opened and all tables is created
   static Future<sql.Database> db() async {
@@ -97,7 +95,6 @@ class SQLHelper {
     $tasks_isEnable INTEGER,
     $tasks_progress REAL,
     $tasks_milestone INTEGER,
-    $tasks_counter INTEGER,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
@@ -115,7 +112,6 @@ class SQLHelper {
     $subtasks_assigned_peoples TEXT,
     $subtasks_isEnable INTEGER,
     $subtasks_progress REAL,
-    $tasks_counter INTEGER,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     ''');
@@ -170,7 +166,6 @@ class SQLHelper {
       int isEnable,
       double task_progress,
       int task_milestone,
-      int counter,
       String current_date) async {
     final db = await SQLHelper.db();
 
@@ -183,7 +178,6 @@ class SQLHelper {
       'is_enable_tasks': isEnable,
       'tasks_progress': task_progress,
       'tasks_milestone': task_milestone,
-      'tasks_counter': counter,
       'createdAt': current_date,
     };
     final id = await db.insert(task_table, data);
@@ -200,7 +194,6 @@ class SQLHelper {
       String assign_peoples,
       int isEnable,
       double subtasks_progress,
-      int counter,
       String current_date) async {
     final db = await SQLHelper.db();
 
@@ -212,7 +205,6 @@ class SQLHelper {
       'subtasks_assigned_peoples': assign_peoples,
       'is_enable_subtasks': isEnable,
       'subtasks_progress': subtasks_progress,
-      'subtasks_counter': counter,
       'createdAt': current_date,
     };
     final id = await db.insert(sub_task_table, data);

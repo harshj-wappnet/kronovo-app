@@ -7,6 +7,7 @@ import 'package:kronovo_app/utils/responsive.dart';
 import 'package:kronovo_app/pages/task_pages/add_task_page.dart';
 import 'package:kronovo_app/pages/task_pages/update_task_page.dart';
 import 'package:kronovo_app/utils/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import '../../databases/sql_helper.dart';
@@ -29,6 +30,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   int task_id = 0;
   double task_progress = 0.0;
   double progress = 0.0;
+  double subtask_count = 0.0;
   String project_title = "";
   String project_description = "";
   String project_enddate = "";
@@ -65,6 +67,13 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
     }
   }
 
+  Future<void> _loadPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      subtask_count = prefs.getDouble('subtask_counter')!;
+    });
+  }
+
   // this method is used for fetching all tasks which are under specific project
   // we fetch that using project id.
   void showTasks(int id) async {
@@ -94,6 +103,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showProject(widget.id);
       showTasks(widget.id);
+      _loadPref();
     });
   }
 
@@ -512,9 +522,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                               height: 20,
                                               child: LinearProgressIndicator(
                                                 value: _listTasks[index]
-                                                        ['tasks_progress'] /
-                                                    _listTasks.length
-                                                        .toDouble(),
+                                                        ['tasks_progress'] / subtask_count,
                                                 valueColor:
                                                     AlwaysStoppedAnimation<
                                                         Color>(
@@ -533,7 +541,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                                       const EdgeInsets.only(
                                                           right: 8),
                                                   child: Text(
-                                                    '${(_listTasks[index]['tasks_progress'] / _listTasks.length * 100).toInt()}%',
+                                                    '${(_listTasks[index]['tasks_progress'] / subtask_count * 100).toInt()}%',
                                                     style: TextStyle(
                                                       fontFamily: 'lato',
                                                       color: Colors.white,

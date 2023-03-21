@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import '../../databases/sql_helper.dart';
@@ -19,7 +20,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   final sub_task_description = TextEditingController();
   List<String> _selectedItems = [];
   String people_data = '';
-  int subtask_counter = 0;
+  double counter = 0.0;
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members = [];
   final _formKey_sub_task = GlobalKey<FormState>();
@@ -34,6 +35,14 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
           .replaceAll('[', '')
           .replaceAll(']', '');
       members = people_data.split(",");
+    });
+  }
+
+  Future<void> sub_task_size() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      counter++;
+      prefs.setDouble('subtask_counter', counter);
     });
   }
 
@@ -338,7 +347,6 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   // used to insert user input data to sub task table in database
   Future<void> _addSubTask(int id) async {
     String current_date = DateTime.now().toString();
-    subtask_counter++;
     await SQLHelper.createSubTask(
         id,
         sub_task_title.text,
@@ -347,7 +355,6 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
         _selectedItems.toString(),
         0,
         0.0,
-        subtask_counter,
         current_date);
   }
 }

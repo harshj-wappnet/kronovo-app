@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import '../../databases/sql_helper.dart';
@@ -22,7 +23,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   String people_data = '';
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members = [];
-  int task_counter = 0;
+  double counter = 0.0;
 
   String _displayText(DateTime? date) {
     if (date != null) {
@@ -42,6 +43,14 @@ class _AddTaskPageState extends State<AddTaskPage> {
       firstDate: DateTime(1999),
       lastDate: DateTime(2999),
     );
+  }
+
+  Future<void> task_size() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      counter++;
+      prefs.setDouble('task_counter', counter);
+    });
   }
 
   void loadMembers(int id) async {
@@ -302,6 +311,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                   );
                                 } else {
                                   await _addTask(widget.id);
+                                  task_size();
                                   setState(() async {
                                     Navigator.pop(context, 'task');
                                   });
@@ -337,7 +347,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
   // used to user inserted data to task table in database
   Future<void> _addTask(int id) async {
     String current_date = DateTime.now().toString();
-    task_counter++;
     await SQLHelper.createTask(
         id,
         _task_title.text,
@@ -347,7 +356,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
         0,
         0.0,
         0,
-        task_counter,
         current_date);
   }
 }

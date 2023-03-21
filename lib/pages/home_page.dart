@@ -11,6 +11,7 @@ import 'package:kronovo_app/pages/project_pages/update_project_page.dart';
 import 'package:kronovo_app/pages/project_pages/project_details_page.dart';
 import 'package:kronovo_app/utils/responsive.dart';
 import 'package:kronovo_app/utils/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../databases/sql_helper.dart';
 import '../widgets/confirmation_dialog.dart';
 
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   int project_id = 0;
   List<Map<String, dynamic>> _listTasks = [];
   double project_progress = 0.0;
+  double task_count = 0.0;
 
   //DateTime _selectedDate = DateTime.now();
   late ValueNotifier<DateTime> _selectedDate;
@@ -45,6 +47,13 @@ class _HomePageState extends State<HomePage> {
         project_id = _listProjects[index]['project_id'];
       });
       getTotalTask(project_id);
+    });
+  }
+
+  Future<void> _loadPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      task_count = prefs.getDouble('task_counter')!;
     });
   }
 
@@ -83,6 +92,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getAllProjects();
     _selectedDate = ValueNotifier<DateTime>(DateTime.now());
+    _loadPref();
     print('number of items ${_listProjects.length}');
   }
 
@@ -216,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
+                child: _listProjects.isNotEmpty ? ListView.builder(
                   shrinkWrap: true,
                   itemCount: _listProjects.length,
                   itemBuilder: (context, index) => _listProjects[index]
@@ -371,9 +381,7 @@ class _HomePageState extends State<HomePage> {
                                               height: 20,
                                               child: LinearProgressIndicator(
                                                 value: _listProjects[index]
-                                                        ['project_progress'] /
-                                                    _listProjects.length
-                                                        .toDouble(),
+                                                        ['project_progress'] / task_count,
                                                 valueColor:
                                                     AlwaysStoppedAnimation<
                                                         Color>(
@@ -392,7 +400,7 @@ class _HomePageState extends State<HomePage> {
                                                       const EdgeInsets.only(
                                                           right: 8),
                                                   child: Text(
-                                                    '${(_listProjects[index]['project_progress'] / _listProjects.length * 100).toInt()}%',
+                                                    '${(_listProjects[index]['project_progress'] / task_count * 100).toInt()}%',
                                                     style: TextStyle(
                                                       fontFamily: 'lato',
                                                       color: Colors.white,
@@ -455,6 +463,31 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
+                ) :  Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(top: hp(20, context)),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Image.asset(
+                            "assets/images/default_icon.png",
+                            height: 120,
+                            width: 120),
+                      ),
+                      SizedBox(
+                        height: 6,
+                      ),
+                      Text(
+                        "NO PROJECTS",
+                        style: TextStyle(fontFamily: 'lato'),
+                      ),
+                      Text(
+                        "Click On + to add project",
+                        style: TextStyle(fontFamily: 'lato'),
+                      ),
+                    ],
+                  ),
                 ),
               )
             ],
