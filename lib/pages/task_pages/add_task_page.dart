@@ -23,7 +23,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   String people_data = '';
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members = [];
-  double counter = 0.0;
+  int counter = 0;
 
   String _displayText(DateTime? date) {
     if (date != null) {
@@ -49,7 +49,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       counter++;
-      prefs.setDouble('task_counter', counter);
+      prefs.setInt('task_counter', counter);
     });
   }
 

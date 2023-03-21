@@ -20,7 +20,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
   final sub_task_description = TextEditingController();
   List<String> _selectedItems = [];
   String people_data = '';
-  double counter = 0.0;
+  int counter = 0;
   List<Map<String, dynamic>> _listMembers = [];
   List<String> members = [];
   final _formKey_sub_task = GlobalKey<FormState>();
@@ -42,7 +42,7 @@ class _AddSubTaskPageState extends State<AddSubTaskPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       counter++;
-      prefs.setDouble('subtask_counter', counter);
+      prefs.setInt('subtask_counter', counter);
     });
   }
 

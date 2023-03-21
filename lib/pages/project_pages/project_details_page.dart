@@ -30,7 +30,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   int task_id = 0;
   double task_progress = 0.0;
   double progress = 0.0;
-  double subtask_count = 0.0;
+  int subtask_count = 1;
   String project_title = "";
   String project_description = "";
   String project_enddate = "";
@@ -70,7 +70,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   Future<void> _loadPref() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      subtask_count = prefs.getDouble('subtask_counter')!;
+      subtask_count = prefs.getInt('subtask_counter')!;
     });
   }
 
@@ -383,7 +383,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                                   flex: 1,
                                   autoClose: true,
                                   onPressed: (value) {
-                                    progress += 0.1;
+                                    progress++;
                                     counter += 1;
 
                                     if (_listTasks[index]["tasks_milestone"] ==

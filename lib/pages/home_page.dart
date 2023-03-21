@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   int project_id = 0;
   List<Map<String, dynamic>> _listTasks = [];
   double project_progress = 0.0;
-  double task_count = 0.0;
+  int task_count = 1;
 
   //DateTime _selectedDate = DateTime.now();
   late ValueNotifier<DateTime> _selectedDate;
@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadPref() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      task_count = prefs.getDouble('task_counter')!;
+      task_count = prefs.getInt('task_counter')!;
     });
   }
 
@@ -398,12 +398,12 @@ class _HomePageState extends State<HomePage> {
                                                 child: Padding(
                                                   padding:
                                                       const EdgeInsets.only(
-                                                          right: 8),
+                                                          right: 8, top: 2, bottom: 3),
                                                   child: Text(
                                                     '${(_listProjects[index]['project_progress'] / task_count * 100).toInt()}%',
                                                     style: TextStyle(
                                                       fontFamily: 'lato',
-                                                      color: Colors.white,
+                                                      color: Colors.grey,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),

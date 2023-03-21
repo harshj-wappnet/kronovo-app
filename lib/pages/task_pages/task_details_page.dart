@@ -362,7 +362,7 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                                   flex: 1,
                                   autoClose: true,
                                   onPressed: (value) {
-                                    progress += 0.1;
+                                    progress++;
                                     counter += 1;
                                     SQLHelper.updateProgressTask(
                                         widget.id, progress, counter);
